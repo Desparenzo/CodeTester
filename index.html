@@ -1,64 +1,66 @@
-html
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple Audio Share</title>
+    <title>Audio Share Pro</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-    </style>
 </head>
-<body class="gradient-bg min-h-screen text-white flex items-center justify-center p-4 font-sans">
+<body class="bg-slate-900 min-h-screen text-white flex items-center justify-center p-4 font-sans">
 
-    <div id="app" class="bg-white/10 backdrop-blur-md p-8 rounded-2xl shadow-2xl w-full max-w-md border border-white/20">
+    <div id="app" class="bg-slate-800 p-8 rounded-2xl shadow-2xl w-full max-w-md border border-slate-700">
         <!-- Role Selection -->
         <div id="setup-section" class="text-center">
-            <h1 class="text-2xl font-bold mb-6">Audio Share</h1>
-            <p class="mb-8 text-white/80">Is this device the Source or the Receiver?</p>
-            <div class="grid grid-cols-1 gap-4">
-                <button onclick="initPC()" class="bg-white text-indigo-600 font-bold py-4 rounded-xl hover:bg-indigo-50 transition-all active:scale-95">
-                    💻 This is my PC (Transmit)
+            <h1 class="text-2xl font-bold mb-2">Audio Share</h1>
+            <p class="mb-8 text-slate-400">Simple PC to Phone streaming</p>
+            <div class="space-y-4">
+                <button onclick="initPC()" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold transition-all">
+                    💻 This is my PC
                 </button>
-                <button onclick="initPhone()" class="bg-indigo-500 text-white font-bold py-4 rounded-xl hover:bg-indigo-400 transition-all active:scale-95 border border-indigo-400">
-                    📱 This is my Phone (Receive)
+                <button onclick="initPhone()" class="w-full bg-slate-700 hover:bg-slate-600 py-4 rounded-xl font-bold transition-all">
+                    📱 This is my Phone
                 </button>
             </div>
         </div>
 
         <!-- PC View -->
         <div id="pc-view" class="hidden text-center">
-            <h2 class="text-xl font-semibold mb-2">PC Mode</h2>
-            <div class="bg-black/20 p-6 rounded-xl mb-6">
-                <p class="text-sm text-white/60 mb-2">YOUR PAIRING CODE</p>
-                <div id="pc-id" class="text-4xl font-mono font-bold tracking-widest text-yellow-300">------</div>
+            <h2 class="text-xl font-semibold mb-6">PC Transmitter</h2>
+            <div class="bg-slate-900 p-6 rounded-xl mb-6 border border-slate-700">
+                <p class="text-xs text-slate-500 mb-2 uppercase tracking-widest">Pairing Code</p>
+                <div id="pc-id" class="text-4xl font-mono font-bold text-blue-400">------</div>
             </div>
-            <p id="pc-status" class="text-sm italic text-white/70">Waiting for PeerJS...</p>
-            <div id="stream-controls" class="hidden mt-6">
-                <button id="start-btn" class="bg-green-500 w-full py-3 rounded-lg font-bold hover:bg-green-400">Start Audio Capture</button>
+            
+            <div id="pc-controls" class="space-y-4">
+                <button id="start-btn" class="w-full bg-green-600 py-3 rounded-lg font-bold hover:bg-green-500">
+                    1. Capture System Audio
+                </button>
+                <p id="pc-status" class="text-sm text-slate-400 italic">Waiting for capture...</p>
             </div>
         </div>
 
         <!-- Phone View -->
         <div id="phone-view" class="hidden text-center">
-            <h2 class="text-xl font-semibold mb-4">Phone Mode</h2>
-            <input type="text" id="join-id" placeholder="Enter 6-digit code" class="w-full p-4 rounded-xl bg-white text-gray-900 text-center text-2xl font-mono mb-4 focus:outline-none focus:ring-4 focus:ring-indigo-300">
-            <button id="connect-btn" class="bg-indigo-500 w-full py-4 rounded-xl font-bold hover:bg-indigo-400 active:scale-95">Connect & Listen</button>
-            <p id="phone-status" class="mt-4 text-sm text-white/70">Ready to connect</p>
+            <h2 class="text-xl font-semibold mb-6">Phone Receiver</h2>
+            <input type="text" id="join-id" placeholder="Enter 6-digit code" 
+                   class="w-full p-4 rounded-xl bg-slate-900 text-white text-center text-2xl font-mono mb-4 border border-slate-700 focus:border-blue-500 outline-none">
+            <button id="connect-btn" class="w-full bg-blue-600 py-4 rounded-xl font-bold hover:bg-blue-500">
+                Connect & Listen
+            </button>
+            <p id="phone-status" class="mt-4 text-sm text-slate-400 italic">Ready to receive</p>
         </div>
     </div>
 
-    <!-- Hidden Audio Element for Phone -->
-    <audio id="remote-audio" autoplay></audio>
+    <audio id="remote-audio" autoplay playsinline></audio>
 
     <script>
         let peer = null;
         let localStream = null;
-        
+        const appId = "audio-share-simple-v2";
+
+        // UI Elements
         const setupSection = document.getElementById('setup-section');
         const pcView = document.getElementById('pc-view');
         const phoneView = document.getElementById('phone-view');
@@ -66,103 +68,97 @@ html
         const phoneStatus = document.getElementById('phone-status');
         const pcIdDisplay = document.getElementById('pc-id');
 
-        // Initialize PC Role
         function initPC() {
             setupSection.classList.add('hidden');
             pcView.classList.remove('hidden');
             
-            // Create a short 6-character ID
             const shortId = Math.random().toString(36).substring(2, 8).toUpperCase();
             peer = new Peer(shortId);
 
             peer.on('open', (id) => {
                 pcIdDisplay.innerText = id;
-                pcStatus.innerText = "Ready. Enter this code on your phone.";
-                document.getElementById('stream-controls').classList.remove('hidden');
+                pcStatus.innerText = "Step 1: Capture audio first.";
             });
 
             document.getElementById('start-btn').onclick = async () => {
                 try {
-                    // Standard display media request
-                    // 'systemAudio: "include"' is a hint for modern browsers
+                    // Optimized capture constraints
                     localStream = await navigator.mediaDevices.getDisplayMedia({
-                        video: { width: 1 }, // Video is required for getDisplayMedia but we only want audio
+                        video: { width: 1, height: 1 }, 
                         audio: {
                             echoCancellation: false,
                             noiseSuppression: false,
-                            autoGainControl: false
+                            autoGainControl: false,
+                            suppressLocalAudioPlayback: false
                         },
                         systemAudio: "include"
                     });
 
-                    // Remove video track immediately if it exists to save bandwidth
-                    const videoTracks = localStream.getVideoTracks();
-                    if (videoTracks.length > 0) {
-                        videoTracks[0].stop();
-                    }
-
-                    pcStatus.innerText = "Streaming captured audio...";
-                    document.getElementById('start-btn').innerText = "Streaming Active";
+                    pcStatus.innerText = "Audio captured. Now enter code on phone.";
+                    document.getElementById('start-btn').innerText = "✅ Audio Captured";
+                    document.getElementById('start-btn').classList.replace('bg-green-600', 'bg-slate-700');
                     document.getElementById('start-btn').disabled = true;
-                    document.getElementById('start-btn').classList.replace('bg-green-500', 'bg-gray-600');
 
                 } catch (err) {
-                    pcStatus.innerText = "Error: " + err.message;
-                    console.error(err);
+                    pcStatus.innerText = "Capture failed: " + err.message;
                 }
             };
 
-            // Handle incoming calls from phone
-            peer.on('call', (call) => {
-                if (!localStream) {
-                    pcStatus.innerText = "Phone connecting, but no audio captured yet!";
-                }
-                call.answer(localStream); 
-                pcStatus.innerText = "Phone connected! Streaming...";
-            });
-
-            peer.on('error', (err) => {
-                pcStatus.innerText = "PeerJS Error: " + err.type;
+            // Listen for the "Ping" from the phone
+            peer.on('connection', (conn) => {
+                conn.on('data', (data) => {
+                    if (data === 'request-stream' && localStream) {
+                        pcStatus.innerText = "Phone detected! Sending audio...";
+                        // PC calls the phone back with the stream
+                        peer.call(conn.peer, localStream);
+                    }
+                });
             });
         }
 
-        // Initialize Phone Role
         function initPhone() {
             setupSection.classList.add('hidden');
             phoneView.classList.remove('hidden');
 
-            peer = new Peer(); // Random ID for phone
+            peer = new Peer(); 
 
             document.getElementById('connect-btn').onclick = () => {
                 const targetId = document.getElementById('join-id').value.toUpperCase().trim();
                 if (!targetId) return;
 
-                phoneStatus.innerText = "Connecting...";
+                phoneStatus.innerText = "Connecting to PC...";
                 
-                // For "Receive only", we call with an empty stream or just initiate
-                // PeerJS requires a stream to "call", so we create a dummy one or 
-                // simply wait for the PC to send tracks. 
-                // Actually, standard pattern: Phone calls PC, PC answers with stream.
+                // Open a data connection first to tell PC we are ready
+                const conn = peer.connect(targetId);
                 
-                const call = peer.call(targetId, new MediaStream()); // Send empty stream
-                
-                call.on('stream', (remoteStream) => {
-                    phoneStatus.innerText = "Connected! Audio playing...";
-                    const audioEl = document.getElementById('remote-audio');
-                    audioEl.srcObject = remoteStream;
+                conn.on('open', () => {
+                    conn.send('request-stream');
+                    phoneStatus.innerText = "Requesting audio stream...";
+                });
+
+                // Listen for the incoming call from PC
+                peer.on('call', (call) => {
+                    phoneStatus.innerText = "Receiving stream...";
+                    call.answer(); // Answer with nothing
                     
-                    // To prevent high pitch beep/feedback:
-                    // Ensure we don't have local microphone feedback
-                    audioEl.play().catch(e => {
-                        phoneStatus.innerHTML = "Tap 'Connect' again (Browser blocked autoplay)";
+                    call.on('stream', (remoteStream) => {
+                        const audioEl = document.getElementById('remote-audio');
+                        audioEl.srcObject = remoteStream;
+                        audioEl.play().then(() => {
+                            phoneStatus.innerText = "🔊 Streaming Active";
+                        }).catch(e => {
+                            phoneStatus.innerText = "Tap 'Connect' again (Autoplay blocked)";
+                        });
                     });
                 });
 
-                call.on('error', (err) => {
-                    phoneStatus.innerText = "Connection failed.";
+                conn.on('error', () => {
+                    phoneStatus.innerText = "Failed to reach PC. Check code.";
                 });
             };
         }
     </script>
 </body>
 </html>
+
+```
