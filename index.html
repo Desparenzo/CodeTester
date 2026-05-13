@@ -3,189 +3,166 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>IMDB Movies</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Audio Share</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body {
-            background-color: #05070a;
-            color: #ffffff;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        .glass-input {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(10px);
-        }
-        .glass-input:focus {
-            border-color: #f5c518;
-            background: rgba(255, 255, 255, 0.05);
-        }
-        .btn-primary {
-            background-color: #f5c518;
-            color: #000;
-            transition: all 0.2s ease;
-        }
-        .btn-primary:active {
-            transform: scale(0.96);
-            opacity: 0.9;
-        }
-        .code-badge {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        #modalOverlay {
-            transition: opacity 0.2s ease;
-        }
-        .modal-hidden {
-            opacity: 0;
-            pointer-events: none;
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
     </style>
 </head>
-<body class="antialiased overflow-hidden">
+<body class="gradient-bg min-h-screen text-white flex items-center justify-center p-4 font-sans">
 
-    <!-- Top Bar: Status and Wireless Trigger -->
-    <div class="fixed top-0 left-0 w-full p-4 flex items-center justify-between z-30">
-        <div class="flex items-center space-x-2">
-            <!-- Subtle Device Code -->
-            <div class="code-badge px-3 py-1.5 rounded-lg flex items-center space-x-2">
-                <div id="statusDot" class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></div>
-                <span id="deviceCode" class="font-mono text-xs text-slate-400 tracking-widest uppercase">Connecting...</span>
-            </div>
-            
-            <!-- Paste Wireless Button (Beside code) -->
-            <button id="openWirelessBtn" class="code-badge p-1.5 rounded-lg text-slate-400 hover:text-yellow-500 transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg>
-            </button>
-        </div>
-    </div>
-
-    <!-- Main Hero Content -->
-    <main class="flex-grow flex flex-col items-center justify-center p-6 space-y-8">
-        <div class="text-center space-y-2">
-            <h1 class="text-3xl font-bold tracking-tight text-white/90">IMDB Movies</h1>
-        </div>
-
-        <div class="w-full max-w-md space-y-4">
-            <div class="relative group">
-                <input 
-                    type="text" 
-                    id="localInput" 
-                    placeholder="Paste link here" 
-                    class="w-full glass-input rounded-2xl px-6 py-5 text-lg text-white focus:outline-none transition-all text-center placeholder:text-slate-600"
-                />
-            </div>
-            <button id="playBtn" class="w-full btn-primary font-bold text-lg py-5 rounded-2xl shadow-2xl shadow-yellow-500/10">
-                Play
-            </button>
-        </div>
-    </main>
-
-    <!-- Wireless Casting Popup -->
-    <div id="modalOverlay" class="fixed inset-0 bg-black/90 backdrop-blur-md modal-hidden flex items-center justify-center p-6 z-50">
-        <div class="w-full max-w-sm space-y-6">
-            <div class="flex items-center justify-between">
-                <h2 class="text-xl font-semibold">Wireless Send</h2>
-                <button id="closeModal" class="text-slate-500 hover:text-white">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    <div id="app" class="bg-white/10 backdrop-blur-md p-8 rounded-2xl shadow-2xl w-full max-w-md border border-white/20">
+        <!-- Role Selection -->
+        <div id="setup-section" class="text-center">
+            <h1 class="text-2xl font-bold mb-6">Audio Share</h1>
+            <p class="mb-8 text-white/80">Is this device the Source or the Receiver?</p>
+            <div class="grid grid-cols-1 gap-4">
+                <button onclick="initPC()" class="bg-white text-indigo-600 font-bold py-4 rounded-xl hover:bg-indigo-50 transition-all active:scale-95">
+                    💻 This is my PC (Transmit)
                 </button>
-            </div>
-
-            <div class="space-y-4">
-                <input 
-                    type="tel" 
-                    id="remoteCode" 
-                    placeholder="Enter 6-digit TV code" 
-                    maxlength="6"
-                    class="w-full glass-input rounded-xl px-4 py-4 text-center text-2xl font-mono tracking-widest focus:outline-none"
-                />
-                <input 
-                    type="text" 
-                    id="remoteUrl" 
-                    placeholder="Paste IMDb link" 
-                    class="w-full glass-input rounded-xl px-4 py-4 focus:outline-none"
-                />
-                <button id="sendBtn" class="w-full btn-primary font-bold py-4 rounded-xl">
-                    Send Link to TV
+                <button onclick="initPhone()" class="bg-indigo-500 text-white font-bold py-4 rounded-xl hover:bg-indigo-400 transition-all active:scale-95 border border-indigo-400">
+                    📱 This is my Phone (Receive)
                 </button>
             </div>
         </div>
+
+        <!-- PC View -->
+        <div id="pc-view" class="hidden text-center">
+            <h2 class="text-xl font-semibold mb-2">PC Mode</h2>
+            <div class="bg-black/20 p-6 rounded-xl mb-6">
+                <p class="text-sm text-white/60 mb-2">YOUR PAIRING CODE</p>
+                <div id="pc-id" class="text-4xl font-mono font-bold tracking-widest text-yellow-300">------</div>
+            </div>
+            <p id="pc-status" class="text-sm italic text-white/70">Waiting for PeerJS...</p>
+            <div id="stream-controls" class="hidden mt-6">
+                <button id="start-btn" class="bg-green-500 w-full py-3 rounded-lg font-bold hover:bg-green-400">Start Audio Capture</button>
+            </div>
+        </div>
+
+        <!-- Phone View -->
+        <div id="phone-view" class="hidden text-center">
+            <h2 class="text-xl font-semibold mb-4">Phone Mode</h2>
+            <input type="text" id="join-id" placeholder="Enter 6-digit code" class="w-full p-4 rounded-xl bg-white text-gray-900 text-center text-2xl font-mono mb-4 focus:outline-none focus:ring-4 focus:ring-indigo-300">
+            <button id="connect-btn" class="bg-indigo-500 w-full py-4 rounded-xl font-bold hover:bg-indigo-400 active:scale-95">Connect & Listen</button>
+            <p id="phone-status" class="mt-4 text-sm text-white/70">Ready to connect</p>
+        </div>
     </div>
+
+    <!-- Hidden Audio Element for Phone -->
+    <audio id="remote-audio" autoplay></audio>
 
     <script>
-        const deviceCodeEl = document.getElementById('deviceCode');
-        const statusDot = document.getElementById('statusDot');
-        const localInput = document.getElementById('localInput');
-        const playBtn = document.getElementById('playBtn');
-        const modal = document.getElementById('modalOverlay');
-        const sendBtn = document.getElementById('sendBtn');
+        let peer = null;
+        let localStream = null;
+        
+        const setupSection = document.getElementById('setup-section');
+        const pcView = document.getElementById('pc-view');
+        const phoneView = document.getElementById('phone-view');
+        const pcStatus = document.getElementById('pc-status');
+        const phoneStatus = document.getElementById('phone-status');
+        const pcIdDisplay = document.getElementById('pc-id');
 
-        // Logic
-        function transform(url) {
-            return url.replace(/www\.imdb\.com/i, 'm.playimdb.com');
+        // Initialize PC Role
+        function initPC() {
+            setupSection.classList.add('hidden');
+            pcView.classList.remove('hidden');
+            
+            // Create a short 6-character ID
+            const shortId = Math.random().toString(36).substring(2, 8).toUpperCase();
+            peer = new Peer(shortId);
+
+            peer.on('open', (id) => {
+                pcIdDisplay.innerText = id;
+                pcStatus.innerText = "Ready. Enter this code on your phone.";
+                document.getElementById('stream-controls').classList.remove('hidden');
+            });
+
+            document.getElementById('start-btn').onclick = async () => {
+                try {
+                    // Standard display media request
+                    // 'systemAudio: "include"' is a hint for modern browsers
+                    localStream = await navigator.mediaDevices.getDisplayMedia({
+                        video: { width: 1 }, // Video is required for getDisplayMedia but we only want audio
+                        audio: {
+                            echoCancellation: false,
+                            noiseSuppression: false,
+                            autoGainControl: false
+                        },
+                        systemAudio: "include"
+                    });
+
+                    // Remove video track immediately if it exists to save bandwidth
+                    const videoTracks = localStream.getVideoTracks();
+                    if (videoTracks.length > 0) {
+                        videoTracks[0].stop();
+                    }
+
+                    pcStatus.innerText = "Streaming captured audio...";
+                    document.getElementById('start-btn').innerText = "Streaming Active";
+                    document.getElementById('start-btn').disabled = true;
+                    document.getElementById('start-btn').classList.replace('bg-green-500', 'bg-gray-600');
+
+                } catch (err) {
+                    pcStatus.innerText = "Error: " + err.message;
+                    console.error(err);
+                }
+            };
+
+            // Handle incoming calls from phone
+            peer.on('call', (call) => {
+                if (!localStream) {
+                    pcStatus.innerText = "Phone connecting, but no audio captured yet!";
+                }
+                call.answer(localStream); 
+                pcStatus.innerText = "Phone connected! Streaming...";
+            });
+
+            peer.on('error', (err) => {
+                pcStatus.innerText = "PeerJS Error: " + err.type;
+            });
         }
 
-        // P2P Setup
-        const myCode = Math.floor(100000 + Math.random() * 900000).toString();
-        const peer = new Peer(myCode);
+        // Initialize Phone Role
+        function initPhone() {
+            setupSection.classList.add('hidden');
+            phoneView.classList.remove('hidden');
 
-        peer.on('open', (id) => {
-            deviceCodeEl.textContent = id;
-            statusDot.classList.replace('bg-red-500', 'bg-emerald-500');
-        });
+            peer = new Peer(); // Random ID for phone
 
-        // Receiver Logic
-        peer.on('connection', (conn) => {
-            conn.on('data', (data) => {
-                if (data.url) {
-                    window.location.href = transform(data.url);
-                }
-            });
-        });
+            document.getElementById('connect-btn').onclick = () => {
+                const targetId = document.getElementById('join-id').value.toUpperCase().trim();
+                if (!targetId) return;
 
-        // Local Play
-        playBtn.onclick = () => {
-            const val = localInput.value.trim();
-            if (val.includes('imdb.com')) {
-                window.location.href = transform(val);
-            }
-        };
-
-        // Modal Controls
-        document.getElementById('openWirelessBtn').onclick = () => modal.classList.remove('modal-hidden');
-        document.getElementById('closeModal').onclick = () => modal.classList.add('modal-hidden');
-
-        // Sender Logic
-        sendBtn.onclick = () => {
-            const code = document.getElementById('remoteCode').value.trim();
-            const url = document.getElementById('remoteUrl').value.trim();
-            
-            if (code.length === 6 && url.includes('imdb.com')) {
-                sendBtn.textContent = 'Connecting...';
-                sendBtn.disabled = true;
+                phoneStatus.innerText = "Connecting...";
                 
-                const conn = peer.connect(code);
-                conn.on('open', () => {
-                    conn.send({ url: url });
-                    sendBtn.textContent = 'Sent!';
-                    setTimeout(() => {
-                        modal.classList.add('modal-hidden');
-                        sendBtn.textContent = 'Send Link to TV';
-                        sendBtn.disabled = false;
-                        document.getElementById('remoteCode').value = '';
-                        document.getElementById('remoteUrl').value = '';
-                    }, 1000);
+                // For "Receive only", we call with an empty stream or just initiate
+                // PeerJS requires a stream to "call", so we create a dummy one or 
+                // simply wait for the PC to send tracks. 
+                // Actually, standard pattern: Phone calls PC, PC answers with stream.
+                
+                const call = peer.call(targetId, new MediaStream()); // Send empty stream
+                
+                call.on('stream', (remoteStream) => {
+                    phoneStatus.innerText = "Connected! Audio playing...";
+                    const audioEl = document.getElementById('remote-audio');
+                    audioEl.srcObject = remoteStream;
+                    
+                    // To prevent high pitch beep/feedback:
+                    // Ensure we don't have local microphone feedback
+                    audioEl.play().catch(e => {
+                        phoneStatus.innerHTML = "Tap 'Connect' again (Browser blocked autoplay)";
+                    });
                 });
-            }
-        };
 
-        // Handle Enter key
-        localInput.onkeydown = (e) => { if(e.key === 'Enter') playBtn.click(); };
+                call.on('error', (err) => {
+                    phoneStatus.innerText = "Connection failed.";
+                });
+            };
+        }
     </script>
 </body>
 </html>
