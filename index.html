@@ -1,4 +1,4 @@
-```html
+html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,13 +12,16 @@
     <!-- Library for QR Scanning -->
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <style>
-        #video-preview { width: 100%; max-width: 400px; transform: scaleX(-1); border-radius: 1rem; }
+        /* Fixed mirroring: removed scaleX(-1) so movement is natural */
+        #video-preview { width: 100%; max-width: 400px; border-radius: 1rem; background: #000; }
         .scanner-container { position: relative; display: inline-block; overflow: hidden; }
         .scanner-line {
             position: absolute; width: 100%; height: 2px; background: rgba(59, 130, 246, 0.8);
             top: 0; left: 0; animation: scan 2s linear infinite;
         }
         @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
+        .pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
     </style>
 </head>
 <body class="bg-zinc-950 min-h-screen text-zinc-100 flex items-center justify-center p-4 font-sans">
@@ -41,14 +44,12 @@
         <!-- PC View -->
         <div id="pc-view" class="hidden text-center">
             <h2 class="text-xl font-bold mb-4">PC Transmitter</h2>
-            
             <div id="pc-step-1">
                 <button id="capture-btn" class="w-full bg-green-600 py-4 rounded-2xl font-bold hover:bg-green-500 mb-4 transition-all">
                     1. Select Audio Source
                 </button>
                 <p class="text-xs text-zinc-500">Note: Enable "Share System Audio" in the popup.</p>
             </div>
-
             <div id="pc-step-2" class="hidden">
                 <div class="bg-white p-4 rounded-2xl inline-block mb-4 shadow-inner" id="qrcode"></div>
                 <p class="text-sm text-zinc-400 mb-2">Scan with your phone to connect</p>
@@ -59,13 +60,39 @@
         <!-- Phone View -->
         <div id="phone-view" class="hidden text-center">
             <h2 class="text-xl font-bold mb-4">Phone Receiver</h2>
+            
+            <!-- Scanner UI -->
             <div id="scanner-wrapper" class="scanner-container bg-black rounded-2xl mb-4 hidden">
                 <canvas id="qr-canvas" class="hidden"></canvas>
                 <video id="video-preview" playsinline></video>
                 <div class="scanner-line"></div>
             </div>
+
+            <!-- Dashboard UI (Shown after scan) -->
+            <div id="phone-dashboard" class="hidden space-y-4">
+                <div class="bg-zinc-950 p-6 rounded-2xl border border-zinc-800">
+                    <div class="flex items-center justify-center space-x-2 mb-4">
+                        <div class="w-3 h-3 bg-green-500 rounded-full pulse"></div>
+                        <span class="text-green-500 font-bold tracking-widest">LIVE</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="text-left p-3 bg-zinc-900 rounded-xl">
+                            <p class="text-[10px] text-zinc-500 uppercase">Latency</p>
+                            <p id="ping-val" class="text-lg font-mono font-bold text-blue-400">-- ms</p>
+                        </div>
+                        <div class="text-left p-3 bg-zinc-900 rounded-xl">
+                            <p class="text-[10px] text-zinc-500 uppercase">Status</p>
+                            <p id="stream-status" class="text-lg font-bold text-zinc-300">Linking...</p>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="location.reload()" class="w-full bg-zinc-800 hover:bg-zinc-700 py-3 rounded-xl text-sm font-semibold border border-zinc-700 transition-all">
+                    Disconnect & Re-scan
+                </button>
+            </div>
+
             <button id="start-scan-btn" class="w-full bg-blue-600 py-4 rounded-2xl font-bold">Open Camera & Scan</button>
-            <p id="phone-status" class="mt-4 text-sm text-zinc-500">Waiting to scan PC QR code...</p>
+            <p id="phone-status" class="mt-4 text-sm text-zinc-500 italic">Waiting to scan PC QR code...</p>
         </div>
     </div>
 
@@ -74,12 +101,16 @@
     <script>
         let peer = null;
         let localStream = null;
+        let activeConn = null;
+        let pingInterval = null;
         
         const setupSection = document.getElementById('setup-section');
         const pcView = document.getElementById('pc-view');
         const phoneView = document.getElementById('phone-view');
         const pcStatus = document.getElementById('pc-status');
         const phoneStatus = document.getElementById('phone-status');
+        const phoneDashboard = document.getElementById('phone-dashboard');
+        const scannerWrapper = document.getElementById('scanner-wrapper');
 
         // --- PC LOGIC ---
         function initPC() {
@@ -103,7 +134,7 @@
                     
                     startPeerPC();
                 } catch (e) {
-                    alert("Capture failed. Make sure to select a screen and enable audio.");
+                    alert("Capture failed. Ensure audio sharing is enabled.");
                 }
             };
         }
@@ -114,7 +145,9 @@
 
             peer.on('open', (id) => {
                 pcStatus.innerText = "ID: " + id;
-                new QRCode(document.getElementById("qrcode"), {
+                const qrContainer = document.getElementById("qrcode");
+                qrContainer.innerHTML = "";
+                new QRCode(qrContainer, {
                     text: id,
                     width: 200,
                     height: 200,
@@ -130,6 +163,9 @@
                         pcStatus.innerText = "Phone connected! Streaming...";
                         peer.call(conn.peer, localStream);
                     }
+                    if (data === 'ping') {
+                        conn.send('pong');
+                    }
                 });
             });
         }
@@ -143,24 +179,25 @@
             const canvasElement = document.getElementById('qr-canvas');
             const canvas = canvasElement.getContext('2d');
             const startBtn = document.getElementById('start-scan-btn');
-            const wrapper = document.getElementById('scanner-wrapper');
 
             peer = new Peer();
 
             startBtn.onclick = () => {
                 startBtn.classList.add('hidden');
-                wrapper.classList.remove('hidden');
+                scannerWrapper.classList.remove('hidden');
                 
                 navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then((stream) => {
                     video.srcObject = stream;
                     video.setAttribute("playsinline", true);
                     video.play();
                     requestAnimationFrame(tick);
+                }).catch(err => {
+                    phoneStatus.innerText = "Camera error: " + err.message;
                 });
             };
 
             function tick() {
-                if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                if (video.readyState === video.HAVE_ENOUGH_DATA && !activeConn) {
                     canvasElement.height = video.videoHeight;
                     canvasElement.width = video.videoWidth;
                     canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
@@ -170,23 +207,41 @@
                     });
 
                     if (code) {
-                        connectToPC(code.data);
+                        // Stop camera
                         video.srcObject.getTracks().forEach(track => track.stop());
-                        wrapper.classList.add('hidden');
+                        scannerWrapper.classList.add('hidden');
+                        phoneDashboard.classList.remove('hidden');
+                        phoneStatus.classList.add('hidden');
+                        connectToPC(code.data);
                         return;
                     }
                 }
-                requestAnimationFrame(tick);
+                if (!activeConn) requestAnimationFrame(tick);
             }
         }
 
         function connectToPC(pcId) {
-            phoneStatus.innerText = "Connecting to " + pcId + "...";
+            document.getElementById('stream-status').innerText = "Connecting...";
             const conn = peer.connect(pcId);
+            activeConn = conn;
 
             conn.on('open', () => {
                 conn.send('hi');
-                phoneStatus.innerText = "Handshake sent. Waiting for audio...";
+                document.getElementById('stream-status').innerText = "Handshake...";
+                
+                // Start Ping Loop - Set to 10 seconds (10,000ms)
+                pingInterval = setInterval(() => {
+                    const start = Date.now();
+                    conn.send('ping');
+                    const pongHandler = (data) => {
+                        if (data === 'pong') {
+                            const end = Date.now();
+                            document.getElementById('ping-val').innerText = (end - start) + " ms";
+                            conn.off('data', pongHandler);
+                        }
+                    };
+                    conn.on('data', pongHandler);
+                }, 10000); 
             });
 
             peer.on('call', (call) => {
@@ -195,17 +250,24 @@
                     const audioEl = document.getElementById('remote-audio');
                     audioEl.srcObject = remoteStream;
                     audioEl.play().then(() => {
-                        phoneStatus.innerText = "🔊 STREAMING ACTIVE";
-                        phoneStatus.className = "mt-4 text-green-400 font-bold";
+                        document.getElementById('stream-status').innerText = "Streaming";
+                        document.getElementById('stream-status').classList.add('text-blue-400');
                     }).catch(err => {
-                        phoneStatus.innerText = "Click here to enable Audio";
-                        window.onclick = () => audioEl.play();
+                        document.getElementById('stream-status').innerText = "Tap to Play";
+                        window.onclick = () => {
+                            audioEl.play();
+                            document.getElementById('stream-status').innerText = "Streaming";
+                        };
                     });
                 });
+            });
+
+            conn.on('close', () => {
+                clearInterval(pingInterval);
+                document.getElementById('stream-status').innerText = "Disconnected";
+                document.getElementById('stream-status').classList.replace('text-blue-400', 'text-red-500');
             });
         }
     </script>
 </body>
 </html>
-
-```
