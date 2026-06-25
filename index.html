@@ -1,273 +1,210 @@
-html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Audio Share</title>
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Library for QR Generation -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <!-- Library for QR Scanning -->
-    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <title>Minecraft OGG Batch Converter</title>
+    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
     <style>
-        /* Fixed mirroring: removed scaleX(-1) so movement is natural */
-        #video-preview { width: 100%; max-width: 400px; border-radius: 1rem; background: #000; }
-        .scanner-container { position: relative; display: inline-block; overflow: hidden; }
-        .scanner-line {
-            position: absolute; width: 100%; height: 2px; background: rgba(59, 130, 246, 0.8);
-            top: 0; left: 0; animation: scan 2s linear infinite;
+        :root {
+            --bg: #121212;
+            --surface: #1e1e1e;
+            --primary: #03dac6;
+            --text: #e0e0e0;
         }
-        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
-        .pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background: var(--surface);
+            padding: 24px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        h1 {
+            font-size: 1.5rem;
+            margin-top: 0;
+            text-align: center;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input[type="file"] {
+            display: block;
+            width: 100%;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #2a2a2a;
+            border-radius: 6px;
+            border: 1px solid #444;
+            color: var(--text);
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary);
+            color: #000;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        button:disabled {
+            background-color: #555;
+            color: #888;
+            cursor: not-allowed;
+        }
+        button:active {
+            opacity: 0.8;
+        }
+        .status-box {
+            margin-top: 20px;
+            padding: 12px;
+            background: #2a2a2a;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            min-height: 60px;
+            word-wrap: break-word;
+        }
+        .progress-bar-container {
+            width: 100%;
+            background-color: #333;
+            border-radius: 4px;
+            margin-top: 10px;
+            overflow: hidden;
+            display: none;
+        }
+        .progress-bar {
+            height: 12px;
+            width: 0%;
+            background-color: var(--primary);
+            transition: width 0.3s ease;
+        }
     </style>
 </head>
-<body class="bg-zinc-950 min-h-screen text-zinc-100 flex items-center justify-center p-4 font-sans">
+<body>
 
-    <div id="app" class="bg-zinc-900 p-8 rounded-3xl shadow-2xl w-full max-w-md border border-zinc-800">
-        <!-- Role Selection -->
-        <div id="setup-section" class="text-center">
-            <h1 class="text-3xl font-black mb-2 text-blue-500">AudioLink</h1>
-            <p class="mb-8 text-zinc-500">High-fidelity audio streaming</p>
-            <div class="space-y-4">
-                <button onclick="initPC()" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-2xl font-bold transition-all active:scale-95 shadow-lg shadow-blue-900/20">
-                    💻 Set up as PC (Source)
-                </button>
-                <button onclick="initPhone()" class="w-full bg-zinc-800 hover:bg-zinc-700 py-4 rounded-2xl font-bold transition-all active:scale-95 border border-zinc-700">
-                    📱 Set up as Phone (Receiver)
-                </button>
-            </div>
+    <div class="container">
+        <h1>Batch Audio to OGG</h1>
+        
+        <label for="audioInput">Select Audio Files (MP3, AAC, etc.)</label>
+        <input type="file" id="audioInput" multiple accept="audio/*">
+        
+        <button id="convertBtn">Start Conversion</button>
+        
+        <div class="progress-bar-container" id="progressContainer">
+            <div class="progress-bar" id="progressBar"></div>
         </div>
 
-        <!-- PC View -->
-        <div id="pc-view" class="hidden text-center">
-            <h2 class="text-xl font-bold mb-4">PC Transmitter</h2>
-            <div id="pc-step-1">
-                <button id="capture-btn" class="w-full bg-green-600 py-4 rounded-2xl font-bold hover:bg-green-500 mb-4 transition-all">
-                    1. Select Audio Source
-                </button>
-                <p class="text-xs text-zinc-500">Note: Enable "Share System Audio" in the popup.</p>
-            </div>
-            <div id="pc-step-2" class="hidden">
-                <div class="bg-white p-4 rounded-2xl inline-block mb-4 shadow-inner" id="qrcode"></div>
-                <p class="text-sm text-zinc-400 mb-2">Scan with your phone to connect</p>
-                <div id="pc-status" class="text-blue-400 font-mono text-sm">Initializing Peer...</div>
-            </div>
-        </div>
-
-        <!-- Phone View -->
-        <div id="phone-view" class="hidden text-center">
-            <h2 class="text-xl font-bold mb-4">Phone Receiver</h2>
-            
-            <!-- Scanner UI -->
-            <div id="scanner-wrapper" class="scanner-container bg-black rounded-2xl mb-4 hidden">
-                <canvas id="qr-canvas" class="hidden"></canvas>
-                <video id="video-preview" playsinline></video>
-                <div class="scanner-line"></div>
-            </div>
-
-            <!-- Dashboard UI (Shown after scan) -->
-            <div id="phone-dashboard" class="hidden space-y-4">
-                <div class="bg-zinc-950 p-6 rounded-2xl border border-zinc-800">
-                    <div class="flex items-center justify-center space-x-2 mb-4">
-                        <div class="w-3 h-3 bg-green-500 rounded-full pulse"></div>
-                        <span class="text-green-500 font-bold tracking-widest">LIVE</span>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="text-left p-3 bg-zinc-900 rounded-xl">
-                            <p class="text-[10px] text-zinc-500 uppercase">Latency</p>
-                            <p id="ping-val" class="text-lg font-mono font-bold text-blue-400">-- ms</p>
-                        </div>
-                        <div class="text-left p-3 bg-zinc-900 rounded-xl">
-                            <p class="text-[10px] text-zinc-500 uppercase">Status</p>
-                            <p id="stream-status" class="text-lg font-bold text-zinc-300">Linking...</p>
-                        </div>
-                    </div>
-                </div>
-                <button onclick="location.reload()" class="w-full bg-zinc-800 hover:bg-zinc-700 py-3 rounded-xl text-sm font-semibold border border-zinc-700 transition-all">
-                    Disconnect & Re-scan
-                </button>
-            </div>
-
-            <button id="start-scan-btn" class="w-full bg-blue-600 py-4 rounded-2xl font-bold">Open Camera & Scan</button>
-            <p id="phone-status" class="mt-4 text-sm text-zinc-500 italic">Waiting to scan PC QR code...</p>
-        </div>
+        <div class="status-box" id="statusLog">Ready. Awaiting files.</div>
     </div>
 
-    <audio id="remote-audio" autoplay playsinline></audio>
-
     <script>
-        let peer = null;
-        let localStream = null;
-        let activeConn = null;
-        let pingInterval = null;
-        
-        const setupSection = document.getElementById('setup-section');
-        const pcView = document.getElementById('pc-view');
-        const phoneView = document.getElementById('phone-view');
-        const pcStatus = document.getElementById('pc-status');
-        const phoneStatus = document.getElementById('phone-status');
-        const phoneDashboard = document.getElementById('phone-dashboard');
-        const scannerWrapper = document.getElementById('scanner-wrapper');
+        const { createFFmpeg, fetchFile } = FFmpeg;
+        // Initialize FFmpeg
+        const ffmpeg = createFFmpeg({ 
+            log: false,
+            corePath: 'https://unpkg.com/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js'
+        });
 
-        // --- PC LOGIC ---
-        function initPC() {
-            setupSection.classList.add('hidden');
-            pcView.classList.remove('hidden');
+        const fileInput = document.getElementById('audioInput');
+        const convertBtn = document.getElementById('convertBtn');
+        const statusLog = document.getElementById('statusLog');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
 
-            document.getElementById('capture-btn').onclick = async () => {
-                try {
-                    localStream = await navigator.mediaDevices.getDisplayMedia({
-                        video: { width: 1 }, 
-                        audio: {
-                            echoCancellation: false,
-                            noiseSuppression: false,
-                            autoGainControl: false
-                        },
-                        systemAudio: "include"
-                    });
-
-                    document.getElementById('pc-step-1').classList.add('hidden');
-                    document.getElementById('pc-step-2').classList.remove('hidden');
-                    
-                    startPeerPC();
-                } catch (e) {
-                    alert("Capture failed. Ensure audio sharing is enabled.");
-                }
-            };
+        function log(message) {
+            statusLog.textContent = message;
+            console.log(message);
         }
 
-        function startPeerPC() {
-            const pcId = 'AL-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-            peer = new Peer(pcId);
-
-            peer.on('open', (id) => {
-                pcStatus.innerText = "ID: " + id;
-                const qrContainer = document.getElementById("qrcode");
-                qrContainer.innerHTML = "";
-                new QRCode(qrContainer, {
-                    text: id,
-                    width: 200,
-                    height: 200,
-                    colorDark : "#000000",
-                    colorLight : "#ffffff",
-                    correctLevel : QRCode.CorrectLevel.H
-                });
-            });
-
-            peer.on('connection', (conn) => {
-                conn.on('data', (data) => {
-                    if (data === 'hi') {
-                        pcStatus.innerText = "Phone connected! Streaming...";
-                        peer.call(conn.peer, localStream);
-                    }
-                    if (data === 'ping') {
-                        conn.send('pong');
-                    }
-                });
-            });
-        }
-
-        // --- PHONE LOGIC ---
-        function initPhone() {
-            setupSection.classList.add('hidden');
-            phoneView.classList.remove('hidden');
-
-            const video = document.getElementById('video-preview');
-            const canvasElement = document.getElementById('qr-canvas');
-            const canvas = canvasElement.getContext('2d');
-            const startBtn = document.getElementById('start-scan-btn');
-
-            peer = new Peer();
-
-            startBtn.onclick = () => {
-                startBtn.classList.add('hidden');
-                scannerWrapper.classList.remove('hidden');
-                
-                navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then((stream) => {
-                    video.srcObject = stream;
-                    video.setAttribute("playsinline", true);
-                    video.play();
-                    requestAnimationFrame(tick);
-                }).catch(err => {
-                    phoneStatus.innerText = "Camera error: " + err.message;
-                });
-            };
-
-            function tick() {
-                if (video.readyState === video.HAVE_ENOUGH_DATA && !activeConn) {
-                    canvasElement.height = video.videoHeight;
-                    canvasElement.width = video.videoWidth;
-                    canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
-                    var imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
-                    var code = jsQR(imageData.data, imageData.width, imageData.height, {
-                        inversionAttempts: "dontInvert",
-                    });
-
-                    if (code) {
-                        // Stop camera
-                        video.srcObject.getTracks().forEach(track => track.stop());
-                        scannerWrapper.classList.add('hidden');
-                        phoneDashboard.classList.remove('hidden');
-                        phoneStatus.classList.add('hidden');
-                        connectToPC(code.data);
-                        return;
-                    }
-                }
-                if (!activeConn) requestAnimationFrame(tick);
+        convertBtn.addEventListener('click', async () => {
+            const files = fileInput.files;
+            if (files.length === 0) {
+                log("Please select at least one audio file first.");
+                return;
             }
-        }
 
-        function connectToPC(pcId) {
-            document.getElementById('stream-status').innerText = "Connecting...";
-            const conn = peer.connect(pcId);
-            activeConn = conn;
+            convertBtn.disabled = true;
+            fileInput.disabled = true;
+            progressContainer.style.display = 'block';
 
-            conn.on('open', () => {
-                conn.send('hi');
-                document.getElementById('stream-status').innerText = "Handshake...";
-                
-                // Start Ping Loop - Set to 10 seconds (10,000ms)
-                pingInterval = setInterval(() => {
-                    const start = Date.now();
-                    conn.send('ping');
-                    const pongHandler = (data) => {
-                        if (data === 'pong') {
-                            const end = Date.now();
-                            document.getElementById('ping-val').innerText = (end - start) + " ms";
-                            conn.off('data', pongHandler);
-                        }
-                    };
-                    conn.on('data', pongHandler);
-                }, 10000); 
-            });
+            try {
+                if (!ffmpeg.isLoaded()) {
+                    log("Loading conversion engine... (Requires internet for first run)");
+                    await ffmpeg.load();
+                }
 
-            peer.on('call', (call) => {
-                call.answer();
-                call.on('stream', (remoteStream) => {
-                    const audioEl = document.getElementById('remote-audio');
-                    audioEl.srcObject = remoteStream;
-                    audioEl.play().then(() => {
-                        document.getElementById('stream-status').innerText = "Streaming";
-                        document.getElementById('stream-status').classList.add('text-blue-400');
-                    }).catch(err => {
-                        document.getElementById('stream-status').innerText = "Tap to Play";
-                        window.onclick = () => {
-                            audioEl.play();
-                            document.getElementById('stream-status').innerText = "Streaming";
-                        };
-                    });
-                });
-            });
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    // Create safe filenames for the virtual file system
+                    const inputName = `input_${i}_${file.name.replace(/[^a-zA-Z0-9.]/g, "")}`;
+                    const outputName = `output_${i}.ogg`;
+                    const originalBaseName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+                    const finalDownloadName = `${originalBaseName}.ogg`;
 
-            conn.on('close', () => {
-                clearInterval(pingInterval);
-                document.getElementById('stream-status').innerText = "Disconnected";
-                document.getElementById('stream-status').classList.replace('text-blue-400', 'text-red-500');
-            });
-        }
+                    // Update UI progress
+                    const percentage = Math.round((i / files.length) * 100);
+                    progressBar.style.width = `${percentage}%`;
+                    log(`Processing (${i + 1}/${files.length}): ${file.name}`);
+
+                    // 1. Write file to WebAssembly Virtual File System
+                    ffmpeg.FS('writeFile', inputName, await fetchFile(file));
+
+                    // 2. Run FFmpeg command
+                    // -c:a libvorbis forces the Vorbis codec (Minecraft standard)
+                    // -q:a 4 sets audio quality to ~128kbps for a good balance of size and quality
+                    await ffmpeg.run('-i', inputName, '-c:a', 'libvorbis', '-q:a', '4', outputName);
+
+                    // 3. Read the converted file
+                    const data = ffmpeg.FS('readFile', outputName);
+
+                    // 4. Trigger download
+                    const blob = new Blob([data.buffer], { type: 'audio/ogg' });
+                    const url = URL.createObjectURL(blob);
+                    
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = finalDownloadName;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+
+                    // 5. CRITICAL RAM CLEAR: Delete files from virtual FS and revoke object URL
+                    URL.revokeObjectURL(url);
+                    ffmpeg.FS('unlink', inputName);
+                    ffmpeg.FS('unlink', outputName);
+                    
+                    // Brief pause to allow the browser thread to breathe on mobile devices
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                }
+
+                progressBar.style.width = '100%';
+                log(`Success! Converted and downloaded ${files.length} files.`);
+
+            } catch (error) {
+                log(`Error: ${error.message}. If using a smartphone, ensure the browser supports WebAssembly.`);
+            } finally {
+                convertBtn.disabled = false;
+                fileInput.disabled = false;
+                setTimeout(() => { progressContainer.style.display = 'none'; progressBar.style.width = '0%'; }, 3000);
+            }
+        });
     </script>
 </body>
 </html>
