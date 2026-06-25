@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minecraft OGG Batch Converter</title>
-    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.7/dist/umd/ffmpeg.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/umd/index.js"></script>
     <style>
         :root {
             --bg: #121212;
@@ -115,14 +116,11 @@
     </div>
 
     <script>
-        const { createFFmpeg } = FFmpeg;
+        // v0.12 API extraction
+        const { FFmpeg } = window.FFmpeg;
+        const { fetchFile } = window.FFmpegUtil;
         
-        // Using the single-threaded core
-        const ffmpeg = createFFmpeg({ 
-            log: false,
-            mainName: 'main',
-            corePath: 'https://unpkg.com/@ffmpeg/core-st@0.11.1/dist/ffmpeg-core.js'
-        });
+        const ffmpeg = new FFmpeg();
 
         const fileInput = document.getElementById('audioInput');
         const convertBtn = document.getElementById('convertBtn');
@@ -147,12 +145,15 @@
             progressContainer.style.display = 'block';
 
             try {
-                if (!ffmpeg.isLoaded()) {
-                    log("Loading engine...");
-                    await ffmpeg.load();
+                // Check if already loaded to avoid redundant network requests
+                if (!ffmpeg.loaded) {
+                    log("Loading v0.12 engine...");
+                    await ffmpeg.load({
+                        coreURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js',
+                        wasmURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.wasm',
+                    });
                 }
 
-                // Strict sequential queue loop
                 for (let i = 0; i < files.length; i++) {
                     const file = files[i];
                     const percentage = Math.round((i / files.length) * 100);
@@ -161,24 +162,21 @@
                     log(`Processing (${i + 1}/${files.length}): ${file.name}`);
 
                     try {
-                        // 1. Read to ArrayBuffer (safer than fetchFile for heavy mobile queues)
-                        const arrayBuffer = await file.arrayBuffer();
-                        const uint8Array = new Uint8Array(arrayBuffer);
+                        // 1. Write file into WASM memory
+                        await ffmpeg.writeFile('input_audio', await fetchFile(file));
 
-                        // 2. Write to static memory slots
-                        ffmpeg.FS('writeFile', 'input_audio', uint8Array);
+                        // 2. Execute command natively (no exit(0) bug)
+                        await ffmpeg.exec(['-i', 'input_audio', '-c:a', 'libvorbis', '-q:a', '4', 'output.ogg']);
 
-                        // 3. Execute conversion
-                        await ffmpeg.run('-i', 'input_audio', '-c:a', 'libvorbis', '-q:a', '4', 'output.ogg');
-
-                        // 4. Extract, construct, and trigger download
-                        const data = ffmpeg.FS('readFile', 'output.ogg');
+                        // 3. Read output
+                        const data = await ffmpeg.readFile('output.ogg');
                         const blob = new Blob([data.buffer], { type: 'audio/ogg' });
                         const url = URL.createObjectURL(blob);
                         
                         const originalBaseName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
                         const finalDownloadName = `${originalBaseName}.ogg`;
 
+                        // 4. Download
                         const a = document.createElement('a');
                         a.href = url;
                         a.download = finalDownloadName;
@@ -186,24 +184,24 @@
                         a.click();
                         document.body.removeChild(a);
 
-                        // 5. Clear Blob memory
+                        // 5. Clean blob URL to prevent RAM buildup
                         URL.revokeObjectURL(url);
                         
                     } catch (fileError) {
                         console.error(`Error on file ${file.name}:`, fileError);
-                        log(`Skipped ${file.name} due to format error. Moving to next...`);
+                        log(`Skipped ${file.name} due to an error. Moving to next...`);
                     } finally {
-                        // ALWAYS force wipe the virtual filesystem slots, even on failure
-                        try { ffmpeg.FS('unlink', 'input_audio'); } catch(e){}
-                        try { ffmpeg.FS('unlink', 'output.ogg'); } catch(e){}
+                        // ALWAYS clean the virtual filesystem before the next loop
+                        try { await ffmpeg.deleteFile('input_audio'); } catch(e){}
+                        try { await ffmpeg.deleteFile('output.ogg'); } catch(e){}
                     }
 
-                    // Strict 500ms breather to let the browser release the WASM lock completely
-                    await new Promise(resolve => setTimeout(resolve, 500));
+                    // Strict breather to keep the Chromium UI thread responsive
+                    await new Promise(resolve => setTimeout(resolve, 300));
                 }
 
                 progressBar.style.width = '100%';
-                log(`Success! Finished processing all files.`);
+                log(`Success! Finished processing all ${files.length} files.`);
 
             } catch (error) {
                 log(`Engine Error: ${error.message}`);
