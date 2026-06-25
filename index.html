@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minecraft OGG Batch Converter</title>
-    <!-- Load FFmpeg WebAssembly port -->
     <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
     <style>
         :root {
@@ -116,9 +115,9 @@
     </div>
 
     <script>
-        const { createFFmpeg, fetchFile } = FFmpeg;
+        const { createFFmpeg } = FFmpeg;
         
-        // FIX: Pointing to the single-threaded core (core-st) which works flawlessly on GitHub Pages
+        // Using the single-threaded core
         const ffmpeg = createFFmpeg({ 
             log: false,
             mainName: 'main',
@@ -149,54 +148,65 @@
 
             try {
                 if (!ffmpeg.isLoaded()) {
-                    log("Loading single-thread engine...");
+                    log("Loading engine...");
                     await ffmpeg.load();
                 }
 
+                // Strict sequential queue loop
                 for (let i = 0; i < files.length; i++) {
                     const file = files[i];
-                    // Sanitize filenames for the virtual file system environment
-                    const inputName = `input_${i}_${file.name.replace(/[^a-zA-Z0-9.]/g, "")}`;
-                    const outputName = `output_${i}.ogg`;
-                    const originalBaseName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
-                    const finalDownloadName = `${originalBaseName}.ogg`;
-
                     const percentage = Math.round((i / files.length) * 100);
                     progressBar.style.width = `${percentage}%`;
+                    
                     log(`Processing (${i + 1}/${files.length}): ${file.name}`);
 
-                    // Write file chunk into virtual memory
-                    ffmpeg.FS('writeFile', inputName, await fetchFile(file));
+                    try {
+                        // 1. Read to ArrayBuffer (safer than fetchFile for heavy mobile queues)
+                        const arrayBuffer = await file.arrayBuffer();
+                        const uint8Array = new Uint8Array(arrayBuffer);
 
-                    // Convert to exact Minecraft Bedrock/Java compatible ogg structure
-                    await ffmpeg.run('-i', inputName, '-c:a', 'libvorbis', '-q:a', '4', outputName);
+                        // 2. Write to static memory slots
+                        ffmpeg.FS('writeFile', 'input_audio', uint8Array);
 
-                    // Pull data out to build immediate local browser download
-                    const data = ffmpeg.FS('readFile', outputName);
-                    const blob = new Blob([data.buffer], { type: 'audio/ogg' });
-                    const url = URL.createObjectURL(blob);
-                    
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = finalDownloadName;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
+                        // 3. Execute conversion
+                        await ffmpeg.run('-i', 'input_audio', '-c:a', 'libvorbis', '-q:a', '4', 'output.ogg');
 
-                    // Strict garbage collection to keep smartphone RAM totally clear
-                    URL.revokeObjectURL(url);
-                    ffmpeg.FS('unlink', inputName);
-                    ffmpeg.FS('unlink', outputName);
-                    
-                    // Tiny timeout delay to let the mobile main UI thread stay responsive
-                    await new Promise(resolve => setTimeout(resolve, 250));
+                        // 4. Extract, construct, and trigger download
+                        const data = ffmpeg.FS('readFile', 'output.ogg');
+                        const blob = new Blob([data.buffer], { type: 'audio/ogg' });
+                        const url = URL.createObjectURL(blob);
+                        
+                        const originalBaseName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+                        const finalDownloadName = `${originalBaseName}.ogg`;
+
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = finalDownloadName;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+
+                        // 5. Clear Blob memory
+                        URL.revokeObjectURL(url);
+                        
+                    } catch (fileError) {
+                        console.error(`Error on file ${file.name}:`, fileError);
+                        log(`Skipped ${file.name} due to format error. Moving to next...`);
+                    } finally {
+                        // ALWAYS force wipe the virtual filesystem slots, even on failure
+                        try { ffmpeg.FS('unlink', 'input_audio'); } catch(e){}
+                        try { ffmpeg.FS('unlink', 'output.ogg'); } catch(e){}
+                    }
+
+                    // Strict 500ms breather to let the browser release the WASM lock completely
+                    await new Promise(resolve => setTimeout(resolve, 500));
                 }
 
                 progressBar.style.width = '100%';
-                log(`Success! Finished converting all ${files.length} files.`);
+                log(`Success! Finished processing all files.`);
 
             } catch (error) {
-                log(`Error: ${error.message}`);
+                log(`Engine Error: ${error.message}`);
             } finally {
                 convertBtn.disabled = false;
                 fileInput.disabled = false;
