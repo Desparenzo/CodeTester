@@ -1,216 +1,754 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark h-full bg-slate-950 text-slate-100">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minecraft OGG Batch Converter</title>
-    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.7/dist/umd/ffmpeg.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/umd/index.js"></script>
-    <style>
-        :root {
-            --bg: #121212;
-            --surface: #1e1e1e;
-            --primary: #03dac6;
-            --text: #e0e0e0;
-        }
-        body {
-            font-family: system-ui, -apple-system, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-        }
-        .container {
-            background: var(--surface);
-            padding: 24px;
-            border-radius: 12px;
-            width: 100%;
-            max-width: 500px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-        }
-        h1 {
-            font-size: 1.5rem;
-            margin-top: 0;
-            text-align: center;
-        }
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-        }
-        input[type="file"] {
-            display: block;
-            width: 100%;
-            margin-bottom: 20px;
-            padding: 10px;
-            background: #2a2a2a;
-            border-radius: 6px;
-            border: 1px solid #444;
-            color: var(--text);
-        }
-        button {
-            width: 100%;
-            padding: 14px;
-            background-color: var(--primary);
-            color: #000;
-            border: none;
-            border-radius: 6px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-        button:disabled {
-            background-color: #555;
-            color: #888;
-            cursor: not-allowed;
-        }
-        button:active {
-            opacity: 0.8;
-        }
-        .status-box {
-            margin-top: 20px;
-            padding: 12px;
-            background: #2a2a2a;
-            border-radius: 6px;
-            font-family: monospace;
-            font-size: 0.9rem;
-            min-height: 60px;
-            word-wrap: break-word;
-        }
-        .progress-bar-container {
-            width: 100%;
-            background-color: #333;
-            border-radius: 4px;
-            margin-top: 10px;
-            overflow: hidden;
-            display: none;
-        }
-        .progress-bar {
-            height: 12px;
-            width: 0%;
-            background-color: var(--primary);
-            transition: width 0.3s ease;
-        }
-    </style>
-</head>
-<body>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DECIMEN - Fountain QR File Transfer</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- QR Code Generator & jsQR Decoder Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 
-    <div class="container">
-        <h1>Batch Audio to OGG</h1>
+  <!-- Google Fonts for Cyber/Technical Aesthetic -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            amber: {
+              400: '#fbbf24',
+              500: '#f59e0b',
+            },
+            cyan: {
+              400: '#22d3ee',
+              500: '#06b6d4',
+            }
+          },
+          fontFamily: {
+            mono: ['"Share Tech Mono"', 'monospace'],
+            sans: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar & UI Tweaks */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #090d16; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+    
+    .hud-box {
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid rgba(51, 65, 85, 0.5);
+      backdrop-filter: blur(8px);
+    }
+    .grid-bg {
+      background-image: radial-gradient(rgba(51, 65, 85, 0.3) 1px, transparent 1px);
+      background-size: 16px 16px;
+    }
+    /* CRT Scanline effect overlay */
+    .scanlines {
+      background: linear-gradient(
+        rgba(18, 16, 16, 0) 50%, 
+        rgba(0, 0, 0, 0.25) 50%
+      ), linear-gradient(
+        90deg,
+        rgba(255, 0, 0, 0.03),
+        rgba(0, 255, 0, 0.01),
+        rgba(0, 0, 255, 0.03)
+      );
+      background-size: 100% 4px, 6px 100%;
+      pointer-events: none;
+    }
+  </style>
+</head>
+
+<body class="h-full flex flex-col font-sans grid-bg select-none antialiased">
+  <!-- Main Container -->
+  <div class="max-w-md w-full mx-auto h-full flex flex-col bg-slate-900 border-x border-slate-800 shadow-2xl relative overflow-hidden">
+    
+    <!-- Top Header Bar -->
+    <header class="p-3 border-b border-slate-800 bg-slate-950/90 flex items-center justify-between z-10">
+      <div class="flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
+        <h1 class="font-mono text-sm tracking-widest text-amber-500 font-bold uppercase">
+          DECIMEN <span class="text-slate-400 font-normal text-xs">— Fountain QR Transfer</span>
+        </h1>
+      </div>
+      
+      <!-- Mode Toggle Switch -->
+      <div class="flex bg-slate-800/80 p-0.5 rounded-lg border border-slate-700/60 text-xs font-mono">
+        <button id="modeRxBtn" onclick="switchMode('rx')" class="px-2.5 py-1 rounded-md font-bold transition-all bg-amber-500 text-slate-950 shadow">
+          <i class="fa-solid fa-camera mr-1 text-[10px]"></i> RECEIVE
+        </button>
+        <button id="modeTxBtn" onclick="switchMode('tx')" class="px-2.5 py-1 rounded-md font-bold transition-all text-slate-400 hover:text-slate-200">
+          <i class="fa-solid fa-qrcode mr-1 text-[10px]"></i> SEND
+        </button>
+      </div>
+    </header>
+
+    <!-- CONTENT AREA -->
+    <main class="flex-1 flex flex-col p-3 overflow-y-auto space-y-3 z-10 relative">
+
+      <!-- TELEMETRY HUD DASHBOARD (Matches exact screenshot layout) -->
+      <div class="hud-box rounded-xl p-3 border border-slate-800 text-slate-300 font-mono text-xs">
         
-        <label for="audioInput">Select Audio Files (MP3, AAC, etc.)</label>
-        <input type="file" id="audioInput" multiple accept="audio/*">
-        
-        <button id="convertBtn">Start Conversion</button>
-        
-        <div class="progress-bar-container" id="progressContainer">
-            <div class="progress-bar" id="progressBar"></div>
+        <!-- Row 1: Capture & Decode FPS -->
+        <div class="grid grid-cols-2 gap-3 mb-2.5 border-b border-slate-800/80 pb-2">
+          <div>
+            <div class="text-[10px] text-slate-400 tracking-wider uppercase">CAPTURE FPS</div>
+            <div id="statCapFps" class="text-xl font-bold text-slate-100">0</div>
+          </div>
+          <div>
+            <div class="text-[10px] text-slate-400 tracking-wider uppercase">DECODE FPS</div>
+            <div id="statDecFps" class="text-xl font-bold text-amber-400">0.0</div>
+          </div>
         </div>
 
-        <div class="status-box" id="statusLog">Ready. Awaiting files.</div>
-    </div>
+        <!-- Row 2: Lock Status & Dropped -->
+        <div class="grid grid-cols-2 gap-3 mb-2.5 border-b border-slate-800/80 pb-2">
+          <div>
+            <div class="text-[10px] text-slate-400 tracking-wider uppercase">LOCK</div>
+            <div id="statLock" class="text-sm font-bold text-emerald-400 tracking-wider uppercase flex items-center gap-1.5">
+              <span id="lockDot" class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+              <span id="lockText">SEARCHING</span>
+            </div>
+          </div>
+          <div>
+            <div class="text-[10px] text-slate-400 tracking-wider uppercase">DROPPED</div>
+            <div id="statDropped" class="text-base font-bold text-slate-300">0</div>
+          </div>
+        </div>
 
-    <script>
-        // v0.12 API extraction
-        const { FFmpeg } = window.FFmpeg;
-        const { fetchFile } = window.FFmpegUtil;
+        <!-- Row 3: Goodput & Elapsed -->
+        <div class="grid grid-cols-2 gap-3 mb-2.5 border-b border-slate-800/80 pb-2">
+          <div>
+            <div class="text-[10px] text-slate-400 tracking-wider uppercase">GOODPUT</div>
+            <div class="text-base font-bold text-amber-400">
+              <span id="statGoodput">0.0</span> <span class="text-xs font-normal text-amber-500/80">KB/s</span>
+            </div>
+          </div>
+          <div>
+            <div class="text-[10px] text-slate-400 tracking-wider uppercase">ELAPSED</div>
+            <div class="text-base font-bold text-slate-200">
+              <span id="statElapsed">0</span> <span class="text-xs font-normal text-slate-400">s</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 4: Frames & Session -->
+        <div class="grid grid-cols-2 gap-3 mb-2.5 border-b border-slate-800/80 pb-2">
+          <div>
+            <div class="text-[10px] text-slate-400 tracking-wider uppercase">FRAMES NEW/DUP/RED</div>
+            <div id="statFrames" class="text-sm font-bold text-slate-200">0/0/0</div>
+          </div>
+          <div>
+            <div class="text-[10px] text-slate-400 tracking-wider uppercase">SESSION</div>
+            <div id="statSession" class="text-sm font-bold text-slate-400">----</div>
+          </div>
+        </div>
+
+        <!-- Row 5: Block Len & Payload -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <div class="text-[10px] text-slate-400 tracking-wider uppercase">BLOCK LEN</div>
+            <div class="text-sm font-bold text-slate-200">
+              <span id="statBlockLen">0</span> <span class="text-[10px] text-slate-400">B</span>
+            </div>
+          </div>
+          <div>
+            <div class="text-[10px] text-slate-400 tracking-wider uppercase">PAYLOAD</div>
+            <div class="text-sm font-bold text-slate-200">
+              <span id="statPayload">0</span> <span class="text-[10px] text-slate-400">KB</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- PROGRESS BAR & RECV BADGE -->
+      <div class="space-y-1">
+        <div class="flex justify-between items-center font-mono text-[11px] text-slate-400 px-0.5">
+          <span id="progressLabel"><i class="fa-solid fa-radar text-amber-500 mr-1"></i> SCANNING OPTICAL STREAM</span>
+          <span id="statRateDetail" class="text-slate-300">0 FPS • 0 bytes/frame</span>
+        </div>
         
-        const ffmpeg = new FFmpeg();
+        <div class="w-full bg-slate-950 h-3 rounded-full overflow-hidden border border-slate-800 p-0.5 relative">
+          <div id="progressBar" class="h-full bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-300 rounded-full transition-all duration-150 w-0"></div>
+        </div>
+      </div>
 
-        const fileInput = document.getElementById('audioInput');
-        const convertBtn = document.getElementById('convertBtn');
-        const statusLog = document.getElementById('statusLog');
-        const progressContainer = document.getElementById('progressContainer');
-        const progressBar = document.getElementById('progressBar');
+      <!-- VIEWPORT PANELS (RECEIVER / SENDER) -->
+      
+      <!-- RECEIVER MODE PANEL -->
+      <div id="rxPanel" class="flex-1 flex flex-col space-y-3">
+        <!-- Camera Viewport Box -->
+        <div class="relative flex-1 bg-black rounded-xl overflow-hidden border border-slate-800 min-h-[260px] flex items-center justify-center group">
+          
+          <video id="videoPreview" playsinline autoplay muted class="w-full h-full object-cover"></video>
+          <canvas id="scanCanvas" class="hidden"></canvas>
+          
+          <!-- Scanner Target Reticle / Finder Box -->
+          <div id="reticleBox" class="absolute inset-8 border-2 border-dashed border-amber-500/40 rounded-lg pointer-events-none flex flex-col justify-between p-2">
+            <div class="flex justify-between">
+              <div class="w-4 h-4 border-t-2 border-l-2 border-amber-400"></div>
+              <div class="w-4 h-4 border-t-2 border-r-2 border-amber-400"></div>
+            </div>
+            <div class="text-center">
+              <span class="bg-slate-950/80 px-2 py-0.5 rounded text-[10px] font-mono text-amber-400 border border-amber-500/30">
+                ALIGN ANIMATED QR CODE HERE
+              </span>
+            </div>
+            <div class="flex justify-between">
+              <div class="w-4 h-4 border-b-2 border-l-2 border-amber-400"></div>
+              <div class="w-4 h-4 border-b-2 border-r-2 border-amber-400"></div>
+            </div>
+          </div>
 
-        function log(message) {
-            statusLog.textContent = message;
-            console.log(message);
+          <!-- Camera Placeholder / Permission Prompt -->
+          <div id="cameraPrompt" class="absolute inset-0 bg-slate-900/90 flex flex-col items-center justify-center p-4 text-center z-20">
+            <div class="w-14 h-14 rounded-full bg-slate-800 flex items-center justify-center text-amber-400 text-2xl mb-3 border border-slate-700">
+              <i class="fa-solid fa-camera"></i>
+            </div>
+            <p class="text-xs text-slate-300 font-medium mb-3 max-w-xs">
+              Optical file receiver requires camera access to read data frames.
+            </p>
+            <button onclick="startCamera()" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-lg shadow transition-all flex items-center gap-2">
+              <i class="fa-solid fa-power-off"></i> START CAMERA SCANNER
+            </button>
+          </div>
+        </div>
+
+        <!-- Download Finished Action Box -->
+        <div id="downloadBox" class="hidden hud-box p-3 rounded-xl border border-emerald-500/40 bg-emerald-950/20 text-center space-y-2">
+          <div class="text-emerald-400 font-mono text-xs font-bold flex items-center justify-center gap-2">
+            <i class="fa-solid fa-circle-check"></i> FILE RECONSTRUCTED SUCCESSFULLY!
+          </div>
+          <p id="downloadFileInfo" class="text-xs text-slate-300 font-mono">Filename: payload.bin (0 KB)</p>
+          <button id="downloadBtn" class="w-full py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs rounded-lg shadow transition-all flex items-center justify-center gap-2">
+            <i class="fa-solid fa-download"></i> SAVE RECEIVED FILE
+          </button>
+        </div>
+      </div>
+
+
+      <!-- SENDER MODE PANEL -->
+      <div id="txPanel" class="hidden flex-1 flex flex-col space-y-3">
+        <!-- QR Display Canvas Card -->
+        <div class="flex-1 bg-white rounded-xl p-3 border border-slate-800 flex flex-col items-center justify-center relative min-h-[260px]">
+          <div id="qrcode" class="flex items-center justify-center"></div>
+          
+          <div id="txPlaceholder" class="text-center p-4 text-slate-500 font-mono text-xs">
+            <i class="fa-solid fa-file-arrow-up text-3xl text-slate-400 mb-2 block"></i>
+            Select a file below to begin optical transmission stream
+          </div>
+        </div>
+
+        <!-- Controls Card -->
+        <div class="hud-box p-3 rounded-xl space-y-2.5">
+          <label class="block">
+            <span class="text-[11px] font-mono text-slate-400 uppercase tracking-wider block mb-1">Select File to Transmit</span>
+            <input type="file" id="fileInput" onchange="handleFileSelect(event)" class="block w-full text-xs text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-amber-500 file:text-slate-950 hover:file:bg-amber-400 cursor-pointer border border-slate-700 rounded-lg bg-slate-950">
+          </label>
+
+          <div class="grid grid-cols-2 gap-2 text-xs font-mono">
+            <div>
+              <label class="text-[10px] text-slate-400 block mb-1">CHUNK SIZE (BYTES)</label>
+              <select id="chunkSizeSelect" onchange="updateTxConfig()" class="w-full bg-slate-950 border border-slate-700 rounded p-1.5 text-amber-400">
+                <option value="150">150 B (Fast scanning)</option>
+                <option value="300" selected>300 B (Standard)</option>
+                <option value="600">600 B (High density)</option>
+                <option value="1000">1000 B (Ultra high density)</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-[10px] text-slate-400 block mb-1">TARGET FPS</label>
+              <select id="fpsSelect" onchange="updateTxConfig()" class="w-full bg-slate-950 border border-slate-700 rounded p-1.5 text-amber-400">
+                <option value="5">5 FPS</option>
+                <option value="10" selected>10 FPS</option>
+                <option value="15">15 FPS</option>
+                <option value="25">25 FPS</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Transmission Play/Pause Button -->
+          <button id="txToggleBtn" disabled onclick="toggleTransmission()" class="w-full py-2 bg-slate-800 text-slate-500 font-bold text-xs rounded-lg shadow transition-all flex items-center justify-center gap-2 cursor-not-allowed">
+            <i class="fa-solid fa-play"></i> START TRANSMITTING
+          </button>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Footer / Demo Helper -->
+    <footer class="p-2 border-t border-slate-800/80 bg-slate-950/90 text-[10px] font-mono text-slate-500 flex justify-between items-center z-10">
+      <span>DECIMEN v1.0 • Air-Gap Protocol</span>
+      <button onclick="loadSampleFile()" class="text-amber-500/80 hover:text-amber-400 underline">
+        Load Demo Payload
+      </button>
+    </footer>
+
+    <!-- Overlay scanline shader effect -->
+    <div class="scanlines absolute inset-0 z-0"></div>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC ENGINE -->
+  <script>
+    // System State Variables
+    let currentMode = 'rx'; // 'rx' (Receiver) or 'tx' (Transmitter)
+    
+    // Receiver State
+    let videoStream = null;
+    let rxScanning = false;
+    let rxAnimationId = null;
+    let rxStartTime = null;
+    let rxLastFrameTime = performance.now();
+    let rxFramesCaptured = 0;
+    let rxFramesDecoded = 0;
+    let rxDecodedTimestamps = [];
+    let rxCapturedTimestamps = [];
+    
+    // Receiver Data Assembly
+    let rxSessionId = null;
+    let rxTotalBlocks = 0;
+    let rxBlockLen = 0;
+    let rxFileName = '';
+    let rxFileType = '';
+    let rxFileSize = 0;
+    let rxReceivedBlocks = new Map(); // index -> Uint8Array
+    let rxDupFrames = 0;
+    let rxDroppedFrames = 0;
+    let rxRedundantFrames = 0;
+    let rxLastSeqSeen = -1;
+
+    // Transmitter State
+    let txFileBuffer = null;
+    let txFileName = '';
+    let txFileType = '';
+    let txChunks = [];
+    let txSessionId = '';
+    let txIntervalId = null;
+    let txCurrentChunkIdx = 0;
+    let txIsPlaying = false;
+    let txQrGenerator = null;
+
+    // DOM Elements
+    const modeRxBtn = document.getElementById('modeRxBtn');
+    const modeTxBtn = document.getElementById('modeTxBtn');
+    const rxPanel = document.getElementById('rxPanel');
+    const txPanel = document.getElementById('txPanel');
+
+    // Stats Elements
+    const statCapFps = document.getElementById('statCapFps');
+    const statDecFps = document.getElementById('statDecFps');
+    const statLock = document.getElementById('statLock');
+    const lockDot = document.getElementById('lockDot');
+    const lockText = document.getElementById('lockText');
+    const statDropped = document.getElementById('statDropped');
+    const statGoodput = document.getElementById('statGoodput');
+    const statElapsed = document.getElementById('statElapsed');
+    const statFrames = document.getElementById('statFrames');
+    const statSession = document.getElementById('statSession');
+    const statBlockLen = document.getElementById('statBlockLen');
+    const statPayload = document.getElementById('statPayload');
+    const progressBar = document.getElementById('progressBar');
+    const progressLabel = document.getElementById('progressLabel');
+    const statRateDetail = document.getElementById('statRateDetail');
+
+    // Download box
+    const downloadBox = document.getElementById('downloadBox');
+    const downloadFileInfo = document.getElementById('downloadFileInfo');
+    const downloadBtn = document.getElementById('downloadBtn');
+
+    // Switch between Transmitter and Receiver modes
+    function switchMode(mode) {
+      currentMode = mode;
+      resetStats();
+
+      if (mode === 'rx') {
+        modeRxBtn.className = "px-2.5 py-1 rounded-md font-bold transition-all bg-amber-500 text-slate-950 shadow";
+        modeTxBtn.className = "px-2.5 py-1 rounded-md font-bold transition-all text-slate-400 hover:text-slate-200";
+        rxPanel.classList.remove('hidden');
+        txPanel.classList.add('hidden');
+        stopTransmission();
+      } else {
+        modeTxBtn.className = "px-2.5 py-1 rounded-md font-bold transition-all bg-amber-500 text-slate-950 shadow";
+        modeRxBtn.className = "px-2.5 py-1 rounded-md font-bold transition-all text-slate-400 hover:text-slate-200";
+        txPanel.classList.remove('hidden');
+        rxPanel.classList.add('hidden');
+        stopCamera();
+      }
+    }
+
+    function resetStats() {
+      statCapFps.textContent = '0';
+      statDecFps.textContent = '0.0';
+      setLockStatus(false);
+      statDropped.textContent = '0';
+      statGoodput.textContent = '0.0';
+      statElapsed.textContent = '0';
+      statFrames.textContent = '0/0/0';
+      statSession.textContent = '----';
+      statBlockLen.textContent = '0';
+      statPayload.textContent = '0';
+      progressBar.style.width = '0%';
+      downloadBox.classList.add('hidden');
+    }
+
+    function setLockStatus(locked) {
+      if (locked) {
+        statLock.className = "text-sm font-bold text-emerald-400 tracking-wider uppercase flex items-center gap-1.5";
+        lockDot.className = "w-2 h-2 rounded-full bg-emerald-400 animate-ping";
+        lockText.textContent = "LOCK";
+      } else {
+        statLock.className = "text-sm font-bold text-amber-500/70 tracking-wider uppercase flex items-center gap-1.5";
+        lockDot.className = "w-2 h-2 rounded-full bg-amber-500/50";
+        lockText.textContent = "SEARCHING";
+      }
+    }
+
+    // ==========================================
+    // RECEIVER (SCANNER) IMPLEMENTATION
+    // ==========================================
+    async function startCamera() {
+      const video = document.getElementById('videoPreview');
+      const cameraPrompt = document.getElementById('cameraPrompt');
+
+      try {
+        videoStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } }
+        });
+        video.srcObject = videoStream;
+        await video.play();
+        cameraPrompt.classList.add('hidden');
+        rxScanning = true;
+        rxStartTime = performance.now();
+        requestAnimationFrame(scanLoop);
+      } catch (err) {
+        alert("Camera error: " + err.message + ". Make sure camera permissions are granted.");
+      }
+    }
+
+    function stopCamera() {
+      rxScanning = false;
+      if (rxAnimationId) cancelAnimationFrame(rxAnimationId);
+      if (videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+        videoStream = null;
+      }
+      document.getElementById('cameraPrompt').classList.remove('hidden');
+    }
+
+    function scanLoop(timestamp) {
+      if (!rxScanning) return;
+
+      const video = document.getElementById('videoPreview');
+      const canvas = document.getElementById('scanCanvas');
+      const ctx = canvas.getContext('2d');
+
+      // Calculate Capture FPS
+      rxCapturedTimestamps.push(timestamp);
+      rxCapturedTimestamps = rxCapturedTimestamps.filter(t => timestamp - t <= 1000);
+      statCapFps.textContent = rxCapturedTimestamps.length;
+
+      // Elapsed Time
+      if (rxStartTime) {
+        const elapsedSec = Math.floor((timestamp - rxStartTime) / 1000);
+        statElapsed.textContent = elapsedSec;
+      }
+
+      if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const code = jsQR(imageData.data, imageData.width, imageData.height, {
+          inversionAttempts: "dontInvert",
+        });
+
+        if (code && code.data) {
+          processFrameData(code.data, timestamp);
+        } else {
+          // If no lock for > 2 seconds
+          if (rxDecodedTimestamps.length > 0 && timestamp - rxDecodedTimestamps[rxDecodedTimestamps.length - 1] > 2000) {
+            setLockStatus(false);
+          }
+        }
+      }
+
+      // Update Decode FPS tracking
+      rxDecodedTimestamps = rxDecodedTimestamps.filter(t => timestamp - t <= 1000);
+      statDecFps.textContent = (rxDecodedTimestamps.length).toFixed(1);
+
+      rxAnimationId = requestAnimationFrame(scanLoop);
+    }
+
+    function processFrameData(payloadStr, timestamp) {
+      // Protocol format: DEC1|SessionID|BlockIndex|TotalBlocks|FileName|FileType|FileSize|Base64Chunk
+      try {
+        const parts = payloadStr.split('|');
+        if (parts[0] !== 'DEC1' || parts.length < 8) return;
+
+        rxDecodedTimestamps.push(timestamp);
+        setLockStatus(true);
+
+        const sessionId = parts[1];
+        const blockIdx = parseInt(parts[2]);
+        const totalBlocks = parseInt(parts[3]);
+        const fileName = decodeURIComponent(parts[4]);
+        const fileType = parts[5];
+        const fileSize = parseInt(parts[6]);
+        const b64Data = parts[7];
+
+        // New Session Initialization
+        if (rxSessionId !== sessionId) {
+          rxSessionId = sessionId;
+          rxTotalBlocks = totalBlocks;
+          rxFileName = fileName;
+          rxFileType = fileType;
+          rxFileSize = fileSize;
+          rxReceivedBlocks.clear();
+          rxDupFrames = 0;
+          rxDroppedFrames = 0;
+          rxRedundantFrames = 0;
+          rxLastSeqSeen = -1;
+
+          statSession.textContent = sessionId;
+          statPayload.textContent = (fileSize / 1024).toFixed(1);
         }
 
-        convertBtn.addEventListener('click', async () => {
-            const files = fileInput.files;
-            if (files.length === 0) {
-                log("Please select at least one audio file first.");
-                return;
-            }
+        // Detect sequence drops
+        if (rxLastSeqSeen !== -1 && blockIdx > rxLastSeqSeen + 1) {
+          rxDroppedFrames += (blockIdx - rxLastSeqSeen - 1);
+        }
+        rxLastSeqSeen = blockIdx;
+        statDropped.textContent = rxDroppedFrames;
 
-            convertBtn.disabled = true;
-            fileInput.disabled = true;
-            progressContainer.style.display = 'block';
+        // Store block if not duplicate
+        if (!rxReceivedBlocks.has(blockIdx)) {
+          const binaryStr = atob(b64Data);
+          const bytes = new Uint8Array(binaryStr.length);
+          for (let i = 0; i < binaryStr.length; i++) {
+            bytes[i] = binaryStr.charCodeAt(i);
+          }
+          rxReceivedBlocks.set(blockIdx, bytes);
+          statBlockLen.textContent = bytes.length;
+          statRateDetail.textContent = `${statDecFps.textContent} FPS • ${bytes.length} bytes/frame`;
+        } else {
+          rxDupFrames++;
+        }
 
-            try {
-                // Check if already loaded to avoid redundant network requests
-                if (!ffmpeg.loaded) {
-                    log("Loading v0.12 engine...");
-                    await ffmpeg.load({
-                        coreURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js',
-                        wasmURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.wasm',
-                    });
-                }
+        // Frame statistics update: NEW / DUP / RED
+        statFrames.textContent = `${rxReceivedBlocks.size}/${rxDupFrames}/${rxRedundantFrames}`;
 
-                for (let i = 0; i < files.length; i++) {
-                    const file = files[i];
-                    const percentage = Math.round((i / files.length) * 100);
-                    progressBar.style.width = `${percentage}%`;
-                    
-                    log(`Processing (${i + 1}/${files.length}): ${file.name}`);
+        // Progress Calculation
+        const pct = Math.min(100, Math.round((rxReceivedBlocks.size / rxTotalBlocks) * 100));
+        progressBar.style.width = pct + '%';
+        progressLabel.innerHTML = `<i class="fa-solid fa-radar text-amber-500 mr-1"></i> RECEIVING: ${pct}% (${rxReceivedBlocks.size}/${rxTotalBlocks})`;
 
-                    try {
-                        // 1. Write file into WASM memory
-                        await ffmpeg.writeFile('input_audio', await fetchFile(file));
+        // Goodput Calculation (KB/s)
+        const elapsedSec = (performance.now() - rxStartTime) / 1000;
+        if (elapsedSec > 0) {
+          let totalBytesReceived = 0;
+          rxReceivedBlocks.forEach(b => totalBytesReceived += b.length);
+          const kbps = (totalBytesReceived / 1024) / elapsedSec;
+          statGoodput.textContent = kbps.toFixed(1);
+        }
 
-                        // 2. Execute command natively (no exit(0) bug)
-                        await ffmpeg.exec(['-i', 'input_audio', '-c:a', 'libvorbis', '-q:a', '4', 'output.ogg']);
+        // Complete Reconstruction Check
+        if (rxReceivedBlocks.size === rxTotalBlocks) {
+          finishReceiving();
+        }
 
-                        // 3. Read output
-                        const data = await ffmpeg.readFile('output.ogg');
-                        const blob = new Blob([data.buffer], { type: 'audio/ogg' });
-                        const url = URL.createObjectURL(blob);
-                        
-                        const originalBaseName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
-                        const finalDownloadName = `${originalBaseName}.ogg`;
+      } catch (err) {
+        console.warn("Frame parse error:", err);
+      }
+    }
 
-                        // 4. Download
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = finalDownloadName;
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
+    function finishReceiving() {
+      // Reassemble chunks in order
+      const blobParts = [];
+      for (let i = 0; i < rxTotalBlocks; i++) {
+        blobParts.push(rxReceivedBlocks.get(i));
+      }
 
-                        // 5. Clean blob URL to prevent RAM buildup
-                        URL.revokeObjectURL(url);
-                        
-                    } catch (fileError) {
-                        console.error(`Error on file ${file.name}:`, fileError);
-                        log(`Skipped ${file.name} due to an error. Moving to next...`);
-                    } finally {
-                        // ALWAYS clean the virtual filesystem before the next loop
-                        try { await ffmpeg.deleteFile('input_audio'); } catch(e){}
-                        try { await ffmpeg.deleteFile('output.ogg'); } catch(e){}
-                    }
+      const blob = new Blob(blobParts, { type: rxFileType || 'application/octet-stream' });
+      const url = URL.createObjectURL(blob);
 
-                    // Strict breather to keep the Chromium UI thread responsive
-                    await new Promise(resolve => setTimeout(resolve, 300));
-                }
+      downloadFileInfo.textContent = `File: ${rxFileName} (${(rxFileSize / 1024).toFixed(1)} KB)`;
+      downloadBtn.onclick = () => {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = rxFileName;
+        a.click();
+      };
 
-                progressBar.style.width = '100%';
-                log(`Success! Finished processing all ${files.length} files.`);
+      downloadBox.classList.remove('hidden');
+      progressLabel.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400 mr-1"></i> RECEIVE COMPLETE`;
+    }
 
-            } catch (error) {
-                log(`Engine Error: ${error.message}`);
-            } finally {
-                convertBtn.disabled = false;
-                fileInput.disabled = false;
-                setTimeout(() => { progressContainer.style.display = 'none'; progressBar.style.width = '0%'; }, 3000);
-            }
-        });
-    </script>
+    // ==========================================
+    // TRANSMITTER (SENDER) IMPLEMENTATION
+    // ==========================================
+    function handleFileSelect(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      prepareTransmission(file);
+    }
+
+    function prepareTransmission(file) {
+      txFileName = file.name;
+      txFileType = file.type;
+      
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        txFileBuffer = new Uint8Array(evt.target.result);
+        sliceAndInitTx();
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function sliceAndInitTx() {
+      const chunkSize = parseInt(document.getElementById('chunkSizeSelect').value);
+      txChunks = [];
+      txSessionId = Math.random().toString(36).substring(2, 6);
+
+      const totalSize = txFileBuffer.length;
+      let offset = 0;
+      let blockIdx = 0;
+
+      while (offset < totalSize) {
+        const end = Math.min(offset + chunkSize, totalSize);
+        const chunkBytes = txFileBuffer.slice(offset, end);
+        
+        // Convert to base64
+        let binary = '';
+        for (let i = 0; i < chunkBytes.length; i++) {
+          binary += String.fromCharCode(chunkBytes[i]);
+        }
+        const b64 = btoa(binary);
+
+        // Protocol packet payload format:
+        // DEC1|SessionID|BlockIndex|TotalBlocks|FileName|FileType|FileSize|Base64Chunk
+        const packetStr = `DEC1|${txSessionId}|${blockIdx}|${Math.ceil(totalSize / chunkSize)}|${encodeURIComponent(txFileName)}|${txFileType}|${totalSize}|${b64}`;
+        txChunks.push(packetStr);
+
+        offset += chunkSize;
+        blockIdx++;
+      }
+
+      // Update Sender UI state
+      document.getElementById('txPlaceholder').classList.add('hidden');
+      const toggleBtn = document.getElementById('txToggleBtn');
+      toggleBtn.disabled = false;
+      toggleBtn.className = "w-full py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-lg shadow transition-all flex items-center justify-center gap-2 cursor-pointer";
+      
+      statSession.textContent = txSessionId;
+      statBlockLen.textContent = chunkSize;
+      statPayload.textContent = (totalSize / 1024).toFixed(1);
+
+      // Init QR code container if needed
+      const qrContainer = document.getElementById('qrcode');
+      qrContainer.innerHTML = '';
+      txQrGenerator = new QRCode(qrContainer, {
+        width: 240,
+        height: 240,
+        correctLevel: QRCode.CorrectLevel.L
+      });
+
+      txCurrentChunkIdx = 0;
+      renderCurrentTxFrame();
+    }
+
+    function updateTxConfig() {
+      if (txFileBuffer) {
+        sliceAndInitTx();
+      }
+    }
+
+    function renderCurrentTxFrame() {
+      if (!txChunks.length || !txQrGenerator) return;
+
+      const frameData = txChunks[txCurrentChunkIdx];
+      txQrGenerator.makeCode(frameData);
+
+      // Update telemetry readout for TX
+      statFrames.textContent = `${txCurrentChunkIdx + 1}/${txChunks.length}/0`;
+      const pct = Math.round(((txCurrentChunkIdx + 1) / txChunks.length) * 100);
+      progressBar.style.width = pct + '%';
+      progressLabel.innerHTML = `<i class="fa-solid fa-satellite-dish text-amber-500 mr-1"></i> TRANSMITTING: FRAME ${txCurrentChunkIdx + 1} OF ${txChunks.length}`;
+    }
+
+    function toggleTransmission() {
+      if (txIsPlaying) {
+        stopTransmission();
+      } else {
+        startTransmission();
+      }
+    }
+
+    function startTransmission() {
+      if (!txChunks.length) return;
+      txIsPlaying = true;
+      const fps = parseInt(document.getElementById('fpsSelect').value);
+      const intervalMs = 1000 / fps;
+
+      const toggleBtn = document.getElementById('txToggleBtn');
+      toggleBtn.innerHTML = `<i class="fa-solid fa-pause"></i> PAUSE TRANSMISSION`;
+      toggleBtn.className = "w-full py-2 bg-amber-500/80 hover:bg-amber-500 text-slate-950 font-bold text-xs rounded-lg shadow transition-all flex items-center justify-center gap-2 cursor-pointer";
+
+      statCapFps.textContent = fps;
+      statDecFps.textContent = fps.toFixed(1);
+      setLockStatus(true);
+
+      txIntervalId = setInterval(() => {
+        txCurrentChunkIdx = (txCurrentChunkIdx + 1) % txChunks.length;
+        renderCurrentTxFrame();
+      }, intervalMs);
+    }
+
+    function stopTransmission() {
+      txIsPlaying = false;
+      if (txIntervalId) clearInterval(txIntervalId);
+      const toggleBtn = document.getElementById('txToggleBtn');
+      if (toggleBtn) {
+        toggleBtn.innerHTML = `<i class="fa-solid fa-play"></i> START TRANSMITTING`;
+        if (txChunks.length) {
+          toggleBtn.className = "w-full py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-lg shadow transition-all flex items-center justify-center gap-2 cursor-pointer";
+        }
+      }
+      setLockStatus(false);
+    }
+
+    // Helper: Load a sample text payload for testing without uploading a real file
+    function loadSampleFile() {
+      switchMode('tx');
+      const text = "DECIMEN OPTICAL TRANSFER DEMO\n\nThis is a sample payload sent over an optical air-gap using animated high-density fountain QR codes!\n\nNo Wi-Fi, No Bluetooth, No Cellular required.";
+      const encoder = new TextEncoder();
+      txFileBuffer = encoder.encode(text);
+      txFileName = "sample_data.txt";
+      txFileType = "text/plain";
+      
+      // Update file input label preview
+      document.getElementById('fileInput').value = '';
+      sliceAndInitTx();
+    }
+  </script>
 </body>
 </html>
+
