@@ -1,451 +1,250 @@
-```html
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Doc Level Cam</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    /* Prevent selection and scrolling for native app feel */
-    body {
-      touch-action: manipulation;
-      user-select: none;
-      -webkit-user-select: none;
-    }
-    
-    /* Smooth transitions for level bubble */
-    .bubble {
-      transition: transform 0.08s ease-out;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    /* Shutter flash animation */
-    @keyframes flash {
-      0% { opacity: 1; }
-      100% { opacity: 0; }
-    }
-    .flash-effect {
-      animation: flash 0.3s ease-out forwards;
-    }
+    <title>ChatGPT Retrieval Test</title>
 
-    /* Safe bottom clearance for mobile browsers */
-    .bottom-nav-spacer {
-      height: calc(3.5rem + env(safe-area-inset-bottom, 0px));
-    }
-  </style>
+    <meta name="description" content="A test page for checking website retrieval.">
+    <meta name="author" content="Akash">
+    <meta name="keywords" content="retrieval, image, text, links, data">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 20px;
+            background: #f4f4f4;
+            color: #222;
+        }
+
+        section {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+
+        pre {
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+    </style>
 </head>
-<body class="bg-black text-white h-screen w-screen overflow-hidden flex flex-col justify-between select-none">
 
-  <!-- TOP BAR / HEADER -->
-  <header class="relative z-20 flex items-center justify-between p-4 bg-black/80 backdrop-blur-md border-b border-gray-800">
-    <div class="flex items-center space-x-2">
-      <i class="fa-solid font-bold text-emerald-400 text-xl fa-camera font-serif"></i>
-      <h1 class="font-bold text-lg tracking-wide">DocLevel Cam</h1>
-    </div>
-    
-    <!-- Calibration / Sensor Request Button -->
-    <div class="flex items-center gap-2">
-      <button id="sensorBtn" onclick="requestSensorPermission()" class="hidden text-xs bg-emerald-600/80 hover:bg-emerald-500 text-white font-medium px-3 py-1.5 rounded-full flex items-center gap-1">
-        <i class="fa-solid fa-compass"></i> Enable Level
-      </button>
-      <button id="calibrateBtn" onclick="calibrateSensors()" class="text-xs bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700 px-3 py-1.5 rounded-full flex items-center gap-1">
-        <i class="fa-solid fa-arrows-to-dot"></i> Calibrate
-      </button>
-    </div>
-  </header>
+<body>
 
-  <!-- CAMERA / VIEWFINDER CONTAINER -->
-  <main class="relative flex-1 w-full flex items-center justify-center overflow-hidden bg-gray-950">
-    
-    <!-- Live Video View -->
-    <video id="video" autoplay playsinline class="absolute inset-0 w-full h-full object-cover"></video>
-    
-    <!-- Flash Overlay Effect -->
-    <div id="flashOverlay" class="absolute inset-0 bg-white pointer-events-none opacity-0 z-30"></div>
+<header>
+    <h1>ChatGPT Website Retrieval Test</h1>
 
-    <!-- DOCUMENT ALIGNMENT FRAME -->
-    <div class="absolute inset-8 md:inset-16 border-2 border-dashed border-white/40 rounded-xl pointer-events-none flex flex-col justify-between p-3 transition-colors duration-200 mb-6" id="docBorder">
-      <div class="flex justify-between text-white/50 text-xs">
-        <span>TOP LEFT</span>
-        <span>TOP RIGHT</span>
-      </div>
-      <div class="flex justify-between text-white/50 text-xs">
-        <span>BOTTOM LEFT</span>
-        <span>BOTTOM RIGHT</span>
-      </div>
-    </div>
+    <p>
+        This page contains different types of information
+        to test what ChatGPT can retrieve from a public URL.
+    </p>
+</header>
 
-    <!-- 2D WATER / SPIRIT LEVEL OVERLAY -->
-    <div class="relative z-10 flex flex-col items-center justify-center pointer-events-none mb-4">
-      
-      <!-- Target Outer Circle -->
-      <div id="levelCircle" class="w-28 h-28 border-2 border-white/60 rounded-full relative flex items-center justify-center bg-black/40 backdrop-blur-xs transition-colors duration-200 shadow-lg">
-        
-        <!-- Crosshairs -->
-        <div class="absolute w-full h-[1px] bg-white/30"></div>
-        <div class="absolute h-full w-[1px] bg-white/30"></div>
+<hr>
 
-        <!-- Target Dead Center Circle -->
-        <div id="targetCenter" class="w-8 h-8 rounded-full border-2 border-emerald-400/80 flex items-center justify-center">
-          <div class="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
-        </div>
+<section id="text-test">
 
-        <!-- Moving Bubble Indicator -->
-        <div id="bubble" class="bubble absolute w-7 h-7 rounded-full bg-red-500/80 border-2 border-white shadow-md flex items-center justify-center" style="transform: translate(0px, 0px);">
-          <div class="w-2 h-2 rounded-full bg-white/80"></div>
-        </div>
-      </div>
+    <h2>1. Text Test</h2>
 
-      <!-- Live Tilt Diagnostics -->
-      <div id="tiltInfo" class="mt-3 px-3 py-1 bg-black/70 backdrop-blur-md rounded-full text-xs font-mono border border-white/10 text-gray-200 shadow-md">
-        Pitch: <span id="pitchVal" class="text-amber-400">0.0°</span> | Roll: <span id="rollVal" class="text-amber-400">0.0°</span>
-      </div>
-      <div id="levelStatus" class="mt-1 text-xs font-bold uppercase tracking-wider text-amber-400 drop-shadow">
-        Tilt Camera to Align
-      </div>
-    </div>
+    <p>
+        The secret test phrase is:
+        <strong>BLUE TIGER 7284</strong>
+    </p>
 
-    <!-- Permission Warning banner if sensors are blocked -->
-    <div id="permissionWarning" class="hidden absolute top-4 inset-x-4 bg-amber-500/90 text-black p-3 rounded-lg text-xs font-medium text-center shadow-lg z-20">
-      Motion sensors not active. Tap "Enable Level" top right or move device to activate water level.
-    </div>
-  </main>
+    <p>
+        This website was created by Akash.
+    </p>
 
-  <!-- CONTROLS CONTAINER WITH FIXED BOTTOM GAP -->
-  <footer class="relative z-20 flex flex-col bg-black">
-    <!-- Main Shutter & Controls Row -->
-    <div class="bg-black border-t border-gray-800 py-4 px-6 flex items-center justify-around">
-      <!-- Camera Switch Toggle (Front / Back) -->
-      <button onclick="toggleCamera()" class="w-12 h-12 rounded-full bg-gray-800 border border-gray-700 flex items-center justify-center text-gray-300 hover:text-white active:scale-95 transition">
-        <i class="fa-solid fa-camera-rotate text-lg"></i>
-      </button>
+    <p>
+        The purpose is to test website retrieval,
+        text extraction, links, images, and structured data.
+    </p>
 
-      <!-- Main Shutter Capture Button -->
-      <button id="shutterBtn" onclick="takePhoto()" class="w-20 h-20 rounded-full border-4 border-white p-1 flex items-center justify-center active:scale-95 transition shadow-lg">
-        <div id="shutterInner" class="w-full h-full bg-red-500 rounded-full flex items-center justify-center">
-          <i class="fa-solid fa-camera text-2xl text-white"></i>
-        </div>
-      </button>
+</section>
 
-      <!-- Flash Toggle -->
-      <button id="torchBtn" onclick="toggleTorch()" class="w-12 h-12 rounded-full bg-gray-800 border border-gray-700 flex items-center justify-center text-gray-300 hover:text-white active:scale-95 transition">
-        <i id="torchIcon" class="fa-solid fa-bolt-slash text-lg"></i>
-      </button>
-    </div>
+<section id="links-test">
 
-    <!-- SOLID BLACK RECTANGLE BOTTOM GAP (Protects against browser navigation bars) -->
-    <div class="w-full bg-black bottom-nav-spacer border-t border-gray-900 flex items-center justify-center">
-      <span class="text-[10px] text-gray-600 font-mono tracking-widest uppercase opacity-40">DocLevel Cam</span>
-    </div>
-  </footer>
+    <h2>2. Links Test</h2>
 
-  <!-- PREVIEW & EXPORT MODAL -->
-  <div id="previewModal" class="fixed inset-0 bg-black z-50 hidden flex-col justify-between">
-    <!-- Modal Header -->
-    <div class="p-4 bg-black/90 border-b border-gray-800 flex justify-between items-center">
-      <h2 class="font-bold text-emerald-400 flex items-center gap-2">
-        <i class="fa-solid fa-circle-check"></i> Scanned Document
-      </h2>
-      <button onclick="closePreview()" class="text-gray-400 hover:text-white p-2 text-xl">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-    </div>
+    <p>External links:</p>
 
-    <!-- Image Preview Area -->
-    <div class="flex-1 bg-gray-950 p-4 flex items-center justify-center overflow-hidden">
-      <img id="previewImg" class="max-h-full max-w-full object-contain rounded border border-gray-800 shadow-2xl" src="" alt="Captured Doc" />
-    </div>
+    <ul>
+        <li>
+            <a href="https://en.wikipedia.org/wiki/Dog">
+                Wikipedia Dog Article
+            </a>
+        </li>
 
-    <!-- Modal Controls with Bottom Gap Protection -->
-    <div class="bg-black flex flex-col">
-      <div class="pt-4 pb-2 px-6 border-t border-gray-800 flex flex-col gap-3">
-        <div class="flex gap-3">
-          <!-- Share JPG Button (Native Web Share API - No Text Caption) -->
-          <button onclick="sharePhoto()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg transition">
-            <i class="fa-solid fa-share-nodes text-lg"></i>
-            <span>Share JPG</span>
-          </button>
+        <li>
+            <a href="https://www.google.com">
+                Google
+            </a>
+        </li>
 
-          <!-- Direct Download Button -->
-          <button onclick="downloadPhoto()" class="flex-1 bg-gray-800 hover:bg-gray-700 active:bg-gray-600 text-white font-semibold py-3.5 px-4 rounded-xl border border-gray-700 flex items-center justify-center gap-2 transition">
-            <i class="fa-solid fa-download text-lg"></i>
-            <span>Save File</span>
-          </button>
-        </div>
+        <li>
+            <a href="https://github.com">
+                GitHub
+            </a>
+        </li>
+    </ul>
 
-        <!-- Retake Button -->
-        <button onclick="closePreview()" class="w-full bg-transparent hover:bg-white/5 text-gray-400 font-medium py-2 rounded-lg text-sm transition">
-          <i class="fa-solid fa-arrow-left mr-1"></i> Retake / Dismiss
-        </button>
-      </div>
+</section>
 
-      <!-- Solid Black Spacer in Preview -->
-      <div class="w-full bg-black bottom-nav-spacer"></div>
-    </div>
-  </div>
+<section id="image-test">
 
-  <!-- Hidden Canvas for full resolution capture -->
-  <canvas id="canvas" class="hidden"></canvas>
+    <h2>3. Image Test</h2>
 
-  <!-- APP JAVASCRIPT LOGIC -->
-  <script>
-    // State variables
-    let currentStream = null;
-    let facingMode = 'environment'; // Default back camera
-    let torchOn = false;
-    let currentBlob = null;
-    let rawPitch = 0;
-    let rawRoll = 0;
-    let pitchOffset = 0;
-    let rollOffset = 0;
-    let isAligned = false;
+    <p>
+        This image is hosted externally on Wikimedia.
+    </p>
 
-    const TOLERANCE_DEG = 2.5; // Degree tolerance for green light level match
+    <img
+        src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Huskiesatrest.jpg/1280px-Huskiesatrest.jpg"
+        alt="Huskies resting in snow"
+        width="600"
+    >
 
-    // Elements
-    const video = document.getElementById('video');
-    const bubble = document.getElementById('bubble');
-    const levelCircle = document.getElementById('levelCircle');
-    const docBorder = document.getElementById('docBorder');
-    const levelStatus = document.getElementById('levelStatus');
-    const pitchVal = document.getElementById('pitchVal');
-    const rollVal = document.getElementById('rollVal');
-    const shutterInner = document.getElementById('shutterInner');
+    <p>
+        Image filename:
+        <strong>1280px-Huskiesatrest.jpg</strong>
+    </p>
 
-    // Startup Camera Init
-    window.onload = () => {
-      initCamera();
-      setupMotionSensors();
-    };
+</section>
 
-    // 1. Initialize Camera
-    async function initCamera() {
-      if (currentStream) {
-        currentStream.getTracks().forEach(track => track.stop());
-      }
+<section id="direct-image-test">
 
-      const constraints = {
-        video: {
-          facingMode: { ideal: facingMode },
-          width: { ideal: 1920 },
-          height: { ideal: 1080 }
-        },
-        audio: false
-      };
+    <h2>4. Direct Image URL</h2>
 
-      try {
-        currentStream = await navigator.mediaDevices.getUserMedia(constraints);
-        video.srcObject = currentStream;
-      } catch (err) {
-        console.error("Camera access error: ", err);
-        alert("Unable to access camera. Please allow camera permissions in your browser settings.");
-      }
-    }
+    <p>
+        Click the following link to open the image itself:
+    </p>
 
-    // Toggle Camera (Front / Rear)
-    function toggleCamera() {
-      facingMode = facingMode === 'environment' ? 'user' : 'environment';
-      initCamera();
-    }
+    <a href="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Dog_coat_variation.png/250px-Dog_coat_variation.png">
+        Open Dog Coat Variation Image
+    </a>
 
-    // Toggle Flash/Torch if supported
-    async function toggleTorch() {
-      if (!currentStream) return;
-      const track = currentStream.getVideoTracks()[0];
-      try {
-        const capabilities = track.getCapabilities();
-        if (capabilities.torch) {
-          torchOn = !torchOn;
-          await track.applyConstraints({
-            advanced: [{ torch: torchOn }]
-          });
-          document.getElementById('torchIcon').className = torchOn ? 
-            "fa-solid fa-bolt text-amber-400 text-lg" : "fa-solid fa-bolt-slash text-lg";
-        } else {
-          alert("Flash/Torch is not supported on this camera device.");
-        }
-      } catch (e) {
-        alert("Torch control not accessible.");
-      }
-    }
+</section>
 
-    // 2. Motion Sensor Setup (Water Level Logic)
-    function setupMotionSensors() {
-      if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-        // iOS 13+ permission flow
-        document.getElementById('sensorBtn').classList.remove('hidden');
-      } else if (window.DeviceOrientationEvent) {
-        window.addEventListener('deviceorientation', handleOrientation);
-      } else {
-        document.getElementById('permissionWarning').classList.remove('hidden');
-        document.getElementById('permissionWarning').innerText = "Device orientation sensors not supported on this device.";
-      }
-    }
+<section id="table-test">
 
-    function requestSensorPermission() {
-      if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-        DeviceOrientationEvent.requestPermission()
-          .then(permissionState => {
-            if (permissionState === 'granted') {
-              window.addEventListener('deviceorientation', handleOrientation);
-              document.getElementById('sensorBtn').classList.add('hidden');
-              document.getElementById('permissionWarning').classList.add('hidden');
-            } else {
-              alert('Motion sensor permission denied.');
-            }
-          })
-          .catch(console.error);
-      }
-    }
+    <h2>5. Table Test</h2>
 
-    // Orientation handler calculation
-    function handleOrientation(event) {
-      let beta = event.beta || 0;  // front-back tilt
-      let gamma = event.gamma || 0; // left-right tilt
+    <table>
 
-      // Calibrate baseline adjustment
-      rawPitch = beta - pitchOffset;
-      rawRoll = gamma - rollOffset;
+        <tr>
+            <th>Animal</th>
+            <th>Color</th>
+            <th>Number</th>
+        </tr>
 
-      // Update Pitch & Roll UI elements
-      pitchVal.innerText = `${rawPitch.toFixed(1)}°`;
-      rollVal.innerText = `${rawRoll.toFixed(1)}°`;
+        <tr>
+            <td>Dog</td>
+            <td>Brown</td>
+            <td>17</td>
+        </tr>
 
-      const maxRadius = 38; // limit inside circle container
-      
-      // Calculate pixel displacement (1 deg ~ 3.5px displacement)
-      let dx = rawRoll * 3.5;  
-      let dy = rawPitch * 3.5; 
+        <tr>
+            <td>Cat</td>
+            <td>White</td>
+            <td>29</td>
+        </tr>
 
-      // Clamp bubble to circle bounds
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist > maxRadius) {
-        dx = (dx / dist) * maxRadius;
-        dy = (dy / dist) * maxRadius;
-      }
+        <tr>
+            <td>Tiger</td>
+            <td>Orange</td>
+            <td>43</td>
+        </tr>
 
-      // Update Bubble Position
-      bubble.style.transform = `translate(${dx}px, ${dy}px)`;
+    </table>
 
-      // Check alignment within tolerance
-      const isLevel = Math.abs(rawPitch) <= TOLERANCE_DEG && Math.abs(rawRoll) <= TOLERANCE_DEG;
-      updateLevelUI(isLevel);
-    }
+</section>
 
-    // Update level visuals (Green when parallel, Red when tilted)
-    function updateLevelUI(level) {
-      isAligned = level;
-      if (level) {
-        bubble.className = "bubble absolute w-7 h-7 rounded-full bg-emerald-500 border-2 border-white shadow-lg shadow-emerald-500/50 flex items-center justify-center";
-        levelCircle.className = "w-28 h-28 border-2 border-emerald-400 rounded-full relative flex items-center justify-center bg-emerald-950/30 backdrop-blur-xs shadow-lg shadow-emerald-500/20";
-        docBorder.className = "absolute inset-8 md:inset-16 border-2 border-emerald-400 rounded-xl pointer-events-none flex flex-col justify-between p-3 transition-colors duration-200 bg-emerald-500/5 mb-6";
-        levelStatus.innerText = "SURFACE PERFECTLY ALIGNED";
-        levelStatus.className = "mt-1 text-xs font-bold uppercase tracking-wider text-emerald-400 drop-shadow";
-        shutterInner.className = "w-full h-full bg-emerald-500 rounded-full flex items-center justify-center";
-      } else {
-        bubble.className = "bubble absolute w-7 h-7 rounded-full bg-red-500/90 border-2 border-white shadow-md flex items-center justify-center";
-        levelCircle.className = "w-28 h-28 border-2 border-white/60 rounded-full relative flex items-center justify-center bg-black/30 backdrop-blur-xs shadow-lg";
-        docBorder.className = "absolute inset-8 md:inset-16 border-2 border-dashed border-white/40 rounded-xl pointer-events-none flex flex-col justify-between p-3 transition-colors duration-200 mb-6";
-        levelStatus.innerText = "TILT CAMERA TO ALIGN";
-        levelStatus.className = "mt-1 text-xs font-bold uppercase tracking-wider text-amber-400 drop-shadow";
-        shutterInner.className = "w-full h-full bg-red-500 rounded-full flex items-center justify-center";
-      }
-    }
+<section id="list-test">
 
-    // Calibrate baseline offset to zero level for flat surface
-    function calibrateSensors() {
-      pitchOffset = rawPitch + pitchOffset;
-      rollOffset = rawRoll + rollOffset;
-      
-      const statusText = document.getElementById('levelStatus');
-      const prevText = statusText.innerText;
-      statusText.innerText = "LEVEL CALIBRATED TO CURRENT TILT";
-      statusText.className = "mt-1 text-xs font-bold uppercase tracking-wider text-cyan-400";
-      setTimeout(() => {
-        statusText.innerText = prevText;
-      }, 1800);
-    }
+    <h2>6. List Test</h2>
 
-    // 3. Take Photo & Process JPG
-    function takePhoto() {
-      // Trigger camera flash visual
-      const flashOverlay = document.getElementById('flashOverlay');
-      flashOverlay.classList.remove('flash-effect');
-      void flashOverlay.offsetWidth; // trigger reflow
-      flashOverlay.classList.add('flash-effect');
+    <ol>
+        <li>First item: Capture screen</li>
+        <li>Second item: Update image</li>
+        <li>Third item: Publish image</li>
+        <li>Fourth item: Test retrieval</li>
+    </ol>
 
-      const canvas = document.getElementById('canvas');
-      const context = canvas.getContext('2d');
+</section>
 
-      // Set canvas size equal to high-res video feed
-      canvas.width = video.videoWidth || 1280;
-      canvas.height = video.videoHeight || 720;
+<section id="data-test">
 
-      // Draw active frame to canvas
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    <h2>7. Structured Data Test</h2>
 
-      // Convert Canvas to JPG Blob
-      canvas.toBlob((blob) => {
-        if (!blob) return;
-        currentBlob = blob;
-        const imageUrl = URL.createObjectURL(blob);
-        
-        // Load into modal preview
-        document.getElementById('previewImg').src = imageUrl;
-        document.getElementById('previewModal').classList.remove('hidden');
-        document.getElementById('previewModal').classList.add('flex');
-      }, 'image/jpeg', 0.92);
-    }
+    <pre>
+{
+    "project": "Image Retrieval Test",
+    "owner": "Akash",
+    "version": 1,
+    "active": true,
+    "capture_interval": "1 minute",
+    "test_code": "KOL-5821"
+}
+    </pre>
 
-    // Close preview modal
-    function closePreview() {
-      document.getElementById('previewModal').classList.add('hidden');
-      document.getElementById('previewModal').classList.remove('flex');
-    }
+</section>
 
-    // 4. Share photo via Native Web Share API (Strictly file only, no text caption)
-    async function sharePhoto() {
-      if (!currentBlob) return;
+<section id="special-test">
 
-      const filename = `DocScan_${new Date().toISOString().slice(0,10)}_${Math.floor(Math.random()*1000)}.jpg`;
-      const file = new File([currentBlob], filename, { type: 'image/jpeg' });
+    <h2>8. Special Information</h2>
 
-      // Check browser support for sharing files
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        try {
-          // Strictly passing files array without text or title captions
-          await navigator.share({
-            files: [file]
-          });
-        } catch (err) {
-          if (err.name !== 'AbortError') {
-            console.error('Sharing failed:', err);
-            fallbackShareOrDownload(file);
-          }
-        }
-      } else {
-        fallbackShareOrDownload(file);
-      }
-    }
+    <p>
+        Secret number:
+        <strong>93617</strong>
+    </p>
 
-    function fallbackShareOrDownload(file) {
-      alert("Direct app-sharing is not natively supported by this browser/device. Initiating direct JPEG download instead.");
-      downloadPhoto();
-    }
+    <p>
+        Secret color:
+        <strong>Violet</strong>
+    </p>
 
-    // 5. Download JPEG file directly
-    function downloadPhoto() {
-      if (!currentBlob) return;
-      const a = document.createElement('a');
-      const filename = `DocScan_${new Date().toISOString().replace(/[:.]/g, "-")}.jpg`;
-      a.href = URL.createObjectURL(currentBlob);
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    }
-  </script>
+    <p>
+        Secret animal:
+        <strong>Snow Leopard</strong>
+    </p>
+
+</section>
+
+<footer>
+
+    <hr>
+
+    <p>
+        End of retrieval test page.
+    </p>
+
+    <p>
+        Page version: 1.0
+    </p>
+
+</footer>
+
 </body>
 </html>
-```
