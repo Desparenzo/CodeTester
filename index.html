@@ -2,20 +2,1471 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Visibility Test</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Android Hardware Test Lab</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 15px;
+    background: #10131a;
+    color: #e9edf5;
+    font-family: Arial, sans-serif;
+}
+
+header {
+    text-align: center;
+    padding: 18px 5px;
+}
+
+header h1 {
+    margin: 0 0 8px;
+    font-size: 25px;
+}
+
+header p {
+    color: #9ba8bc;
+    font-size: 13px;
+}
+
+.summary {
+    background: #202938;
+    padding: 14px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.card {
+    background: #1b2230;
+    border: 1px solid #303b4c;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 15px;
+}
+
+h2 {
+    margin: 0 0 14px;
+    font-size: 18px;
+}
+
+h3 {
+    font-size: 14px;
+    color: #b9c7dc;
+}
+
+.data {
+    background: #111722;
+    padding: 11px;
+    border-radius: 8px;
+    margin: 7px 0;
+    font-family: monospace;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+.status {
+    font-size: 12px;
+    margin-top: 10px;
+    color: #aab8ca;
+}
+
+button {
+    border: none;
+    border-radius: 9px;
+    padding: 12px 15px;
+    margin: 4px 3px 4px 0;
+    background: #3976e8;
+    color: white;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button:active {
+    opacity: .7;
+}
+
+button.secondary {
+    background: #354255;
+}
+
+button.danger {
+    background: #b93f4c;
+}
+
+video {
+    width: 100%;
+    background: black;
+    border-radius: 10px;
+    margin-top: 10px;
+    max-height: 380px;
+}
+
+audio {
+    width: 100%;
+    margin-top: 10px;
+}
+
+input[type=file] {
+    display: none;
+}
+
+label {
+    display: inline-block;
+    background: #3976e8;
+    padding: 12px 15px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: bold;
+    margin: 4px 3px 4px 0;
+}
+
+.file-list {
+    font-size: 12px;
+    color: #bac8da;
+    padding-left: 18px;
+    overflow-wrap: anywhere;
+}
+
+.good {
+    color: #49dc94;
+}
+
+.bad {
+    color: #ff707b;
+}
+
+.warning {
+    color: #ffc56b;
+}
+
+canvas {
+    display: none;
+}
+
+footer {
+    text-align: center;
+    color: #8290a4;
+    font-size: 12px;
+    padding: 20px;
+}
+</style>
 </head>
+
 <body>
 
-    <h1>Image Visibility Test</h1>
+<header>
+    <h1>⚙️ Hardware Test Lab</h1>
+    <p>Android WebView | Device Capability Diagnostics</p>
+</header>
 
-    <p>
-        Morning sunlight spilled across the quiet garden, warming the leaves after a brief rain.
-        A small bird landed on the fence and watched the clouds drift over the rooftops.
+<div class="summary">
+    <strong>Device Connection</strong>
+    <div id="connectionStatus" class="status">
+        Checking browser environment...
+    </div>
+    <div id="secureStatus" class="status"></div>
+</div>
+
+<!-- 1. ACCELEROMETER AND GYROSCOPE -->
+
+<section class="card">
+    <h2>1. Accelerometer & Gyroscope</h2>
+
+    <button onclick="startSensors()">Start Sensors</button>
+    <button class="danger" onclick="stopSensors()">Stop</button>
+
+    <h3>Accelerometer (m/s²)</h3>
+    <div class="data" id="accel">X: -- | Y: -- | Z: --</div>
+
+    <h3>Gyroscope</h3>
+    <div class="data" id="gyro">Alpha: -- | Beta: -- | Gamma: --</div>
+
+    <h3>Rotation Rate</h3>
+    <div class="data" id="rotation">X: -- | Y: -- | Z: --</div>
+
+    <div id="sensorStatus" class="status">Not started</div>
+</section>
+
+<!-- 2. PROXIMITY -->
+
+<section class="card">
+    <h2>2. Proximity Sensor</h2>
+
+    <button onclick="testProximity()">Test Proximity</button>
+
+    <div class="data" id="proximity">
+        Distance: --
+    </div>
+
+    <div id="proximityStatus" class="status">
+        Waiting for test...
+    </div>
+
+    <p class="status">
+        Move your hand close to the top of the phone.
+        Proximity sensor access is not exposed by standard web APIs
+        on many Android WebView versions.
     </p>
+</section>
 
-    <img src="gptcanyousee.jpg" alt="Image for the visibility test">
+<!-- 3. CAMERA -->
+
+<section class="card">
+    <h2>3. Camera Test</h2>
+
+    <button onclick="startCamera()">Open Camera</button>
+    <button class="secondary" onclick="switchCamera()">Switch Camera</button>
+    <button class="danger" onclick="stopCamera()">Stop Camera</button>
+
+    <video id="camera" autoplay playsinline muted></video>
+
+    <button onclick="takePhoto()">📸 Capture Photo</button>
+
+    <canvas id="photoCanvas"></canvas>
+
+    <div id="cameraStatus" class="status">
+        Camera not started
+    </div>
+</section>
+
+<!-- 4. MICROPHONE -->
+
+<section class="card">
+    <h2>4. Microphone & Audio Recording</h2>
+
+    <button onclick="startRecording()">Start Recording</button>
+    <button class="danger" onclick="stopRecording()">Stop & Save</button>
+
+    <div id="micStatus" class="status">
+        Microphone not started
+    </div>
+
+    <audio id="audioPlayback" controls></audio>
+
+    <p class="status">
+        Records microphone input and creates a downloadable audio file.
+    </p>
+</section>
+
+<!-- 5. FILES -->
+
+<section class="card">
+    <h2>5. File Upload & Download</h2>
+
+    <h3>Select Files</h3>
+
+    <label for="fileInput">📂 Choose Files</label>
+
+    <input id="fileInput" type="file" multiple
+           onchange="showFiles(this.files)">
+
+    <h3>Select Folder</h3>
+
+    <button onclick="pickFolder()">📁 Choose Folder</button>
+
+    <input id="folderInput" type="file"
+           webkitdirectory multiple
+           onchange="showFiles(this.files)">
+
+    <div id="fileStatus" class="status">
+        No files selected
+    </div>
+
+    <ul id="fileList" class="file-list"></ul>
+
+    <hr style="border-color:#303b4c; margin:18px 0;">
+
+    <h3>Download Test File</h3>
+
+    <button onclick="downloadFile()">⬇ Download TXT File</button>
+
+    <button class="secondary" onclick="saveWithPicker()">
+        Save Using File Picker
+    </button>
+
+    <h3>Download Test Folder</h3>
+
+    <button onclick="downloadFolder()">
+        📁 Select Destination Folder
+    </button>
+
+    <div id="downloadStatus" class="status">
+        Ready to test downloading
+    </div>
+</section>
+
+<!-- 6. SPEAKER -->
+
+<section class="card">
+    <h2>6. Speaker Test</h2>
+
+    <button onclick="playBeep()">🔊 Play Beep</button>
+
+    <button class="secondary" onclick="playLongBeep()">
+        Play Long Beep
+    </button>
+
+    <div id="speakerStatus" class="status">
+        Press a button to test speaker
+    </div>
+</section>
+
+<!-- 7. GPS -->
+
+<section class="card">
+    <h2>7. GPS & Geolocation</h2>
+
+    <button onclick="getLocation()">Get GPS Location</button>
+    <button class="secondary" onclick="watchLocation()">Live Tracking</button>
+    <button class="danger" onclick="stopLocation()">Stop Tracking</button>
+
+    <div class="data" id="gps">
+        Latitude: --<br>
+        Longitude: --<br>
+        Accuracy: --
+    </div>
+
+    <div id="gpsStatus" class="status">
+        Location not requested
+    </div>
+</section>
+
+<!-- 8. COMPASS -->
+
+<section class="card">
+    <h2>8. Compass & Orientation</h2>
+
+    <button onclick="startCompass()">Start Compass</button>
+
+    <div class="data" id="compass">
+        Heading: --°
+    </div>
+
+    <div class="data" id="orientation">
+        Alpha: -- | Beta: -- | Gamma: --
+    </div>
+
+    <div id="compassStatus" class="status">
+        Waiting for compass
+    </div>
+</section>
+
+<!-- 9. VIBRATION -->
+
+<section class="card">
+    <h2>9. Vibration Motor</h2>
+
+    <button onclick="vibrate(200)">Short Vibration</button>
+    <button onclick="vibrate(800)">Long Vibration</button>
+    <button class="secondary" onclick="vibrate([200,100,200,100,400])">
+        Vibration Pattern
+    </button>
+
+    <div id="vibrationStatus" class="status">Ready</div>
+</section>
+
+<!-- 10. BATTERY -->
+
+<section class="card">
+    <h2>10. Battery Information</h2>
+
+    <button onclick="batteryInfo()">Read Battery</button>
+
+    <div class="data" id="battery">
+        Battery: --
+    </div>
+
+    <div id="batteryStatus" class="status"></div>
+</section>
+
+<!-- 11. NETWORK -->
+
+<section class="card">
+    <h2>11. Network Information</h2>
+
+    <button onclick="networkInfo()">Refresh Network Info</button>
+
+    <div class="data" id="network">Loading...</div>
+</section>
+
+<!-- 12. SCREEN -->
+
+<section class="card">
+    <h2>12. Screen & Device Information</h2>
+
+    <button onclick="deviceInfo()">Read Device Info</button>
+
+    <div class="data" id="device">Loading...</div>
+</section>
+
+<footer>
+    Android Hardware Test Lab<br>
+    Single-file HTML diagnostic application
+</footer>
+
+<script>
+
+// CONNECTION INFORMATION
+
+document.getElementById("connectionStatus").textContent =
+    navigator.userAgent;
+
+document.getElementById("secureStatus").textContent =
+    "Secure context: " + (window.isSecureContext ? "Yes" : "No");
+
+
+// 1. ACCELEROMETER AND GYROSCOPE
+
+let accelerationSensor = null;
+let gyroscopeSensor = null;
+
+let motionHandler = null;
+let orientationHandler = null;
+let compassAbsoluteHandler = null;
+
+async function startSensors() {
+
+    try {
+
+        if (typeof DeviceMotionEvent !== "undefined" &&
+            typeof DeviceMotionEvent.requestPermission === "function") {
+
+            const permission = await DeviceMotionEvent.requestPermission();
+
+            if (permission !== "granted") {
+                throw new Error("Motion permission denied");
+            }
+        }
+
+        if (typeof DeviceOrientationEvent !== "undefined" &&
+            typeof DeviceOrientationEvent.requestPermission === "function") {
+
+            const permission = await DeviceOrientationEvent.requestPermission();
+
+            if (permission !== "granted") {
+                throw new Error("Orientation permission denied");
+            }
+        }
+
+        if (!motionHandler) {
+
+            motionHandler = function(event) {
+
+                const a = event.accelerationIncludingGravity ||
+                          event.acceleration;
+
+                if (a) {
+                    document.getElementById("accel").textContent =
+                        `X: ${format(a.x)} | Y: ${format(a.y)} | Z: ${format(a.z)}`;
+                }
+
+                const r = event.rotationRate;
+
+                if (r) {
+                    document.getElementById("rotation").textContent =
+                        `Alpha: ${format(r.alpha)} | Beta: ${format(r.beta)} | Gamma: ${format(r.gamma)}`;
+                }
+            };
+
+            window.addEventListener("devicemotion", motionHandler);
+        }
+
+        if (!orientationHandler) {
+
+            orientationHandler = function(event) {
+
+                document.getElementById("gyro").textContent =
+                    `Alpha: ${format(event.alpha)} | Beta: ${format(event.beta)} | Gamma: ${format(event.gamma)}`;
+
+                updateCompass(event);
+            };
+
+            window.addEventListener("deviceorientation", orientationHandler);
+        }
+
+        // Generic Sensor API fallback / additional readings
+
+        if ("Accelerometer" in window && !accelerationSensor) {
+
+            try {
+
+                accelerationSensor = new Accelerometer({
+                    frequency: 10
+                });
+
+                accelerationSensor.addEventListener("reading", () => {
+
+                    document.getElementById("accel").textContent =
+                        `X: ${format(accelerationSensor.x)} | Y: ${format(accelerationSensor.y)} | Z: ${format(accelerationSensor.z)} (Generic Sensor)`;
+
+                });
+
+                accelerationSensor.addEventListener("error", e => {
+                    console.warn(e);
+                });
+
+                accelerationSensor.start();
+
+            } catch(e) {
+                console.log("Accelerometer API:", e);
+            }
+        }
+
+        if ("Gyroscope" in window && !gyroscopeSensor) {
+
+            try {
+
+                gyroscopeSensor = new Gyroscope({
+                    frequency: 10
+                });
+
+                gyroscopeSensor.addEventListener("reading", () => {
+
+                    document.getElementById("rotation").textContent =
+                        `X: ${format(gyroscopeSensor.x)} | Y: ${format(gyroscopeSensor.y)} | Z: ${format(gyroscopeSensor.z)} rad/s`;
+
+                });
+
+                gyroscopeSensor.addEventListener("error", e => {
+                    console.warn(e);
+                });
+
+                gyroscopeSensor.start();
+
+            } catch(e) {
+                console.log("Gyroscope API:", e);
+            }
+        }
+
+        document.getElementById("sensorStatus").textContent =
+            "Listening. Move and rotate your phone.";
+
+    } catch(error) {
+
+        document.getElementById("sensorStatus").textContent =
+            "Error: " + error.message;
+    }
+}
+
+function stopSensors() {
+
+    if (motionHandler) {
+        window.removeEventListener("devicemotion", motionHandler);
+        motionHandler = null;
+    }
+
+    if (orientationHandler) {
+        window.removeEventListener("deviceorientation", orientationHandler);
+        orientationHandler = null;
+    }
+
+    if (accelerationSensor) {
+        accelerationSensor.stop();
+        accelerationSensor = null;
+    }
+
+    if (gyroscopeSensor) {
+        gyroscopeSensor.stop();
+        gyroscopeSensor = null;
+    }
+
+    document.getElementById("sensorStatus").textContent =
+        "Sensors stopped";
+}
+
+
+// 2. PROXIMITY SENSOR
+
+let proximitySensor = null;
+
+function testProximity() {
+
+    const output = document.getElementById("proximity");
+    const status = document.getElementById("proximityStatus");
+
+    // Legacy browser events
+
+    if ("ondeviceproximity" in window) {
+
+        window.addEventListener("deviceproximity", event => {
+
+            output.textContent =
+                "Distance: " + event.value +
+                " | Maximum: " + event.max;
+
+        });
+
+        status.textContent =
+            "Legacy proximity event detected. Try covering the sensor.";
+
+        return;
+    }
+
+    if ("onuserproximity" in window) {
+
+        window.addEventListener("userproximity", event => {
+
+            output.textContent =
+                "Near: " + event.near;
+
+        });
+
+        status.textContent =
+            "Legacy user proximity event detected.";
+
+        return;
+    }
+
+    // Generic Sensor API, if implemented
+
+    if ("ProximitySensor" in window) {
+
+        try {
+
+            proximitySensor = new ProximitySensor();
+
+            proximitySensor.addEventListener("reading", () => {
+
+                output.textContent =
+                    "Distance: " + proximitySensor.distance;
+
+            });
+
+            proximitySensor.addEventListener("error", e => {
+                status.textContent = "Sensor error: " + e.error.message;
+            });
+
+            proximitySensor.start();
+
+            status.textContent = "Proximity sensor started.";
+
+        } catch(e) {
+
+            status.textContent = "Unable to start: " + e.message;
+        }
+
+        return;
+    }
+
+    output.textContent = "Not available";
+    status.textContent =
+        "This WebView does not expose a standard proximity sensor API.";
+}
+
+
+// 3. CAMERA
+
+let cameraStream = null;
+let cameraFacing = "environment";
+
+async function startCamera() {
+
+    try {
+
+        if (!navigator.mediaDevices ||
+            !navigator.mediaDevices.getUserMedia) {
+
+            throw new Error("Camera API unavailable");
+        }
+
+        if (cameraStream) {
+            cameraStream.getTracks().forEach(track => track.stop());
+        }
+
+        cameraStream = await navigator.mediaDevices.getUserMedia({
+
+            video: {
+                facingMode: cameraFacing,
+                width: { ideal: 1920 },
+                height: { ideal: 1080 }
+            },
+
+            audio: false
+
+        });
+
+        document.getElementById("camera").srcObject = cameraStream;
+
+        document.getElementById("cameraStatus").textContent =
+            "Camera opened successfully.";
+
+    } catch(error) {
+
+        document.getElementById("cameraStatus").textContent =
+            "Camera error: " + error.message;
+    }
+}
+
+function switchCamera() {
+
+    cameraFacing =
+        cameraFacing === "environment" ? "user" : "environment";
+
+    startCamera();
+}
+
+function stopCamera() {
+
+    if (cameraStream) {
+
+        cameraStream.getTracks().forEach(track => track.stop());
+
+        cameraStream = null;
+
+        document.getElementById("camera").srcObject = null;
+
+        document.getElementById("cameraStatus").textContent =
+            "Camera stopped.";
+    }
+}
+
+function takePhoto() {
+
+    const video = document.getElementById("camera");
+    const canvas = document.getElementById("photoCanvas");
+
+    if (!cameraStream || !video.videoWidth) {
+
+        document.getElementById("cameraStatus").textContent =
+            "Start the camera first.";
+
+        return;
+    }
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    canvas.getContext("2d").drawImage(
+        video, 0, 0, canvas.width, canvas.height
+    );
+
+    canvas.toBlob(blob => {
+
+        if (!blob) return;
+
+        downloadBlob(blob, "camera_photo_" + Date.now() + ".jpg");
+
+        document.getElementById("cameraStatus").textContent =
+            "Photo captured. Check your downloads.";
+
+    }, "image/jpeg", 0.95);
+}
+
+
+// 4. MICROPHONE AND RECORDING
+
+let mediaRecorder = null;
+let audioStream = null;
+let audioChunks = [];
+
+async function startRecording() {
+
+    try {
+
+        if (!navigator.mediaDevices ||
+            !navigator.mediaDevices.getUserMedia) {
+
+            throw new Error("Microphone API unavailable");
+        }
+
+        if (!window.MediaRecorder) {
+            throw new Error("MediaRecorder is not supported");
+        }
+
+        audioStream = await navigator.mediaDevices.getUserMedia({
+            audio: true
+        });
+
+        audioChunks = [];
+
+        let options = {};
+
+        if (MediaRecorder.isTypeSupported("audio/webm;codecs=opus")) {
+            options.mimeType = "audio/webm;codecs=opus";
+        }
+
+        mediaRecorder = new MediaRecorder(audioStream, options);
+
+        mediaRecorder.ondataavailable = event => {
+
+            if (event.data.size > 0) {
+                audioChunks.push(event.data);
+            }
+        };
+
+        mediaRecorder.onstop = () => {
+
+            const blob = new Blob(audioChunks, {
+                type: mediaRecorder.mimeType || "audio/webm"
+            });
+
+            const url = URL.createObjectURL(blob);
+
+            const audio = document.getElementById("audioPlayback");
+
+            audio.src = url;
+
+            const extension = blob.type.includes("mp4") ? "mp4" : "webm";
+
+            downloadBlob(
+                blob,
+                "recording_" + Date.now() + "." + extension
+            );
+
+            document.getElementById("micStatus").textContent =
+                "Recording saved. You can play it above.";
+
+            audioStream.getTracks().forEach(track => track.stop());
+
+            audioStream = null;
+        };
+
+        mediaRecorder.start();
+
+        document.getElementById("micStatus").textContent =
+            "🔴 Recording...";
+
+    } catch(error) {
+
+        document.getElementById("micStatus").textContent =
+            "Microphone error: " + error.message;
+    }
+}
+
+function stopRecording() {
+
+    if (mediaRecorder && mediaRecorder.state !== "inactive") {
+        mediaRecorder.stop();
+    } else {
+        document.getElementById("micStatus").textContent =
+            "No active recording.";
+    }
+}
+
+
+// 5. FILE UPLOAD
+
+function showFiles(files) {
+
+    const list = document.getElementById("fileList");
+
+    list.innerHTML = "";
+
+    if (!files || !files.length) {
+
+        document.getElementById("fileStatus").textContent =
+            "No files selected.";
+
+        return;
+    }
+
+    document.getElementById("fileStatus").textContent =
+        files.length + " file(s) selected.";
+
+    Array.from(files).forEach(file => {
+
+        const li = document.createElement("li");
+
+        li.textContent =
+            (file.webkitRelativePath || file.name) +
+            " (" + formatBytes(file.size) + ")";
+
+        list.appendChild(li);
+    });
+}
+
+
+// Folder picker: modern File System Access API,
+// with webkitdirectory fallback.
+
+async function pickFolder() {
+
+    if ("showDirectoryPicker" in window) {
+
+        try {
+
+            const directory = await window.showDirectoryPicker();
+
+            let count = 0;
+
+            const list = document.getElementById("fileList");
+
+            list.innerHTML = "";
+
+            async function readDirectory(dir, prefix = "") {
+
+                for await (const [name, handle] of dir.entries()) {
+
+                    if (handle.kind === "file") {
+
+                        const file = await handle.getFile();
+
+                        count++;
+
+                        const li = document.createElement("li");
+
+                        li.textContent =
+                            prefix + name + " (" +
+                            formatBytes(file.size) + ")";
+
+                        list.appendChild(li);
+
+                    } else if (handle.kind === "directory") {
+
+                        await readDirectory(
+                            handle,
+                            prefix + name + "/"
+                        );
+                    }
+                }
+            }
+
+            await readDirectory(directory);
+
+            document.getElementById("fileStatus").textContent =
+                "Folder selected: " + directory.name +
+                " | " + count + " files.";
+
+        } catch(error) {
+
+            document.getElementById("fileStatus").textContent =
+                "Folder selection cancelled or unavailable: " +
+                error.message;
+        }
+
+    } else {
+
+        document.getElementById("folderInput").click();
+    }
+}
+
+
+// 6. DOWNLOAD FILES
+
+function downloadBlob(blob, filename) {
+
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = filename;
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    link.remove();
+
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+}
+
+function downloadFile() {
+
+    const content =
+        "Android Hardware Test Lab\n" +
+        "Test file created successfully.\n" +
+        "Date: " + new Date().toString();
+
+    const blob = new Blob([content], {
+        type: "text/plain"
+    });
+
+    downloadBlob(blob, "hardware_test.txt");
+
+    document.getElementById("downloadStatus").textContent =
+        "Test file download requested.";
+}
+
+
+// Save using modern file picker
+
+async function saveWithPicker() {
+
+    const content =
+        "Android Hardware Test Lab\n" +
+        "File picker test successful.\n" +
+        new Date().toString();
+
+    if (!("showSaveFilePicker" in window)) {
+
+        downloadFile();
+
+        document.getElementById("downloadStatus").textContent =
+            "Save picker unsupported. Standard download attempted.";
+
+        return;
+    }
+
+    try {
+
+        const handle = await window.showSaveFilePicker({
+
+            suggestedName: "hardware_test.txt",
+
+            types: [{
+                description: "Text file",
+                accept: {
+                    "text/plain": [".txt"]
+                }
+            }]
+
+        });
+
+        const writable = await handle.createWritable();
+
+        await writable.write(content);
+
+        await writable.close();
+
+        document.getElementById("downloadStatus").textContent =
+            "File successfully saved.";
+
+    } catch(error) {
+
+        document.getElementById("downloadStatus").textContent =
+            "Save cancelled or failed: " + error.message;
+    }
+}
+
+
+// Folder download test
+
+async function downloadFolder() {
+
+    if (!("showDirectoryPicker" in window)) {
+
+        document.getElementById("downloadStatus").textContent =
+            "Folder destination picker is NOT supported in this WebView.";
+
+        return;
+    }
+
+    try {
+
+        const directory = await window.showDirectoryPicker({
+            mode: "readwrite"
+        });
+
+        const folder = await directory.getDirectoryHandle(
+            "HardwareTestExport",
+            { create: true }
+        );
+
+        const report = {
+
+            application: "Android Hardware Test Lab",
+
+            date: new Date().toISOString(),
+
+            userAgent: navigator.userAgent,
+
+            secureContext: window.isSecureContext,
+
+            cameraAPI: !!navigator.mediaDevices?.getUserMedia,
+
+            microphoneAPI: !!navigator.mediaDevices?.getUserMedia,
+
+            geolocationAPI: !!navigator.geolocation,
+
+            accelerometerAPI: "Accelerometer" in window,
+
+            gyroscopeAPI: "Gyroscope" in window,
+
+            mediaRecorderAPI: !!window.MediaRecorder
+
+        };
+
+        const files = {
+
+            "readme.txt":
+                "Hardware Test Lab export folder.\nCreated: " +
+                new Date().toString(),
+
+            "report.json":
+                JSON.stringify(report, null, 2)
+
+        };
+
+        for (const [filename, content] of Object.entries(files)) {
+
+            const fileHandle = await folder.getFileHandle(
+                filename,
+                { create: true }
+            );
+
+            const writable = await fileHandle.createWritable();
+
+            await writable.write(content);
+
+            await writable.close();
+        }
+
+        document.getElementById("downloadStatus").textContent =
+            "Created HardwareTestExport folder with 2 files successfully.";
+
+    } catch(error) {
+
+        document.getElementById("downloadStatus").textContent =
+            "Folder export failed: " + error.message;
+    }
+}
+
+
+// 7. SPEAKER
+
+function playTone(duration) {
+
+    try {
+
+        const AudioContextClass =
+            window.AudioContext || window.webkitAudioContext;
+
+        if (!AudioContextClass) {
+            throw new Error("Web Audio API unavailable");
+        }
+
+        const context = new AudioContextClass();
+
+        context.resume().then(() => {
+
+            const oscillator = context.createOscillator();
+
+            const gain = context.createGain();
+
+            oscillator.type = "sine";
+
+            oscillator.frequency.value = 880;
+
+            gain.gain.value = 0.25;
+
+            oscillator.connect(gain);
+
+            gain.connect(context.destination);
+
+            oscillator.start();
+
+            oscillator.stop(
+                context.currentTime + duration / 1000
+            );
+
+            oscillator.onended = () => {
+                context.close();
+            };
+
+        });
+
+        document.getElementById("speakerStatus").textContent =
+            "Beep generated. Listen to your speaker.";
+
+    } catch(error) {
+
+        document.getElementById("speakerStatus").textContent =
+            error.message;
+    }
+}
+
+function playBeep() {
+    playTone(150);
+}
+
+function playLongBeep() {
+    playTone(1000);
+}
+
+
+// 8. GPS
+
+let locationWatch = null;
+
+function gpsSuccess(position) {
+
+    const c = position.coords;
+
+    document.getElementById("gps").innerHTML =
+        "Latitude: " + format(c.latitude) + "<br>" +
+        "Longitude: " + format(c.longitude) + "<br>" +
+        "Accuracy: " + format(c.accuracy) + " metres<br>" +
+        "Altitude: " + format(c.altitude) + "<br>" +
+        "Speed: " + format(c.speed) + "<br>" +
+        "Heading: " + format(c.heading);
+
+    document.getElementById("gpsStatus").textContent =
+        "GPS reading received at " +
+        new Date(position.timestamp).toLocaleTimeString();
+}
+
+function gpsError(error) {
+
+    document.getElementById("gpsStatus").textContent =
+        "GPS error: " + error.message;
+}
+
+function getLocation() {
+
+    if (!navigator.geolocation) {
+
+        document.getElementById("gpsStatus").textContent =
+            "Geolocation API unavailable.";
+
+        return;
+    }
+
+    document.getElementById("gpsStatus").textContent =
+        "Requesting location permission...";
+
+    navigator.geolocation.getCurrentPosition(
+        gpsSuccess,
+        gpsError,
+        {
+            enableHighAccuracy: true,
+            timeout: 20000,
+            maximumAge: 0
+        }
+    );
+}
+
+function watchLocation() {
+
+    if (!navigator.geolocation) {
+        gpsError({ message: "Geolocation unavailable" });
+        return;
+    }
+
+    if (locationWatch !== null) {
+        navigator.geolocation.clearWatch(locationWatch);
+    }
+
+    locationWatch = navigator.geolocation.watchPosition(
+        gpsSuccess,
+        gpsError,
+        {
+            enableHighAccuracy: true,
+            maximumAge: 1000,
+            timeout: 20000
+        }
+    );
+
+    document.getElementById("gpsStatus").textContent =
+        "Live GPS tracking enabled.";
+}
+
+function stopLocation() {
+
+    if (locationWatch !== null) {
+
+        navigator.geolocation.clearWatch(locationWatch);
+
+        locationWatch = null;
+
+        document.getElementById("gpsStatus").textContent =
+            "GPS tracking stopped.";
+    }
+}
+
+
+// 9. COMPASS
+
+function updateCompass(event) {
+
+    let heading = null;
+
+    if (typeof event.webkitCompassHeading === "number") {
+
+        heading = event.webkitCompassHeading;
+
+    } else if (event.alpha !== null) {
+
+        heading = (360 - event.alpha) % 360;
+    }
+
+    if (heading !== null) {
+
+        document.getElementById("compass").textContent =
+            "Heading: " + heading.toFixed(1) + "°";
+
+    }
+
+    document.getElementById("orientation").textContent =
+        "Alpha: " + format(event.alpha) +
+        " | Beta: " + format(event.beta) +
+        " | Gamma: " + format(event.gamma);
+}
+
+function startCompass() {
+
+    startSensors();
+
+    document.getElementById("compassStatus").textContent =
+        "Waiting for orientation readings. Alpha-based heading may not be true magnetic north.";
+}
+
+
+// 10. VIBRATION
+
+function vibrate(pattern) {
+
+    if ("vibrate" in navigator) {
+
+        const result = navigator.vibrate(pattern);
+
+        document.getElementById("vibrationStatus").textContent =
+            result ? "Vibration request accepted." :
+                     "Vibration unavailable or blocked.";
+
+    } else {
+
+        document.getElementById("vibrationStatus").textContent =
+            "Vibration API unsupported.";
+    }
+}
+
+
+// 11. BATTERY
+
+async function batteryInfo() {
+
+    if (!navigator.getBattery) {
+
+        document.getElementById("battery").textContent =
+            "Battery API unavailable.";
+
+        return;
+    }
+
+    try {
+
+        const battery = await navigator.getBattery();
+
+        function update() {
+
+            document.getElementById("battery").textContent =
+                "Level: " + (battery.level * 100).toFixed(0) + "% | " +
+                "Charging: " + battery.charging + " | " +
+                "Charging time: " + battery.chargingTime + " sec | " +
+                "Discharging time: " + battery.dischargingTime + " sec";
+        }
+
+        update();
+
+        battery.addEventListener("levelchange", update);
+        battery.addEventListener("chargingchange", update);
+
+        document.getElementById("batteryStatus").textContent =
+            "Battery information retrieved.";
+
+    } catch(error) {
+
+        document.getElementById("batteryStatus").textContent =
+            error.message;
+    }
+}
+
+
+// 12. NETWORK
+
+function networkInfo() {
+
+    const c = navigator.connection ||
+              navigator.mozConnection ||
+              navigator.webkitConnection;
+
+    let result =
+        "Online: " + navigator.onLine;
+
+    if (c) {
+
+        result +=
+            "\nConnection: " + c.effectiveType +
+            "\nDownlink: " + c.downlink + " Mbps" +
+            "\nRTT: " + c.rtt + " ms" +
+            "\nSave Data: " + c.saveData;
+
+    } else {
+
+        result += "\nDetailed network information unavailable.";
+    }
+
+    document.getElementById("network").textContent = result;
+}
+
+window.addEventListener("online", networkInfo);
+window.addEventListener("offline", networkInfo);
+
+
+// 13. DEVICE INFORMATION
+
+function deviceInfo() {
+
+    document.getElementById("device").textContent =
+
+        "User Agent: " + navigator.userAgent +
+
+        "\nPlatform: " + navigator.platform +
+
+        "\nLanguage: " + navigator.language +
+
+        "\nScreen: " + screen.width + " x " + screen.height +
+
+        "\nAvailable Screen: " + screen.availWidth + " x " +
+        screen.availHeight +
+
+        "\nPixel Ratio: " + window.devicePixelRatio +
+
+        "\nTouch Points: " + navigator.maxTouchPoints +
+
+        "\nCPU Cores: " + (navigator.hardwareConcurrency || "Unknown") +
+
+        "\nDevice Memory: " + (navigator.deviceMemory || "Unknown") + " GB" +
+
+        "\nCookies Enabled: " + navigator.cookieEnabled +
+
+        "\nWebView/Browser: " + navigator.userAgent;
+}
+
+
+// HELPERS
+
+function format(value) {
+
+    if (value === null || value === undefined ||
+        !Number.isFinite(value)) {
+
+        return "--";
+    }
+
+    return Number(value).toFixed(3);
+}
+
+function formatBytes(bytes) {
+
+    if (bytes < 1024) return bytes + " B";
+
+    if (bytes < 1048576) {
+        return (bytes / 1024).toFixed(1) + " KB";
+    }
+
+    return (bytes / 1048576).toFixed(2) + " MB";
+}
+
+
+// INITIALIZE
+
+networkInfo();
+deviceInfo();
+
+document.getElementById("secureStatus").textContent +=
+    " | Camera API: " +
+    (!!navigator.mediaDevices?.getUserMedia ? "Available" : "Unavailable");
+
+</script>
 
 </body>
 </html>
