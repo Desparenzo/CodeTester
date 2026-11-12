@@ -8,31 +8,60 @@
 
 <style>
 *{box-sizing:border-box}
+
 html,body{
- margin:0;width:100%;height:100%;overflow:hidden;
- background:#080a0e;color:white;
+ margin:0;
+ width:100%;
+ height:100%;
+ overflow:hidden;
+ background:#080a0e;
+ color:white;
  font-family:Arial,sans-serif;
 }
+
 #view{
- position:fixed;inset:0;width:100%;height:100%;
+ position:fixed;
+ inset:0;
+ width:100%;
+ height:100%;
  touch-action:none;
 }
+
 #controls{
- position:fixed;top:12px;left:12px;right:12px;
- z-index:5;display:flex;gap:7px;flex-wrap:wrap;
+ position:fixed;
+ top:12px;
+ left:12px;
+ right:12px;
+ z-index:5;
+ display:flex;
+ gap:7px;
+ flex-wrap:wrap;
+ align-items:center;
 }
+
 button,label{
- background:#202735;color:white;
+ background:#202735;
+ color:white;
  border:1px solid #ffffff40;
- border-radius:9px;padding:10px 13px;
+ border-radius:9px;
+ padding:10px 13px;
  font-size:14px;
+ cursor:pointer;
 }
+
 input{display:none}
+
 #hint{
- position:fixed;bottom:12px;left:12px;right:12px;
- background:#111722dd;padding:10px;
- border-radius:9px;text-align:center;
- font-size:13px;z-index:5;
+ position:fixed;
+ bottom:12px;
+ left:12px;
+ right:12px;
+ background:#111722dd;
+ padding:10px;
+ border-radius:9px;
+ text-align:center;
+ font-size:13px;
+ z-index:5;
 }
 </style>
 </head>
@@ -44,7 +73,7 @@ input{display:none}
 <div id="controls">
 <label for="picker">Choose Photos</label>
 <input id="picker" type="file" accept="image/*" multiple>
-<button id="motion">Enable Gyroscope</button>
+<button id="motion">Enable Motion</button>
 <button id="reset">Reset</button>
 <button id="zoomIn">+</button>
 <button id="zoomOut">−</button>
@@ -53,21 +82,26 @@ input{display:none}
 </div>
 
 <div id="hint">
-Select a 360° panorama. Drag to look around.
+Choose a 360° panorama to begin.
 </div>
 
 <script>
 (() => {
 
 const canvas=document.getElementById("view");
-const gl=canvas.getContext("webgl");
+const gl=canvas.getContext("webgl",{
+ antialias:false,
+ alpha:false
+});
 
 const hint=document.getElementById("hint");
 
 if(!gl){
- hint.textContent="WebGL unavailable.";
+ hint.textContent="WebGL is not supported.";
  return;
 }
+
+// SHADERS
 
 const vertexShader=`
 attribute vec2 position;
@@ -129,6 +163,8 @@ void main(){
  gl_FragColor=texture2D(panorama,texCoord);
 }`;
 
+// COMPILE SHADERS
+
 function createShader(type,source){
 
  const shader=gl.createShader(type);
@@ -143,12 +179,21 @@ function createShader(type,source){
  return shader;
 }
 
-const program=gl.createProgram();
+let program;
 
 try{
 
- gl.attachShader(program,createShader(gl.VERTEX_SHADER,vertexShader));
- gl.attachShader(program,createShader(gl.FRAGMENT_SHADER,fragmentShader));
+ program=gl.createProgram();
+
+ gl.attachShader(
+  program,
+  createShader(gl.VERTEX_SHADER,vertexShader)
+ );
+
+ gl.attachShader(
+  program,
+  createShader(gl.FRAGMENT_SHADER,fragmentShader)
+ );
 
  gl.linkProgram(program);
 
@@ -156,14 +201,16 @@ try{
   throw new Error(gl.getProgramInfoLog(program));
  }
 
-}catch(e){
+}catch(error){
 
- hint.textContent=e.message;
+ hint.textContent="Shader error: "+error.message;
  return;
 
 }
 
 gl.useProgram(program);
+
+// FULLSCREEN QUAD
 
 const buffer=gl.createBuffer();
 
@@ -172,8 +219,12 @@ gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
 gl.bufferData(
  gl.ARRAY_BUFFER,
  new Float32Array([
-  -1,-1, 1,-1, -1,1,
-  -1,1, 1,-1, 1,1
+  -1,-1,
+   1,-1,
+  -1, 1,
+  -1, 1,
+   1,-1,
+   1, 1
  ]),
  gl.STATIC_DRAW
 );
@@ -181,7 +232,12 @@ gl.bufferData(
 const position=gl.getAttribLocation(program,"position");
 
 gl.enableVertexAttribArray(position);
-gl.vertexAttribPointer(position,2,gl.FLOAT,false,0,0);
+
+gl.vertexAttribPointer(
+ position,2,gl.FLOAT,false,0,0
+);
+
+// UNIFORMS
 
 const uniforms={
  panorama:gl.getUniformLocation(program,"panorama"),
@@ -191,17 +247,45 @@ const uniforms={
  fov:gl.getUniformLocation(program,"fov")
 };
 
+// TEXTURE
+
 const texture=gl.createTexture();
 
 gl.activeTexture(gl.TEXTURE0);
+
 gl.bindTexture(gl.TEXTURE_2D,texture);
 
-gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.REPEAT);
-gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
-gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
-gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+// IMPORTANT FIX:
+// CLAMP_TO_EDGE supports non-power-of-two images in WebGL 1.
+// The shader's fract() handles horizontal panorama wrapping.
+
+gl.texParameteri(
+ gl.TEXTURE_2D,
+ gl.TEXTURE_WRAP_S,
+ gl.CLAMP_TO_EDGE
+);
+
+gl.texParameteri(
+ gl.TEXTURE_2D,
+ gl.TEXTURE_WRAP_T,
+ gl.CLAMP_TO_EDGE
+);
+
+gl.texParameteri(
+ gl.TEXTURE_2D,
+ gl.TEXTURE_MIN_FILTER,
+ gl.LINEAR
+);
+
+gl.texParameteri(
+ gl.TEXTURE_2D,
+ gl.TEXTURE_MAG_FILTER,
+ gl.LINEAR
+);
 
 gl.uniform1i(uniforms.panorama,0);
+
+// VIEW STATE
 
 let yaw=0;
 let pitch=0;
@@ -216,16 +300,27 @@ let lastY=0;
 
 let initialAlpha=null;
 let initialBeta=null;
-let initialGamma=null;
-
 let initialYaw=0;
 let initialPitch=0;
 
-const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
+let imageLoaded=false;
+
+const clamp=(v,min,max)=>{
+ return Math.max(min,Math.min(max,v));
+};
+
+// RENDER
 
 function render(){
 
- gl.uniform2f(uniforms.resolution,canvas.width,canvas.height);
+ if(!gl)return;
+
+ gl.uniform2f(
+  uniforms.resolution,
+  canvas.width,
+  canvas.height
+ );
+
  gl.uniform1f(uniforms.yaw,yaw);
  gl.uniform1f(uniforms.pitch,pitch);
  gl.uniform1f(uniforms.fov,fov);
@@ -234,14 +329,20 @@ function render(){
 
 }
 
+// RESIZE
+
 function resize(){
 
  const dpr=Math.min(devicePixelRatio||1,2);
 
- canvas.width=innerWidth*dpr;
- canvas.height=innerHeight*dpr;
+ canvas.width=Math.floor(innerWidth*dpr);
+ canvas.height=Math.floor(innerHeight*dpr);
 
- gl.viewport(0,0,canvas.width,canvas.height);
+ gl.viewport(
+  0,0,
+  canvas.width,
+  canvas.height
+ );
 
  render();
 
@@ -250,64 +351,103 @@ function resize(){
 window.addEventListener("resize",resize);
 resize();
 
+// IMAGE LOADING
+
 function loadPhoto(file){
+
+ if(!file || !file.type.startsWith("image/")){
+  hint.textContent="Please select a valid image.";
+  return;
+ }
+
+ hint.textContent="Loading panorama...";
 
  const url=URL.createObjectURL(file);
  const image=new Image();
 
  image.onload=()=>{
 
-  gl.bindTexture(gl.TEXTURE_2D,texture);
+  try{
 
-  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);
+   gl.activeTexture(gl.TEXTURE0);
+   gl.bindTexture(gl.TEXTURE_2D,texture);
 
-  gl.texImage2D(
-   gl.TEXTURE_2D,
-   0,
-   gl.RGBA,
-   gl.RGBA,
-   gl.UNSIGNED_BYTE,
-   image
-  );
+   gl.pixelStorei(
+    gl.UNPACK_FLIP_Y_WEBGL,
+    true
+   );
 
-  yaw=0;
-  pitch=0;
+   gl.texImage2D(
+    gl.TEXTURE_2D,
+    0,
+    gl.RGBA,
+    gl.RGBA,
+    gl.UNSIGNED_BYTE,
+    image
+   );
 
-  initialAlpha=null;
-  initialBeta=null;
-  initialGamma=null;
+   const error=gl.getError();
 
-  hint.textContent=
-   "Photo "+(current+1)+"/"+photos.length+
-   ". Drag or move your phone.";
+   if(error!==gl.NO_ERROR){
+    throw new Error("WebGL texture error: "+error);
+   }
 
-  render();
+   imageLoaded=true;
+
+   yaw=0;
+   pitch=0;
+
+   initialAlpha=null;
+   initialBeta=null;
+
+   hint.textContent=
+    "Loaded: "+file.name+
+    " | Photo "+(current+1)+"/"+photos.length;
+
+   render();
+
+  }catch(error){
+
+   hint.textContent="Image error: "+error.message;
+
+  }
 
   URL.revokeObjectURL(url);
 
  };
 
  image.onerror=()=>{
-  hint.textContent="Unable to load image.";
+
+  hint.textContent="Unable to decode this image.";
+
   URL.revokeObjectURL(url);
+
  };
 
  image.src=url;
 
 }
 
-document.getElementById("picker").onchange=e=>{
+// PHOTO PICKER
 
- photos=Array.from(e.target.files||[]);
- current=0;
+document.getElementById("picker").addEventListener(
+ "change",
+ e=>{
 
- if(photos.length){
-  loadPhoto(photos[current]);
+  photos=Array.from(e.target.files||[]);
+
+  current=0;
+
+  if(photos.length){
+   loadPhoto(photos[current]);
+  }
+
+  e.target.value="";
+
  }
+);
 
- e.target.value="";
-
-};
+// PHOTO NAVIGATION
 
 function changePhoto(step){
 
@@ -319,8 +459,15 @@ function changePhoto(step){
 
 }
 
-document.getElementById("prev").onclick=()=>changePhoto(-1);
-document.getElementById("next").onclick=()=>changePhoto(1);
+document.getElementById("prev").onclick=()=>{
+ changePhoto(-1);
+};
+
+document.getElementById("next").onclick=()=>{
+ changePhoto(1);
+};
+
+// RESET
 
 document.getElementById("reset").onclick=()=>{
 
@@ -330,20 +477,25 @@ document.getElementById("reset").onclick=()=>{
 
  initialAlpha=null;
  initialBeta=null;
- initialGamma=null;
 
  render();
 
 };
 
+// ZOOM
+
 document.getElementById("zoomIn").onclick=()=>{
+
  fov=clamp(fov-.12,.45,1.8);
  render();
+
 };
 
 document.getElementById("zoomOut").onclick=()=>{
+
  fov=clamp(fov+.12,.45,1.8);
  render();
+
 };
 
 // TOUCH AND MOUSE CONTROLS
@@ -370,23 +522,33 @@ canvas.addEventListener("pointermove",e=>{
  lastY=e.clientY;
 
  yaw-=dx*.005;
- pitch=clamp(pitch+dy*.005,-1.52,1.52);
+
+ pitch=clamp(
+  pitch+dy*.005,
+  -1.52,
+  1.52
+ );
 
  render();
 
 });
 
-canvas.addEventListener("pointerup",()=>dragging=false);
-canvas.addEventListener("pointercancel",()=>dragging=false);
+canvas.addEventListener("pointerup",()=>{
+ dragging=false;
+});
 
-// GYROSCOPE CONTROLS
+canvas.addEventListener("pointercancel",()=>{
+ dragging=false;
+});
+
+// GYROSCOPE
 
 async function enableMotion(){
 
  try{
 
   if(!window.isSecureContext){
-   throw new Error("HTTPS required. Use GitHub Pages.");
+   throw new Error("HTTPS is required. Use GitHub Pages.");
   }
 
   if(!("DeviceOrientationEvent" in window)){
@@ -410,7 +572,7 @@ async function enableMotion(){
    true
   );
 
-  hint.textContent="Gyroscope enabled. Move your phone!";
+  hint.textContent="Motion enabled. Move your phone!";
 
   document.getElementById("motion").textContent="Motion ON";
 
@@ -424,13 +586,14 @@ async function enableMotion(){
 
 function handleOrientation(event){
 
- if(event.alpha===null || event.beta===null)return;
+ if(event.alpha===null || event.beta===null){
+  return;
+ }
 
  if(initialAlpha===null){
 
   initialAlpha=event.alpha;
   initialBeta=event.beta;
-  initialGamma=event.gamma;
 
   initialYaw=yaw;
   initialPitch=pitch;
