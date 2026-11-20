@@ -4,149 +4,147 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#10131d">
-<title>Desparenzo AI · Compatibility Check</title>
+<title>Desparenzo AI · Diagnostic 2.0</title>
 <style>
 :root{color-scheme:dark;--bg:#0d1018;--panel:#171d2a;--panel2:#20293a;--line:#303b50;--text:#edf2ff;--muted:#a5b0c5;--accent:#9aaaff;--good:#69d6a2;--warn:#f1c36c;--bad:#ff8585}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 15% -10%,#29365b 0,transparent 42%),var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
 .wrap{max-width:850px;margin:auto;padding:18px 14px 40px}header{display:flex;align-items:center;gap:12px;padding:8px 0 18px;border-bottom:1px solid var(--line)}
 .logo{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#9aaaff,#c3a1ff);display:grid;place-items:center;color:#111522;font-size:21px;font-weight:900}
 h1{font-size:20px;margin:0}h2{font-size:16px;margin:0 0 10px}.muted{color:var(--muted)}.sub{font-size:12px;color:var(--muted)}
-.intro,.card{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:15px;margin-top:14px}
-.intro p{margin:5px 0 0;color:var(--muted);font-size:13px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:15px;margin-top:14px}
+.intro{color:var(--muted);font-size:13px}.intro strong{color:var(--text);font-size:15px}
 .actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:13px}
-button,.filebtn{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:10px 13px;border-radius:10px;font:inherit;cursor:pointer}
-button.primary{background:linear-gradient(135deg,#9aaaff,#c3a1ff);color:#10131d;border:0;font-weight:750}
-button:disabled{opacity:.5;cursor:wait}
+button{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:10px 13px;border-radius:10px;font:inherit;cursor:pointer}
+button.primary{background:linear-gradient(135deg,#9aaaff,#c3a1ff);color:#10131d;border:0;font-weight:750}button:disabled{opacity:.5;cursor:wait}
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
 .item{background:#111722;border:1px solid var(--line);border-radius:11px;padding:11px;min-width:0}
-.itemtop{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.name{font-weight:650;font-size:13px}.state{font-size:11px;border-radius:999px;padding:3px 8px;background:#30394a;color:var(--muted);white-space:nowrap}
+.itemtop{display:flex;align-items:center;justify-content:space-between;gap:8px}.name{font-weight:650;font-size:13px}
+.state{font-size:11px;border-radius:999px;padding:3px 8px;background:#30394a;color:var(--muted);white-space:nowrap}
 .state.pass{background:#163c30;color:var(--good)}.state.warn{background:#49391d;color:var(--warn)}.state.fail{background:#48262b;color:var(--bad)}
 .detail{font-size:12px;color:var(--muted);margin-top:5px;overflow-wrap:anywhere}
-#fileInput{display:none}.filebox{border:1px dashed #56627a;border-radius:12px;padding:15px;text-align:center;margin-top:10px}
-.filemeta{font-size:12px;color:var(--muted);margin-top:8px;overflow-wrap:anywhere}
-.report{white-space:pre-wrap;background:#101722;border:1px solid var(--line);border-radius:10px;padding:12px;font:12px/1.5 ui-monospace,monospace;max-height:260px;overflow:auto}
-.note{font-size:12px;color:var(--muted)}.foot{text-align:center;color:var(--muted);font-size:11px;margin-top:20px}
+.report{white-space:pre-wrap;background:#101722;border:1px solid var(--line);border-radius:10px;padding:12px;font:12px/1.5 ui-monospace,monospace;max-height:300px;overflow:auto}
+.note{font-size:12px;color:var(--muted)}.meter{height:6px;background:#30394a;border-radius:20px;overflow:hidden;margin-top:8px}.bar{height:100%;width:0;background:linear-gradient(90deg,#9aaaff,#c3a1ff)}
 @media(max-width:560px){.grid{grid-template-columns:1fr}.wrap{padding:13px 11px 30px}}
 </style>
 </head>
-<body>
-<div class="wrap">
-<header><div class="logo">D</div><div><h1>Desparenzo AI</h1><div class="sub">Offline runtime compatibility diagnostic</div></div></header>
-<section class="intro">
- <strong>Let's check whether this device can run our planned local AI setup.</strong>
- <p>This test does not download a model, contact an AI service, or run inference. It checks browser capabilities and can inspect the header of a GGUF file you choose.</p>
- <div class="actions"><button class="primary" id="runBtn">Run device checks</button><button id="reportBtn" disabled>Download diagnostic report</button></div>
+<body><div class="wrap">
+<header><div class="logo">D</div><div><h1>Desparenzo AI</h1><div class="sub">Diagnostic 2.0 · GPU, WASM and memory tests</div></div></header>
+<section class="card intro">
+ <strong>Deeper compatibility check</strong>
+ <p>This test performs a small real GPU compute operation, checks WebAssembly SIMD with a valid test module, and briefly tests browser memory allocations. It does not download a model or send data anywhere.</p>
+ <p><b>Safety:</b> GPU allocation tests are limited to 64 MB at a time. Close other heavy apps first. If the browser becomes unstable, stop the test and reopen it.</p>
+ <div class="actions"><button class="primary" id="run">Run full diagnostic</button><button id="download" disabled>Download report</button></div>
+ <div class="meter"><div class="bar" id="bar"></div></div>
+ <div class="note" id="progress">Ready.</div>
 </section>
-<section class="card">
- <h2>Device and browser checks</h2>
- <div class="grid" id="results">
-  <div class="item"><div class="name">Waiting to run</div><div class="detail">Tap “Run device checks”.</div></div>
- </div>
-</section>
-<section class="card">
- <h2>GGUF file check</h2>
- <p class="note">Choose a model file already stored on this device. The page reads only its first few bytes and file size. It does not upload or load the model.</p>
- <div class="filebox">
-  <input id="fileInput" type="file" accept=".gguf,application/octet-stream">
-  <button id="chooseBtn">Choose a .gguf file</button>
-  <div class="filemeta" id="fileInfo">No file selected.</div>
- </div>
-</section>
-<section class="card">
- <h2>What this test can and cannot prove</h2>
- <p class="note">A passing WebAssembly or WebGPU check does not guarantee that a particular model will load. Actual limits depend on free RAM, browser memory caps, model architecture, quantization, context length and runtime support. This diagnostic deliberately does not claim to measure all available RAM or guarantee GGUF compatibility.</p>
- <p class="note">For a fair test, open this file in the browser you plan to use. If a feature says “not available”, try a current Chrome browser and compare results. WebGPU generally requires a secure context such as HTTPS or localhost.</p>
-</section>
-<section class="card">
- <h2>Diagnostic report</h2>
- <div class="report" id="report">No checks run yet.</div>
-</section>
-<div class="foot">Desparenzo AI · Local diagnostics only · No telemetry</div>
+<section class="card"><h2>Results</h2><div class="grid" id="results"><div class="item"><div class="name">Waiting</div><div class="detail">Run the diagnostic to see results.</div></div></div></section>
+<section class="card"><h2>Report</h2><div class="report" id="report">No diagnostic run yet.</div></section>
+<section class="card"><h2>What to send me</h2><p class="note">Download the TXT report and upload it here. If any test fails, include the exact browser used (Chrome, Edge, etc.). No model file is needed for this test.</p></section>
+<div class="note" style="text-align:center;margin:18px 0">Desparenzo AI · Diagnostic only · No telemetry</div>
 </div>
 <script>
 const $=id=>document.getElementById(id);
-let reportLines=[],ran=false;
-function add(name,state,detail){
- const el=document.createElement('div');el.className='item';
+let lines=[],running=false;
+const fmt=n=>{if(!Number.isFinite(n))return 'unknown';let u=['B','KB','MB','GB'],i=0;while(n>=1024&&i<3){n/=1024;i++}return n.toFixed(i?1:0)+' '+u[i]};
+function result(name,status,detail){
+ const box=document.createElement('div');box.className='item';
  const top=document.createElement('div');top.className='itemtop';
- const n=document.createElement('div');n.className='name';n.textContent=name;
- const s=document.createElement('span');s.className='state '+state;s.textContent=state==='pass'?'SUPPORTED':state==='warn'?'LIMITED / UNKNOWN':'NOT AVAILABLE';
+ const nm=document.createElement('div');nm.className='name';nm.textContent=name;
+ const st=document.createElement('span');st.className='state '+status;st.textContent=status==='pass'?'PASS':status==='warn'?'LIMITED':'FAIL';
  const d=document.createElement('div');d.className='detail';d.textContent=detail;
- top.append(n,s);el.append(top,d);$('results').append(el);
- reportLines.push(`${name}: ${s.textContent}\n  ${detail}`);
+ top.append(nm,st);box.append(top,d);$('results').append(box);
+ lines.push(`${name}: ${st.textContent}\n  ${detail}`);
 }
-function fmtBytes(n){if(!Number.isFinite(n))return 'unknown';const u=['B','KB','MB','GB'];let i=0;while(n>=1024&&i<u.length-1){n/=1024;i++}return `${n.toFixed(i?2:0)} ${u[i]}`}
-function detectDevice(){
- const ua=navigator.userAgent||'Unknown';
- let platform=/Android/i.test(ua)?'Android':/Windows/i.test(ua)?'Windows':/iPhone|iPad|iPod/i.test(ua)?'iOS':navigator.platform||'Unknown';
- return {ua,platform};
+function step(p,msg){$('bar').style.width=(p*100)+'%';$('progress').textContent=msg}
+function section(title){lines.push('=== '+title+' ===')}
+async function testSIMD(){
+ // Valid WASM module: function returns v128.const 0.
+ const b=[0,97,115,109,1,0,0,0,
+  1,5,1,96,0,1,123,
+  3,2,1,0,
+  10,22,1,20,0,253,12,
+  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11];
+ await WebAssembly.compile(new Uint8Array(b));
+ return true;
 }
-async function runChecks(){
- $('runBtn').disabled=true;$('results').innerHTML='';reportLines=[];
- const {ua,platform}=detectDevice();
- add('Platform', 'pass',platform);
- add('Browser user agent','pass',ua);
- add('Secure context',window.isSecureContext?'pass':'warn',window.isSecureContext?'Yes. Browser APIs that require a secure context may be enabled.':'No. Some features, especially WebGPU, may be blocked. Try HTTPS or localhost.');
- add('WebAssembly',typeof WebAssembly==='object'?'pass':'fail',typeof WebAssembly==='object'?'WebAssembly API exists.':'WebAssembly API is missing.');
- if(typeof WebAssembly==='object'){
-  try{const m=await WebAssembly.compile(new Uint8Array([0,97,115,109,1,0,0,0]));add('WASM compile test','pass','A minimal WebAssembly module compiled successfully.')}
-  catch(e){add('WASM compile test','fail',String(e))}
+async function testGPU(){
+ if(!navigator.gpu)return {status:'warn',detail:'navigator.gpu is not exposed in this browser.'};
+ const adapter=await navigator.gpu.requestAdapter();
+ if(!adapter)return {status:'warn',detail:'WebGPU API exists, but requestAdapter returned null.'};
+ const info=adapter.info||{};
+ const device=await adapter.requestDevice();
+ try{
+  const shader=device.createShaderModule({code:`
+   @group(0) @binding(0) var<storage, read_write> output: array<u32>;
+   @compute @workgroup_size(64) fn main(@builtin(global_invocation_id) id: vec3<u32>) {
+     output[id.x] = id.x ^ 0x5a5a1234u;
+   }`});
+  const count=1024,bytes=count*4;
+  const storage=device.createBuffer({size:bytes,usage:GPUBufferUsage.STORAGE|GPUBufferUsage.COPY_SRC});
+  const read=device.createBuffer({size:bytes,usage:GPUBufferUsage.COPY_DST|GPUBufferUsage.MAP_READ});
+  const pipeline=await device.createComputePipelineAsync({layout:'auto',compute:{module:shader,entryPoint:'main'}});
+  const bind=device.createBindGroup({layout:pipeline.getBindGroupLayout(0),entries:[{binding:0,resource:{buffer:storage}}]});
+  const enc=device.createCommandEncoder();const pass=enc.beginComputePass();pass.setPipeline(pipeline);pass.setBindGroup(0,bind);pass.dispatchWorkgroups(count/64);pass.end();enc.copyBufferToBuffer(storage,0,read,0,bytes);device.queue.submit([enc.finish()]);
+  await read.mapAsync(GPUMapMode.READ);
+  const vals=new Uint32Array(read.getMappedRange().slice(0));
+  const ok=vals[0]===0x5a5a1234&&vals[17]===(17^0x5a5a1234)&&vals[1023]===(1023^0x5a5a1234);
+  read.unmap();storage.destroy();read.destroy();
+  const lim=device.limits;
+  return {status:ok?'pass':'fail',detail:`Compute shader ${ok?'executed and verified':'ran but output verification failed'}. Adapter: ${[info.vendor,info.architecture,info.device].filter(Boolean).join(' / ')||'details hidden'}. Max buffer ${fmt(lim.maxBufferSize)}; max storage binding ${fmt(lim.maxStorageBufferBindingSize)}.`};
+ }finally{device.destroy()}
+}
+async function testAlloc(){
+ const sizes=[16,32,64],passed=[];
+ for(const mb of sizes){
   try{
-   // Minimal module using the SIMD v128.const instruction.
-   const simdBytes=new Uint8Array([0,97,115,109,1,0,0,0,1,5,1,96,0,1,123,3,2,1,0,10,22,1,20,0,253,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11]);
-   await WebAssembly.compile(simdBytes);add('WebAssembly SIMD','pass','SIMD module compiled. This is useful for CPU-optimized inference.')
-  }catch(e){add('WebAssembly SIMD','warn','SIMD test did not compile in this browser. Some optimized runtimes may be slower or unsupported.')}
- }else{add('WASM compile test','fail','WebAssembly unavailable.');add('WebAssembly SIMD','fail','WebAssembly unavailable.')}
- const sab=typeof SharedArrayBuffer!=='undefined';
- add('SharedArrayBuffer / threads',sab?'pass':'warn',sab?'Available. Threaded WASM may be possible, subject to cross-origin isolation and runtime requirements.':'Unavailable. Threaded WASM may be restricted; single-threaded inference may still work.');
- add('Cross-origin isolation',crossOriginIsolated?'pass':'warn',crossOriginIsolated?'Enabled.':'Not enabled. Some threaded WASM builds require COOP/COEP headers, which a plain local HTML file cannot set.');
- const gpu=!!navigator.gpu;let adapter=null;
- if(gpu){
-  try{adapter=await navigator.gpu.requestAdapter();if(adapter){const info=adapter.info||{};let label=[info.vendor,info.architecture,info.device].filter(Boolean).join(' / ')||'Adapter found; browser hides identifying details.';add('WebGPU adapter','pass',label)}
-   else add('WebGPU adapter','warn','The WebGPU API exists, but no adapter was returned.')}
-  catch(e){add('WebGPU adapter','warn','Adapter request failed: '+(e.message||e))}
- }else add('WebGPU API','warn','navigator.gpu is absent. Browser/device may not expose WebGPU. WASM CPU inference could still be possible.');
- if(adapter){
-  try{const dev=await adapter.requestDevice();const lim=dev.limits;add('WebGPU device','pass','Device created. maxBufferSize: '+fmtBytes(lim.maxBufferSize)+'. maxStorageBufferBindingSize: '+fmtBytes(lim.maxStorageBufferBindingSize)+'.');dev.destroy()}
-  catch(e){add('WebGPU device','warn','Could not create a GPU device: '+(e.message||e))}
- }else add('WebGPU device','warn','Not tested because no adapter was available.');
- const mem=navigator.deviceMemory;
- add('Browser RAM estimate',mem?'warn':'warn',mem?`Browser reports approximately ${mem} GB device memory. This is a coarse estimate, not free RAM.`:'Browser does not expose deviceMemory. We cannot reliably read free RAM from ordinary HTML.');
- add('CPU threads',navigator.hardwareConcurrency?'pass':'warn',navigator.hardwareConcurrency?`${navigator.hardwareConcurrency} logical CPU threads reported.`:'Browser did not report CPU thread count.');
- add('File input access',typeof File!=='undefined'&&typeof Blob!=='undefined'?'pass':'fail',typeof File!=='undefined'?'Browser File API exists. User-selected files can be read after permission.':'File API unavailable.');
- add('Local storage',(()=>{try{localStorage.setItem('__dp_test','1');localStorage.removeItem('__dp_test');return 'pass'}catch{return 'fail'}})(), 'Tests whether small chat settings/history can be stored in localStorage.');
- add('IndexedDB',typeof indexedDB!=='undefined'?'pass':'fail',typeof indexedDB!=='undefined'?'Available for browser-managed local data and caches.':'IndexedDB unavailable.');
- add('Origin Private File System',navigator.storage&&navigator.storage.getDirectory?'pass':'warn',navigator.storage&&navigator.storage.getDirectory?'OPFS API exists. Browser-managed persistent file storage may be possible.':'OPFS API not exposed.');
- try{
-  if(navigator.storage&&navigator.storage.estimate){const est=await navigator.storage.estimate();add('Browser storage estimate','warn',`Quota: ${fmtBytes(est.quota)}; currently used: ${fmtBytes(est.usage)}. This is browser storage, not total phone storage or guaranteed model space.`)}
-  else add('Browser storage estimate','warn','Storage estimate API unavailable.');
- }catch(e){add('Browser storage estimate','warn','Could not estimate: '+e.message)}
- add('File System Access API',typeof showOpenFilePicker==='function'?'pass':'warn',typeof showOpenFilePicker==='function'?'Advanced file picker API exists.':'Not available. Standard file input still works for selecting a GGUF file.');
- add('Service Worker', 'warn', 'Not checked from this local file. Offline app caching typically requires HTTPS or localhost and a service worker registration.');
- ran=true;$('reportBtn').disabled=false;$('report').textContent=reportLines.join('\n\n');
- $('runBtn').disabled=false;
+   let a=new ArrayBuffer(mb*1024*1024);
+   new Uint8Array(a)[0]=123;new Uint8Array(a)[a.byteLength-1]=45;
+   const ok=new Uint8Array(a)[0]===123&&new Uint8Array(a)[a.byteLength-1]===45;
+   a=null;
+   if(!ok)throw new Error('Read/write verification failed');
+   passed.push(mb+' MB');
+   await new Promise(r=>setTimeout(r,150));
+  }catch(e){return {status:passed.length?'warn':'fail',detail:`Passed ${passed.join(', ')||'none'}; failed at ${mb} MB: ${e.message||e}. Browser memory limits vary; this is not a free-RAM measurement.`}}
+ }
+ return {status:'pass',detail:`Sequential JS ArrayBuffer allocations passed: ${passed.join(', ')}. Buffers were released after each test. This does not measure available RAM or guarantee model loading.`};
 }
-$('runBtn').addEventListener('click',runChecks);
-$('chooseBtn').addEventListener('click',()=>$('fileInput').click());
-$('fileInput').addEventListener('change',async e=>{
- const f=e.target.files&&e.target.files[0];if(!f)return;
- let result=`Selected: ${f.name}\nSize: ${fmtBytes(f.size)} (${f.size.toLocaleString()} bytes)\n`;
- try{
-  const head=new Uint8Array(await f.slice(0,4).arrayBuffer());
-  const magic=String.fromCharCode(...head);
-  if(magic==='GGUF')result+='Header: GGUF signature confirmed.\nResult: File appears to be a GGUF container. This does not verify the model architecture or whether our future runtime supports it.';
-  else result+=`Header bytes: ${Array.from(head).map(x=>x.toString(16).padStart(2,'0')).join(' ')}\nResult: GGUF signature NOT found. Check that this is the actual .gguf file, not a ZIP, HTML download page, or Git LFS pointer.`;
- }catch(err){result+='Could not read file header: '+err.message}
- $('fileInfo').textContent=result;
- reportLines.push('GGUF file check:\n  '+result.replace(/\n/g,'\n  '));
- if(ran)$('report').textContent=reportLines.join('\n\n');
-});
-$('reportBtn').addEventListener('click',()=>{
- const body=['DESPARENZO AI - DEVICE DIAGNOSTIC',new Date().toString(),'','This report contains browser capability checks only. It does not prove a model will run.','',...reportLines].join('\n\n');
- const blob=new Blob([body],{type:'text/plain'});const url=URL.createObjectURL(blob);
- const a=document.createElement('a');a.href=url;a.download='Desparenzo_AI_Diagnostic.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);
+async function run(){
+ if(running)return;running=true;$('run').disabled=true;$('download').disabled=true;$('results').innerHTML='';lines=[];
+ const ua=navigator.userAgent||'unknown',plat=/Android/i.test(ua)?'Android':/Windows/i.test(ua)?'Windows':'Other';
+ lines.push('DESPARENZO AI DIAGNOSTIC 2.0',new Date().toString(),`Platform: ${plat}`,`User agent: ${ua}`,'','This diagnostic does not guarantee model compatibility.','');
+ section('BROWSER');
+ result('Secure context',isSecureContext?'pass':'warn',isSecureContext?'Secure context enabled.':'Not a secure context; some browser APIs may be restricted.');
+ result('WebAssembly',typeof WebAssembly==='object'?'pass':'fail',typeof WebAssembly==='object'?'API available.':'API unavailable.');
+ if(typeof WebAssembly==='object'){
+  try{await WebAssembly.compile(new Uint8Array([0,97,115,109,1,0,0,0]));result('WASM compile','pass','Minimal WASM module compiled.')}catch(e){result('WASM compile','fail',e.message)}
+  try{await testSIMD();result('WASM SIMD','pass','Valid SIMD module compiled successfully.')}catch(e){result('WASM SIMD','warn','SIMD module compilation failed: '+e.message)}
+ }else result('WASM compile','fail','WebAssembly unavailable.');
+ result('SharedArrayBuffer',typeof SharedArrayBuffer!=='undefined'?'pass':'warn',typeof SharedArrayBuffer!=='undefined'?'Available.':'Unavailable; multi-threaded WASM may be restricted.');
+ result('Cross-origin isolation',crossOriginIsolated?'pass':'warn',crossOriginIsolated?'Enabled.':'Disabled; threaded builds requiring COOP/COEP may not work.');
+ result('CPU threads',navigator.hardwareConcurrency?'pass':'warn',navigator.hardwareConcurrency?`${navigator.hardwareConcurrency} logical threads reported.`:'Not reported.');
+ result('Device memory estimate','warn',navigator.deviceMemory?`${navigator.deviceMemory} GB reported. This is approximate, not free RAM.`:'Not exposed by browser.');
+ section('GPU');
+ step(.25,'Testing a real WebGPU compute operation…');
+ try{const g=await testGPU();result('WebGPU compute',g.status,g.detail)}catch(e){result('WebGPU compute','fail','GPU test failed: '+(e.message||e))}
+ section('MEMORY');
+ step(.55,'Testing short-lived browser memory allocations…');
+ const a=await testAlloc();result('JavaScript memory allocation',a.status,a.detail);
+ section('LOCAL STORAGE AND FILES');
+ result('File API',typeof File!=='undefined'?'pass':'fail',typeof File!=='undefined'?'File and Blob APIs available for user-selected GGUF files.':'File API unavailable.');
+ result('IndexedDB',typeof indexedDB!=='undefined'?'pass':'fail',typeof indexedDB!=='undefined'?'Available for local app data.':'Unavailable.');
+ result('OPFS',navigator.storage?.getDirectory?'pass':'warn',navigator.storage?.getDirectory?'Origin Private File System API available.':'OPFS unavailable.');
+ try{if(navigator.storage?.estimate){const e=await navigator.storage.estimate();result('Storage quota','warn',`Quota ${fmt(e.quota)}; used ${fmt(e.usage)}. Quota is not guaranteed free space.`)}else result('Storage quota','warn','Storage estimate API unavailable.')}catch(e){result('Storage quota','warn',e.message)}
+ result('Browser storage persistence',navigator.storage?.persist?'pass':'warn',navigator.storage?.persist?'Persistence request API exists; user/browser may still deny it.':'Persistence API unavailable.');
+ step(1,'Diagnostic complete.');
+ $('report').textContent=lines.join('\n\n');$('download').disabled=false;
+ $('run').disabled=false;running=false;
+}
+$('run').addEventListener('click',run);
+$('download').addEventListener('click',()=>{
+ const blob=new Blob([lines.join('\n\n')],{type:'text/plain'});
+ const url=URL.createObjectURL(blob),a=document.createElement('a');
+ a.href=url;a.download='Desparenzo_AI_Diagnostic_2.txt';a.click();
+ setTimeout(()=>URL.revokeObjectURL(url),1500);
 });
 </script>
-</body>
-</html>
+</body></html>
