@@ -1,150 +1,329 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#10131d">
-<title>Desparenzo AI · Diagnostic 2.0</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Desparenzo TV</title>
+
 <style>
-:root{color-scheme:dark;--bg:#0d1018;--panel:#171d2a;--panel2:#20293a;--line:#303b50;--text:#edf2ff;--muted:#a5b0c5;--accent:#9aaaff;--good:#69d6a2;--warn:#f1c36c;--bad:#ff8585}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 15% -10%,#29365b 0,transparent 42%),var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-.wrap{max-width:850px;margin:auto;padding:18px 14px 40px}header{display:flex;align-items:center;gap:12px;padding:8px 0 18px;border-bottom:1px solid var(--line)}
-.logo{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#9aaaff,#c3a1ff);display:grid;place-items:center;color:#111522;font-size:21px;font-weight:900}
-h1{font-size:20px;margin:0}h2{font-size:16px;margin:0 0 10px}.muted{color:var(--muted)}.sub{font-size:12px;color:var(--muted)}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:15px;margin-top:14px}
-.intro{color:var(--muted);font-size:13px}.intro strong{color:var(--text);font-size:15px}
-.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:13px}
-button{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:10px 13px;border-radius:10px;font:inherit;cursor:pointer}
-button.primary{background:linear-gradient(135deg,#9aaaff,#c3a1ff);color:#10131d;border:0;font-weight:750}button:disabled{opacity:.5;cursor:wait}
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
-.item{background:#111722;border:1px solid var(--line);border-radius:11px;padding:11px;min-width:0}
-.itemtop{display:flex;align-items:center;justify-content:space-between;gap:8px}.name{font-weight:650;font-size:13px}
-.state{font-size:11px;border-radius:999px;padding:3px 8px;background:#30394a;color:var(--muted);white-space:nowrap}
-.state.pass{background:#163c30;color:var(--good)}.state.warn{background:#49391d;color:var(--warn)}.state.fail{background:#48262b;color:var(--bad)}
-.detail{font-size:12px;color:var(--muted);margin-top:5px;overflow-wrap:anywhere}
-.report{white-space:pre-wrap;background:#101722;border:1px solid var(--line);border-radius:10px;padding:12px;font:12px/1.5 ui-monospace,monospace;max-height:300px;overflow:auto}
-.note{font-size:12px;color:var(--muted)}.meter{height:6px;background:#30394a;border-radius:20px;overflow:hidden;margin-top:8px}.bar{height:100%;width:0;background:linear-gradient(90deg,#9aaaff,#c3a1ff)}
-@media(max-width:560px){.grid{grid-template-columns:1fr}.wrap{padding:13px 11px 30px}}
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+    width:100vw;height:100vh;overflow:hidden;
+    background:#080b14;color:white;
+    font-family:Arial,sans-serif;
+}
+
+:root{
+    --accent:#8b7cff;
+    --panel:#151a2a;
+    --muted:#939bb0;
+}
+
+#app{
+    height:100%;display:flex;flex-direction:column;
+    padding:3.5vh 5vw;
+}
+
+header{
+    display:flex;align-items:center;
+    justify-content:space-between;height:12%;
+}
+
+.logo{font-size:2rem;font-weight:800;letter-spacing:1px}
+.logo span{color:var(--accent)}
+
+.header-right{
+    display:flex;gap:35px;align-items:center;
+    color:var(--muted);font-size:1.1rem;
+}
+
+#clock{color:white;font-size:1.4rem;font-weight:bold}
+
+main{
+    flex:1;display:flex;flex-direction:column;
+    justify-content:center;min-height:0;
+}
+
+.greeting{margin-bottom:25px}
+.greeting h1{font-size:2.8rem;margin-bottom:8px}
+.greeting p{font-size:1.15rem;color:var(--muted)}
+
+.section-title{
+    font-size:1.25rem;margin-bottom:18px;
+    color:#c4c9da;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:20px;
+}
+
+.card{
+    height:165px;background:var(--panel);
+    border:3px solid transparent;border-radius:17px;
+    display:flex;flex-direction:column;
+    justify-content:space-between;padding:22px;
+    transition:transform .15s,border-color .15s,background .15s;
+    outline:none;cursor:pointer;
+}
+
+.card .icon{font-size:2.8rem}
+.card .name{font-size:1.15rem;font-weight:bold}
+.card .description{
+    font-size:.85rem;color:var(--muted);margin-top:5px;
+}
+
+.card.focused{
+    border-color:var(--accent);
+    background:#252442;
+    transform:scale(1.07);
+    box-shadow:0 8px 35px #0008;
+}
+
+.feature{
+    margin-top:35px;height:155px;border-radius:18px;
+    padding:25px 32px;
+    background:
+    radial-gradient(circle at 80% 30%,#6954b9 0,transparent 35%),
+    linear-gradient(110deg,#202746,#171529);
+    display:flex;justify-content:space-between;
+    align-items:center;border:2px solid #35345b;
+    cursor:pointer;
+}
+
+.feature h2{font-size:1.8rem;margin-bottom:10px}
+.feature p{color:#bdc1d5;font-size:1rem}
+.feature .big-icon{font-size:4rem;margin-right:30px}
+
+.feature.focused{
+    border:3px solid var(--accent);
+    transform:scale(1.025);
+    box-shadow:0 8px 35px #0008;
+}
+
+footer{
+    height:9%;display:flex;align-items:end;
+    justify-content:space-between;
+    color:#858da4;font-size:.9rem;
+}
+
+.keys{display:flex;gap:22px}
+.key{display:flex;align-items:center;gap:7px}
+.key b{
+    background:#252a3d;color:white;
+    border-radius:5px;padding:5px 9px;
+}
+
 </style>
 </head>
-<body><div class="wrap">
-<header><div class="logo">D</div><div><h1>Desparenzo AI</h1><div class="sub">Diagnostic 2.0 · GPU, WASM and memory tests</div></div></header>
-<section class="card intro">
- <strong>Deeper compatibility check</strong>
- <p>This test performs a small real GPU compute operation, checks WebAssembly SIMD with a valid test module, and briefly tests browser memory allocations. It does not download a model or send data anywhere.</p>
- <p><b>Safety:</b> GPU allocation tests are limited to 64 MB at a time. Close other heavy apps first. If the browser becomes unstable, stop the test and reopen it.</p>
- <div class="actions"><button class="primary" id="run">Run full diagnostic</button><button id="download" disabled>Download report</button></div>
- <div class="meter"><div class="bar" id="bar"></div></div>
- <div class="note" id="progress">Ready.</div>
-</section>
-<section class="card"><h2>Results</h2><div class="grid" id="results"><div class="item"><div class="name">Waiting</div><div class="detail">Run the diagnostic to see results.</div></div></div></section>
-<section class="card"><h2>Report</h2><div class="report" id="report">No diagnostic run yet.</div></section>
-<section class="card"><h2>What to send me</h2><p class="note">Download the TXT report and upload it here. If any test fails, include the exact browser used (Chrome, Edge, etc.). No model file is needed for this test.</p></section>
-<div class="note" style="text-align:center;margin:18px 0">Desparenzo AI · Diagnostic only · No telemetry</div>
+
+<body>
+<div id="app">
+
+<header>
+    <div class="logo">DESPARENZO<span> TV</span></div>
+    <div class="header-right">
+        <span id="date"></span>
+        <span id="clock">00:00</span>
+        <span>⚙ Settings</span>
+    </div>
+</header>
+
+<main>
+    <div class="greeting">
+        <h1>Welcome home.</h1>
+        <p>Your entertainment, your space.</p>
+    </div>
+
+    <div class="section-title">Your applications</div>
+
+    <div class="grid">
+        <div class="card" data-action="apps">
+            <div class="icon">📱</div>
+            <div>
+                <div class="name">Applications</div>
+                <div class="description">Explore your apps</div>
+            </div>
+        </div>
+
+        <div class="card" data-action="browser">
+            <div class="icon">🌐</div>
+            <div>
+                <div class="name">Browser</div>
+                <div class="description">Explore the web</div>
+            </div>
+        </div>
+
+        <div class="card" data-action="media">
+            <div class="icon">🎬</div>
+            <div>
+                <div class="name">Media</div>
+                <div class="description">Movies and videos</div>
+            </div>
+        </div>
+
+        <div class="card" data-action="music">
+            <div class="icon">🎵</div>
+            <div>
+                <div class="name">Music</div>
+                <div class="description">Listen to music</div>
+            </div>
+        </div>
+
+        <div class="card" data-action="settings">
+            <div class="icon">⚙️</div>
+            <div>
+                <div class="name">Settings</div>
+                <div class="description">Personalize your TV</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="feature" data-action="featured">
+        <div>
+            <h2>Everything starts here.</h2>
+            <p>Your personal TV dashboard, powered by Desparenzo.</p>
+        </div>
+        <div class="big-icon">✦</div>
+    </div>
+</main>
+
+<footer>
+    <span>DESPARENZO TV · YOUR DIGITAL LIVING ROOM</span>
+    <div class="keys">
+        <div class="key"><b>↕ ↔</b> Navigate</div>
+        <div class="key"><b>OK</b> Select</div>
+        <div class="key"><b>BACK</b> Return</div>
+    </div>
+</footer>
+
 </div>
+
 <script>
-const $=id=>document.getElementById(id);
-let lines=[],running=false;
-const fmt=n=>{if(!Number.isFinite(n))return 'unknown';let u=['B','KB','MB','GB'],i=0;while(n>=1024&&i<3){n/=1024;i++}return n.toFixed(i?1:0)+' '+u[i]};
-function result(name,status,detail){
- const box=document.createElement('div');box.className='item';
- const top=document.createElement('div');top.className='itemtop';
- const nm=document.createElement('div');nm.className='name';nm.textContent=name;
- const st=document.createElement('span');st.className='state '+status;st.textContent=status==='pass'?'PASS':status==='warn'?'LIMITED':'FAIL';
- const d=document.createElement('div');d.className='detail';d.textContent=detail;
- top.append(nm,st);box.append(top,d);$('results').append(box);
- lines.push(`${name}: ${st.textContent}\n  ${detail}`);
+const cards = [...document.querySelectorAll('.card, .feature')];
+
+let current = 0;
+
+function focusCard(index){
+    current = Math.max(0,Math.min(index,cards.length-1));
+
+    cards.forEach((card,i)=>{
+        card.classList.toggle('focused',i===current);
+    });
 }
-function step(p,msg){$('bar').style.width=(p*100)+'%';$('progress').textContent=msg}
-function section(title){lines.push('=== '+title+' ===')}
-async function testSIMD(){
- // Valid WASM module: function returns v128.const 0.
- const b=[0,97,115,109,1,0,0,0,
-  1,5,1,96,0,1,123,
-  3,2,1,0,
-  10,22,1,20,0,253,12,
-  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11];
- await WebAssembly.compile(new Uint8Array(b));
- return true;
+
+function activate(){
+    const action=cards[current].dataset.action;
+
+    const messages={
+        apps:'Applications section coming soon!',
+        browser:'Browser section coming soon!',
+        media:'Media section coming soon!',
+        music:'Music section coming soon!',
+        settings:'Settings coming soon!',
+        featured:'Welcome to Desparenzo TV!'
+    };
+
+    alert(messages[action] || 'Coming soon!');
 }
-async function testGPU(){
- if(!navigator.gpu)return {status:'warn',detail:'navigator.gpu is not exposed in this browser.'};
- const adapter=await navigator.gpu.requestAdapter();
- if(!adapter)return {status:'warn',detail:'WebGPU API exists, but requestAdapter returned null.'};
- const info=adapter.info||{};
- const device=await adapter.requestDevice();
- try{
-  const shader=device.createShaderModule({code:`
-   @group(0) @binding(0) var<storage, read_write> output: array<u32>;
-   @compute @workgroup_size(64) fn main(@builtin(global_invocation_id) id: vec3<u32>) {
-     output[id.x] = id.x ^ 0x5a5a1234u;
-   }`});
-  const count=1024,bytes=count*4;
-  const storage=device.createBuffer({size:bytes,usage:GPUBufferUsage.STORAGE|GPUBufferUsage.COPY_SRC});
-  const read=device.createBuffer({size:bytes,usage:GPUBufferUsage.COPY_DST|GPUBufferUsage.MAP_READ});
-  const pipeline=await device.createComputePipelineAsync({layout:'auto',compute:{module:shader,entryPoint:'main'}});
-  const bind=device.createBindGroup({layout:pipeline.getBindGroupLayout(0),entries:[{binding:0,resource:{buffer:storage}}]});
-  const enc=device.createCommandEncoder();const pass=enc.beginComputePass();pass.setPipeline(pipeline);pass.setBindGroup(0,bind);pass.dispatchWorkgroups(count/64);pass.end();enc.copyBufferToBuffer(storage,0,read,0,bytes);device.queue.submit([enc.finish()]);
-  await read.mapAsync(GPUMapMode.READ);
-  const vals=new Uint32Array(read.getMappedRange().slice(0));
-  const ok=vals[0]===0x5a5a1234&&vals[17]===(17^0x5a5a1234)&&vals[1023]===(1023^0x5a5a1234);
-  read.unmap();storage.destroy();read.destroy();
-  const lim=device.limits;
-  return {status:ok?'pass':'fail',detail:`Compute shader ${ok?'executed and verified':'ran but output verification failed'}. Adapter: ${[info.vendor,info.architecture,info.device].filter(Boolean).join(' / ')||'details hidden'}. Max buffer ${fmt(lim.maxBufferSize)}; max storage binding ${fmt(lim.maxStorageBufferBindingSize)}.`};
- }finally{device.destroy()}
+
+function goBack(){
+    // Back navigation placeholder.
+    // Future sections will use this to return to the previous screen.
+    focusCard(0);
 }
-async function testAlloc(){
- const sizes=[16,32,64],passed=[];
- for(const mb of sizes){
-  try{
-   let a=new ArrayBuffer(mb*1024*1024);
-   new Uint8Array(a)[0]=123;new Uint8Array(a)[a.byteLength-1]=45;
-   const ok=new Uint8Array(a)[0]===123&&new Uint8Array(a)[a.byteLength-1]===45;
-   a=null;
-   if(!ok)throw new Error('Read/write verification failed');
-   passed.push(mb+' MB');
-   await new Promise(r=>setTimeout(r,150));
-  }catch(e){return {status:passed.length?'warn':'fail',detail:`Passed ${passed.join(', ')||'none'}; failed at ${mb} MB: ${e.message||e}. Browser memory limits vary; this is not a free-RAM measurement.`}}
- }
- return {status:'pass',detail:`Sequential JS ArrayBuffer allocations passed: ${passed.join(', ')}. Buffers were released after each test. This does not measure available RAM or guarantee model loading.`};
+
+function navigate(direction){
+    const columns=5;
+    const rows=2;
+
+    let row=Math.floor(current/columns);
+    let col=current%columns;
+
+    if(direction==='right') col=Math.min(col+1,columns-1);
+    if(direction==='left') col=Math.max(col-1,0);
+    if(direction==='down') row=Math.min(row+1,rows-1);
+    if(direction==='up') row=Math.max(row-1,0);
+
+    let next=row*columns+col;
+    next=Math.min(next,cards.length-1);
+
+    focusCard(next);
 }
-async function run(){
- if(running)return;running=true;$('run').disabled=true;$('download').disabled=true;$('results').innerHTML='';lines=[];
- const ua=navigator.userAgent||'unknown',plat=/Android/i.test(ua)?'Android':/Windows/i.test(ua)?'Windows':'Other';
- lines.push('DESPARENZO AI DIAGNOSTIC 2.0',new Date().toString(),`Platform: ${plat}`,`User agent: ${ua}`,'','This diagnostic does not guarantee model compatibility.','');
- section('BROWSER');
- result('Secure context',isSecureContext?'pass':'warn',isSecureContext?'Secure context enabled.':'Not a secure context; some browser APIs may be restricted.');
- result('WebAssembly',typeof WebAssembly==='object'?'pass':'fail',typeof WebAssembly==='object'?'API available.':'API unavailable.');
- if(typeof WebAssembly==='object'){
-  try{await WebAssembly.compile(new Uint8Array([0,97,115,109,1,0,0,0]));result('WASM compile','pass','Minimal WASM module compiled.')}catch(e){result('WASM compile','fail',e.message)}
-  try{await testSIMD();result('WASM SIMD','pass','Valid SIMD module compiled successfully.')}catch(e){result('WASM SIMD','warn','SIMD module compilation failed: '+e.message)}
- }else result('WASM compile','fail','WebAssembly unavailable.');
- result('SharedArrayBuffer',typeof SharedArrayBuffer!=='undefined'?'pass':'warn',typeof SharedArrayBuffer!=='undefined'?'Available.':'Unavailable; multi-threaded WASM may be restricted.');
- result('Cross-origin isolation',crossOriginIsolated?'pass':'warn',crossOriginIsolated?'Enabled.':'Disabled; threaded builds requiring COOP/COEP may not work.');
- result('CPU threads',navigator.hardwareConcurrency?'pass':'warn',navigator.hardwareConcurrency?`${navigator.hardwareConcurrency} logical threads reported.`:'Not reported.');
- result('Device memory estimate','warn',navigator.deviceMemory?`${navigator.deviceMemory} GB reported. This is approximate, not free RAM.`:'Not exposed by browser.');
- section('GPU');
- step(.25,'Testing a real WebGPU compute operation…');
- try{const g=await testGPU();result('WebGPU compute',g.status,g.detail)}catch(e){result('WebGPU compute','fail','GPU test failed: '+(e.message||e))}
- section('MEMORY');
- step(.55,'Testing short-lived browser memory allocations…');
- const a=await testAlloc();result('JavaScript memory allocation',a.status,a.detail);
- section('LOCAL STORAGE AND FILES');
- result('File API',typeof File!=='undefined'?'pass':'fail',typeof File!=='undefined'?'File and Blob APIs available for user-selected GGUF files.':'File API unavailable.');
- result('IndexedDB',typeof indexedDB!=='undefined'?'pass':'fail',typeof indexedDB!=='undefined'?'Available for local app data.':'Unavailable.');
- result('OPFS',navigator.storage?.getDirectory?'pass':'warn',navigator.storage?.getDirectory?'Origin Private File System API available.':'OPFS unavailable.');
- try{if(navigator.storage?.estimate){const e=await navigator.storage.estimate();result('Storage quota','warn',`Quota ${fmt(e.quota)}; used ${fmt(e.usage)}. Quota is not guaranteed free space.`)}else result('Storage quota','warn','Storage estimate API unavailable.')}catch(e){result('Storage quota','warn',e.message)}
- result('Browser storage persistence',navigator.storage?.persist?'pass':'warn',navigator.storage?.persist?'Persistence request API exists; user/browser may still deny it.':'Persistence API unavailable.');
- step(1,'Diagnostic complete.');
- $('report').textContent=lines.join('\n\n');$('download').disabled=false;
- $('run').disabled=false;running=false;
-}
-$('run').addEventListener('click',run);
-$('download').addEventListener('click',()=>{
- const blob=new Blob([lines.join('\n\n')],{type:'text/plain'});
- const url=URL.createObjectURL(blob),a=document.createElement('a');
- a.href=url;a.download='Desparenzo_AI_Diagnostic_2.txt';a.click();
- setTimeout(()=>URL.revokeObjectURL(url),1500);
+
+document.addEventListener('keydown',e=>{
+    const key=e.key;
+
+    const controls=[
+        'ArrowUp','ArrowDown','ArrowLeft','ArrowRight',
+        'Enter','Backspace','Escape'
+    ];
+
+    if(controls.includes(key)){
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    switch(key){
+        case 'ArrowUp':
+            navigate('up');
+            break;
+
+        case 'ArrowDown':
+            navigate('down');
+            break;
+
+        case 'ArrowLeft':
+            navigate('left');
+            break;
+
+        case 'ArrowRight':
+            navigate('right');
+            break;
+
+        case 'Enter':
+            if(!e.repeat) activate();
+            break;
+
+        case 'Backspace':
+        case 'Escape':
+            if(!e.repeat) goBack();
+            break;
+    }
 });
+
+cards.forEach((card,index)=>{
+    card.addEventListener('mouseenter',()=>{
+        focusCard(index);
+    });
+
+    card.addEventListener('click',()=>{
+        focusCard(index);
+        activate();
+    });
+});
+
+function updateClock(){
+    const now=new Date();
+
+    document.getElementById('clock').textContent=
+        now.toLocaleTimeString([],{
+            hour:'2-digit',minute:'2-digit'
+        });
+
+    document.getElementById('date').textContent=
+        now.toLocaleDateString([],{
+            weekday:'short',day:'numeric',month:'short'
+        });
+}
+
+setInterval(updateClock,1000);
+updateClock();
+
+focusCard(0);
 </script>
-</body></html>
+</body>
+</html>
