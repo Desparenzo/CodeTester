@@ -7,323 +7,305 @@
 <title>Desparenzo TV</title>
 
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-
-body{
-    width:100vw;height:100vh;overflow:hidden;
-    background:#080b14;color:white;
-    font-family:Arial,sans-serif;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-:root{
-    --accent:#8b7cff;
-    --panel:#151a2a;
-    --muted:#939bb0;
+body {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: #090b13;
+    color: white;
+    font-family: Arial, sans-serif;
 }
 
-#app{
-    height:100%;display:flex;flex-direction:column;
-    padding:3.5vh 5vw;
+#app {
+    width: 100%;
+    height: 100%;
+    padding: 4vh 6vw;
+    display: flex;
+    flex-direction: column;
 }
 
-header{
-    display:flex;align-items:center;
-    justify-content:space-between;height:12%;
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 12%;
 }
 
-.logo{font-size:2rem;font-weight:800;letter-spacing:1px}
-.logo span{color:var(--accent)}
-
-.header-right{
-    display:flex;gap:35px;align-items:center;
-    color:var(--muted);font-size:1.1rem;
+.logo {
+    font-size: 2rem;
+    font-weight: 900;
+    letter-spacing: 1px;
 }
 
-#clock{color:white;font-size:1.4rem;font-weight:bold}
-
-main{
-    flex:1;display:flex;flex-direction:column;
-    justify-content:center;min-height:0;
+.logo span {
+    color: #927cff;
 }
 
-.greeting{margin-bottom:25px}
-.greeting h1{font-size:2.8rem;margin-bottom:8px}
-.greeting p{font-size:1.15rem;color:var(--muted)}
-
-.section-title{
-    font-size:1.25rem;margin-bottom:18px;
-    color:#c4c9da;
+#clock {
+    font-size: 1.2rem;
+    color: #a4a9bc;
 }
 
-.grid{
-    display:grid;
-    grid-template-columns:repeat(5,1fr);
-    gap:20px;
+main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
-.card{
-    height:165px;background:var(--panel);
-    border:3px solid transparent;border-radius:17px;
-    display:flex;flex-direction:column;
-    justify-content:space-between;padding:22px;
-    transition:transform .15s,border-color .15s,background .15s;
-    outline:none;cursor:pointer;
+.intro {
+    margin-bottom: 42px;
 }
 
-.card .icon{font-size:2.8rem}
-.card .name{font-size:1.15rem;font-weight:bold}
-.card .description{
-    font-size:.85rem;color:var(--muted);margin-top:5px;
+.intro h1 {
+    font-size: 3.2rem;
+    font-weight: 800;
+    margin-bottom: 12px;
 }
 
-.card.focused{
-    border-color:var(--accent);
-    background:#252442;
-    transform:scale(1.07);
-    box-shadow:0 8px 35px #0008;
+.intro p {
+    font-size: 1.2rem;
+    color: #9299ae;
 }
 
-.feature{
-    margin-top:35px;height:155px;border-radius:18px;
-    padding:25px 32px;
+.options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+.option {
+    height: 310px;
+    border-radius: 25px;
+    padding: 35px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border: 3px solid transparent;
+    transition: .18s ease;
+    cursor: pointer;
+    outline: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.browser {
     background:
-    radial-gradient(circle at 80% 30%,#6954b9 0,transparent 35%),
-    linear-gradient(110deg,#202746,#171529);
-    display:flex;justify-content:space-between;
-    align-items:center;border:2px solid #35345b;
-    cursor:pointer;
+        radial-gradient(circle at 85% 15%, #536bcf88, transparent 45%),
+        linear-gradient(135deg, #18294a, #11192d);
 }
 
-.feature h2{font-size:1.8rem;margin-bottom:10px}
-.feature p{color:#bdc1d5;font-size:1rem}
-.feature .big-icon{font-size:4rem;margin-right:30px}
-
-.feature.focused{
-    border:3px solid var(--accent);
-    transform:scale(1.025);
-    box-shadow:0 8px 35px #0008;
+.games {
+    background:
+        radial-gradient(circle at 85% 15%, #a14cc588, transparent 45%),
+        linear-gradient(135deg, #392044, #1b162c);
 }
 
-footer{
-    height:9%;display:flex;align-items:end;
-    justify-content:space-between;
-    color:#858da4;font-size:.9rem;
+.option.focused {
+    border-color: #a99aff;
+    transform: scale(1.045);
+    box-shadow: 0 15px 50px #0009;
 }
 
-.keys{display:flex;gap:22px}
-.key{display:flex;align-items:center;gap:7px}
-.key b{
-    background:#252a3d;color:white;
-    border-radius:5px;padding:5px 9px;
+.icon {
+    font-size: 5rem;
 }
 
+.option h2 {
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+.option p {
+    font-size: 1.05rem;
+    color: #c2c7d7;
+}
+
+.arrow {
+    position: absolute;
+    right: 35px;
+    bottom: 35px;
+    font-size: 2rem;
+    color: #ffffff99;
+}
+
+footer {
+    height: 10%;
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    color: #747d94;
+    font-size: .95rem;
+}
+
+.controls {
+    display: flex;
+    gap: 25px;
+}
+
+.controls b {
+    background: #24283a;
+    padding: 7px 11px;
+    border-radius: 6px;
+    color: white;
+    margin-right: 5px;
+}
 </style>
 </head>
 
 <body>
+
 <div id="app">
 
 <header>
     <div class="logo">DESPARENZO<span> TV</span></div>
-    <div class="header-right">
-        <span id="date"></span>
-        <span id="clock">00:00</span>
-        <span>⚙ Settings</span>
-    </div>
+    <div id="clock"></div>
 </header>
 
 <main>
-    <div class="greeting">
-        <h1>Welcome home.</h1>
-        <p>Your entertainment, your space.</p>
+
+    <div class="intro">
+        <h1>Your TV. Your World.</h1>
+        <p>What would you like to do today?</p>
     </div>
 
-    <div class="section-title">Your applications</div>
+    <div class="options">
 
-    <div class="grid">
-        <div class="card" data-action="apps">
-            <div class="icon">📱</div>
-            <div>
-                <div class="name">Applications</div>
-                <div class="description">Explore your apps</div>
-            </div>
-        </div>
-
-        <div class="card" data-action="browser">
+        <div class="option browser" data-action="browser">
             <div class="icon">🌐</div>
             <div>
-                <div class="name">Browser</div>
-                <div class="description">Explore the web</div>
+                <h2>Browse Internet</h2>
+                <p>Explore websites and discover the internet.</p>
             </div>
+            <div class="arrow">➜</div>
         </div>
 
-        <div class="card" data-action="media">
-            <div class="icon">🎬</div>
+        <div class="option games" data-action="apps">
+            <div class="icon">🎮</div>
             <div>
-                <div class="name">Media</div>
-                <div class="description">Movies and videos</div>
+                <h2>Apps & Games</h2>
+                <p>Your applications, games and entertainment.</p>
             </div>
+            <div class="arrow">➜</div>
         </div>
 
-        <div class="card" data-action="music">
-            <div class="icon">🎵</div>
-            <div>
-                <div class="name">Music</div>
-                <div class="description">Listen to music</div>
-            </div>
-        </div>
-
-        <div class="card" data-action="settings">
-            <div class="icon">⚙️</div>
-            <div>
-                <div class="name">Settings</div>
-                <div class="description">Personalize your TV</div>
-            </div>
-        </div>
     </div>
 
-    <div class="feature" data-action="featured">
-        <div>
-            <h2>Everything starts here.</h2>
-            <p>Your personal TV dashboard, powered by Desparenzo.</p>
-        </div>
-        <div class="big-icon">✦</div>
-    </div>
 </main>
 
 <footer>
-    <span>DESPARENZO TV · YOUR DIGITAL LIVING ROOM</span>
-    <div class="keys">
-        <div class="key"><b>↕ ↔</b> Navigate</div>
-        <div class="key"><b>OK</b> Select</div>
-        <div class="key"><b>BACK</b> Return</div>
+    <div>DESPARENZO TV · PERSONAL ENTERTAINMENT HUB</div>
+
+    <div class="controls">
+        <span><b>↔</b> Navigate</span>
+        <span><b>OK</b> Select</span>
+        <span><b>BACK</b> Return</span>
     </div>
 </footer>
 
 </div>
 
 <script>
-const cards = [...document.querySelectorAll('.card, .feature')];
+const options = [...document.querySelectorAll('.option')];
 
-let current = 0;
+let selected = 0;
 
-function focusCard(index){
-    current = Math.max(0,Math.min(index,cards.length-1));
+function focusOption(index) {
+    selected = Math.max(0, Math.min(index, options.length - 1));
 
-    cards.forEach((card,i)=>{
-        card.classList.toggle('focused',i===current);
+    options.forEach((option, i) => {
+        option.classList.toggle('focused', i === selected);
     });
 }
 
-function activate(){
-    const action=cards[current].dataset.action;
+function activate() {
+    const action = options[selected].dataset.action;
 
-    const messages={
-        apps:'Applications section coming soon!',
-        browser:'Browser section coming soon!',
-        media:'Media section coming soon!',
-        music:'Music section coming soon!',
-        settings:'Settings coming soon!',
-        featured:'Welcome to Desparenzo TV!'
-    };
-
-    alert(messages[action] || 'Coming soon!');
-}
-
-function goBack(){
-    // Back navigation placeholder.
-    // Future sections will use this to return to the previous screen.
-    focusCard(0);
-}
-
-function navigate(direction){
-    const columns=5;
-    const rows=2;
-
-    let row=Math.floor(current/columns);
-    let col=current%columns;
-
-    if(direction==='right') col=Math.min(col+1,columns-1);
-    if(direction==='left') col=Math.max(col-1,0);
-    if(direction==='down') row=Math.min(row+1,rows-1);
-    if(direction==='up') row=Math.max(row-1,0);
-
-    let next=row*columns+col;
-    next=Math.min(next,cards.length-1);
-
-    focusCard(next);
-}
-
-document.addEventListener('keydown',e=>{
-    const key=e.key;
-
-    const controls=[
-        'ArrowUp','ArrowDown','ArrowLeft','ArrowRight',
-        'Enter','Backspace','Escape'
-    ];
-
-    if(controls.includes(key)){
-        e.preventDefault();
-        e.stopPropagation();
+    if (action === 'browser') {
+        alert('Browse Internet - Coming Soon');
     }
 
-    switch(key){
-        case 'ArrowUp':
-            navigate('up');
-            break;
+    if (action === 'apps') {
+        alert('Apps & Games - Coming Soon');
+    }
+}
 
+function back() {
+    focusOption(0);
+}
+
+document.addEventListener('keydown', e => {
+
+    if ([
+        'ArrowLeft',
+        'ArrowRight',
+        'ArrowUp',
+        'ArrowDown',
+        'Enter',
+        'Backspace',
+        'Escape'
+    ].includes(e.key)) {
+        e.preventDefault();
+    }
+
+    switch (e.key) {
+
+        case 'ArrowRight':
         case 'ArrowDown':
-            navigate('down');
+            focusOption(1);
             break;
 
         case 'ArrowLeft':
-            navigate('left');
-            break;
-
-        case 'ArrowRight':
-            navigate('right');
+        case 'ArrowUp':
+            focusOption(0);
             break;
 
         case 'Enter':
-            if(!e.repeat) activate();
+            if (!e.repeat) activate();
             break;
 
         case 'Backspace':
         case 'Escape':
-            if(!e.repeat) goBack();
+            if (!e.repeat) back();
             break;
     }
 });
 
-cards.forEach((card,index)=>{
-    card.addEventListener('mouseenter',()=>{
-        focusCard(index);
+options.forEach((option, index) => {
+
+    option.addEventListener('mouseenter', () => {
+        focusOption(index);
     });
 
-    card.addEventListener('click',()=>{
-        focusCard(index);
+    option.addEventListener('click', () => {
+        focusOption(index);
         activate();
     });
+
 });
 
-function updateClock(){
-    const now=new Date();
-
-    document.getElementById('clock').textContent=
-        now.toLocaleTimeString([],{
-            hour:'2-digit',minute:'2-digit'
-        });
-
-    document.getElementById('date').textContent=
-        now.toLocaleDateString([],{
-            weekday:'short',day:'numeric',month:'short'
+function updateClock() {
+    document.getElementById('clock').textContent =
+        new Date().toLocaleString([], {
+            weekday: 'short',
+            day: 'numeric',
+            month: 'short',
+            hour: '2-digit',
+            minute: '2-digit'
         });
 }
 
-setInterval(updateClock,1000);
 updateClock();
+setInterval(updateClock, 1000);
 
-focusCard(0);
+focusOption(0);
 </script>
+
 </body>
 </html>
