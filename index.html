@@ -3,1177 +3,591 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<meta name="theme-color" content="#10121b">
-<title>Desparenzo TV</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Nokia Bounce - Retro Edition</title>
 <style>
 :root {
-    --bg:#10121b;
-    --surface:#1b1e2c;
-    --surface2:#24283a;
-    --text:#f4f5fb;
-    --muted:#969db2;
-    --accent:#a69aff;
-    --line:#ffffff15;
-    --focus:#a69aff;
+  --green:#a8c66c;
+  --dark:#253b21;
+  --light:#d9e9a0;
+  --focus:#fff36a;
 }
-
-[data-theme="light"] {
-    --bg:#f2f3fa;
-    --surface:#ffffff;
-    --surface2:#e9eafa;
-    --text:#171927;
-    --muted:#74788b;
-    --accent:#6457ed;
-    --line:#25294718;
-    --focus:#6457ed;
+*{box-sizing:border-box}
+body{
+ margin:0;background:#172318;color:#e8f3d0;
+ font-family:Arial,sans-serif;overflow:hidden;
+ user-select:none;
 }
-
-* {
-    box-sizing:border-box;
-    margin:0;
-    padding:0;
+button{
+ background:#344c2d;color:white;border:2px solid #799653;
+ padding:12px 20px;border-radius:8px;
+ font-size:16px;font-weight:bold;cursor:pointer;
 }
-
-body {
-    width:100vw;
-    min-height:100vh;
-    overflow-x:hidden;
-    background:
-        radial-gradient(ellipse at 0% 0%,#6457ed20,transparent 45%),
-        radial-gradient(ellipse at 100% 20%,#259ec515,transparent 40%),
-        var(--bg);
-    color:var(--text);
-    font-family:Arial,sans-serif;
-    transition:background .2s,color .2s;
+button:focus-visible{
+ outline:4px solid var(--focus);
+ outline-offset:4px;
+ background:#617b39;
 }
-
-button,input {
-    font:inherit;
-    color:inherit;
+#app{
+ width:100vw;height:100dvh;display:flex;
+ flex-direction:column;align-items:center;
+ padding:10px;gap:8px;
 }
-
-button {
-    cursor:pointer;
+header{
+ width:min(900px,100%);display:flex;
+ justify-content:space-between;align-items:center;
+ font-weight:bold;
 }
-
-#app {
-    width:100%;
-    min-height:100vh;
-    padding:25px 4.5vw 30px;
+h1{font-size:clamp(18px,4vw,27px);margin:4px}
+#hud{display:flex;gap:15px;font-size:14px}
+#gameFrame{
+ width:min(900px,100%);flex:1;min-height:0;
+ position:relative;border:5px solid #829c58;
+ border-radius:12px;overflow:hidden;
+ background:var(--green);
+ box-shadow:0 0 25px #0008;
 }
-
-/* HEADER */
-
-header {
-    height:65px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    margin-bottom:24px;
+canvas{width:100%;height:100%;display:block}
+#overlay{
+ position:absolute;inset:0;
+ background:#172318d9;
+ display:flex;align-items:center;justify-content:center;
+ flex-direction:column;gap:14px;text-align:center;
+ padding:20px;
 }
-
-.brand {
-    display:flex;
-    align-items:center;
-    gap:13px;
+#overlay.hidden{display:none}
+#overlay h2{font-size:clamp(25px,5vw,42px);margin:0;color:#e7f4a7}
+#overlay p{max-width:450px;line-height:1.5}
+#menuButtons{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+#bottom{
+ display:flex;justify-content:space-between;align-items:center;
+ width:min(900px,100%);gap:8px;font-size:12px;
 }
-
-.brand-mark {
-    width:48px;
-    height:48px;
-    border-radius:16px;
-    display:grid;
-    place-items:center;
-    background:linear-gradient(140deg,#7867ff,#4b9fe8);
-    color:white;
-    font-size:21px;
-    font-weight:900;
-    box-shadow:0 7px 22px #6457ed45;
+#bottom button{padding:8px 12px;font-size:13px}
+#controls{
+ display:flex;gap:7px;align-items:center;
 }
-
-.brand-name {
-    font-size:23px;
-    font-weight:900;
-    letter-spacing:-.5px;
+@media(max-width:500px){
+ #hud{gap:7px;font-size:11px}
+ #bottom{font-size:10px}
+ button{padding:10px 13px}
 }
-
-.brand-sub {
-    margin-top:4px;
-    font-size:10px;
-    font-weight:800;
-    letter-spacing:2px;
-    color:var(--muted);
-}
-
-.header-right {
-    display:flex;
-    align-items:center;
-    gap:16px;
-}
-
-#clock {
-    color:var(--muted);
-    font-size:15px;
-    font-weight:bold;
-}
-
-.header-btn {
-    height:43px;
-    min-width:43px;
-    padding:0 13px;
-    border:1px solid var(--line);
-    border-radius:13px;
-    background:var(--surface);
-    font-size:17px;
-}
-
-/* INTRO */
-
-.intro {
-    display:flex;
-    align-items:end;
-    justify-content:space-between;
-    margin:25px 0 25px;
-}
-
-.eyebrow {
-    color:var(--accent);
-    font-size:11px;
-    font-weight:900;
-    letter-spacing:2px;
-    margin-bottom:8px;
-}
-
-.intro h1 {
-    font-size:clamp(30px,4vw,43px);
-    letter-spacing:-1.5px;
-}
-
-.intro p {
-    margin-top:8px;
-    color:var(--muted);
-    font-size:14px;
-}
-
-#count {
-    color:var(--muted);
-    font-size:13px;
-    padding-bottom:5px;
-}
-
-/* SEARCH */
-
-.search-area {
-    display:none;
-    margin-bottom:20px;
-}
-
-.search-area.open {
-    display:block;
-}
-
-#search {
-    width:100%;
-    height:48px;
-    padding:0 18px;
-    background:var(--surface);
-    border:2px solid var(--line);
-    border-radius:13px;
-    outline:none;
-    font-size:16px;
-}
-
-#search:focus {
-    border-color:var(--focus);
-}
-
-/* CATEGORY NAV */
-
-.category-nav {
-    display:flex;
-    gap:10px;
-    overflow-x:auto;
-    scrollbar-width:none;
-    padding:5px 4px 14px;
-    margin-bottom:12px;
-}
-
-.category-nav::-webkit-scrollbar {
-    display:none;
-}
-
-.category-btn {
-    flex-shrink:0;
-    padding:11px 20px;
-    border:1px solid var(--line);
-    border-radius:30px;
-    background:var(--surface);
-    color:var(--muted);
-    font-size:13px;
-    font-weight:800;
-}
-
-.category-btn.active {
-    background:var(--accent);
-    color:white;
-    border-color:transparent;
-}
-
-/* SECTIONS */
-
-.library-section {
-    margin-bottom:35px;
-    scroll-margin-top:20px;
-}
-
-.section-heading {
-    display:flex;
-    align-items:center;
-    gap:12px;
-    margin-bottom:17px;
-}
-
-.section-heading h2 {
-    font-size:21px;
-    font-weight:850;
-}
-
-.section-count {
-    padding:4px 9px;
-    border-radius:8px;
-    background:var(--surface);
-    color:var(--muted);
-    font-size:11px;
-    font-weight:bold;
-}
-
-.section-line {
-    height:1px;
-    background:var(--line);
-    flex:1;
-}
-
-/* APPLICATION GRID */
-
-.app-grid {
-    display:grid;
-    grid-template-columns:repeat(6,minmax(0,1fr));
-    gap:15px;
-}
-
-.app-wrap {
-    position:relative;
-    min-width:0;
-}
-
-.app-card {
-    width:100%;
-    min-height:145px;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    gap:12px;
-    padding:13px 8px;
-    border:3px solid transparent;
-    border-radius:19px;
-    background:var(--surface);
-    text-decoration:none;
-    outline:none;
-    transition:transform .15s,background .15s,border-color .15s;
-}
-
-.app-icon {
-    width:72px;
-    height:72px;
-    border-radius:21px;
-    display:grid;
-    place-items:center;
-    overflow:hidden;
-    background:linear-gradient(140deg,var(--color1),var(--color2));
-    box-shadow:0 7px 18px #0002;
-    color:white;
-    font-size:27px;
-    font-weight:900;
-}
-
-.app-icon img {
-    width:100%;
-    height:100%;
-    object-fit:cover;
-}
-
-.app-name {
-    width:100%;
-    color:var(--text);
-    font-size:13px;
-    line-height:1.3;
-    font-weight:750;
-    text-align:center;
-    overflow-wrap:anywhere;
-}
-
-.app-card.focused {
-    border-color:var(--focus);
-    background:var(--surface2);
-    transform:scale(1.09);
-    box-shadow:0 12px 30px #0004;
-    z-index:3;
-}
-
-.pin {
-    position:absolute;
-    top:5px;
-    right:5px;
-    width:29px;
-    height:29px;
-    border:1px solid var(--line);
-    border-radius:50%;
-    background:var(--surface2);
-    font-size:17px;
-    z-index:4;
-}
-
-.pin.active {
-    color:#ffc95c;
-}
-
-/* EMPTY / LOADING */
-
-.status {
-    text-align:center;
-    padding:45px 15px;
-    border-radius:18px;
-    background:var(--surface);
-    color:var(--muted);
-    line-height:1.7;
-}
-
-.status strong {
-    display:block;
-    color:var(--text);
-    font-size:18px;
-    margin-bottom:8px;
-}
-
-.hidden {
-    display:none!important;
-}
-
-/* FOOTER */
-
-footer {
-    border-top:1px solid var(--line);
-    margin-top:35px;
-    padding-top:18px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    color:var(--muted);
-    font-size:11px;
-}
-
-footer strong {
-    color:var(--accent);
-}
-
-.key-hints {
-    display:flex;
-    gap:18px;
-}
-
-.key-hints b {
-    background:var(--surface2);
-    padding:6px 9px;
-    border-radius:6px;
-    color:var(--text);
-    margin-right:5px;
-}
-
-/* REMOTE FOCUS */
-
-button.focused {
-    outline:3px solid var(--focus);
-    outline-offset:3px;
-    background:var(--surface2);
-    color:var(--text);
-    transform:scale(1.06);
-}
-
-.category-btn.active.focused {
-    background:var(--accent);
-    color:white;
-}
-
-/* TV SCREEN ADJUSTMENTS */
-
-@media (min-width:1500px) {
-    #app {
-        padding:30px 5vw;
-    }
-
-    .app-grid {
-        gap:20px;
-    }
-
-    .app-card {
-        min-height:165px;
-    }
-
-    .app-icon {
-        width:85px;
-        height:85px;
-    }
-
-    .app-name {
-        font-size:14px;
-    }
-}
-
-@media (max-width:900px) {
-    .app-grid {
-        grid-template-columns:repeat(4,minmax(0,1fr));
-    }
-}
-
 </style>
 </head>
-
 <body>
-
 <div id="app">
-
 <header>
-
-    <div class="brand">
-        <div class="brand-mark">D</div>
-        <div>
-            <div class="brand-name">Desparenzo Inc.</div>
-            <div class="brand-sub">TV EDITION</div>
-        </div>
-    </div>
-
-    <div class="header-right">
-        <div id="clock">00:00</div>
-        <button class="header-btn" id="searchBtn" aria-label="Search">⌕</button>
-        <button class="header-btn" id="themeBtn" aria-label="Toggle theme">☾</button>
-    </div>
-
+ <h1>🔴 NOKIA BOUNCE</h1>
+ <div id="hud">
+  <span>LEVEL <b id="level">1</b></span>
+  <span>SCORE <b id="score">0</b></span>
+  <span>❤️ <b id="lives">3</b></span>
+ </div>
 </header>
 
-<div class="intro">
-    <div>
-        <div class="eyebrow">YOUR COLLECTION</div>
-        <h1>Games & Apps</h1>
-        <p>Everything I made, in one place.</p>
-    </div>
-    <div id="count">Loading...</div>
+<div id="gameFrame">
+ <canvas id="game"></canvas>
+ <div id="overlay">
+  <h2 id="overlayTitle">NOKIA BOUNCE</h2>
+  <p id="overlayText">A classic bouncing adventure. Collect coins, dodge hazards and reach the exit!</p>
+  <div id="menuButtons">
+   <button id="startBtn">▶ START GAME</button>
+   <button id="helpBtn">CONTROLS</button>
+  </div>
+ </div>
 </div>
 
-<div class="search-area" id="searchArea">
-    <input id="search" type="text"
-        placeholder="Search applications and games...">
+<div id="bottom">
+ <span>ARROWS: MOVE / JUMP · ENTER: SELECT · ESC: PAUSE</span>
+ <div id="controls">
+  <button id="pauseBtn">Ⅱ PAUSE</button>
+  <button id="restartBtn">↻ RESTART</button>
+ </div>
 </div>
-
-<nav class="category-nav" id="categoryNav">
-    <button class="category-btn active" data-category="all">All</button>
-</nav>
-
-<section class="library-section hidden" id="pinnedSection">
-    <div class="section-heading">
-        <h2>★ Pinned</h2>
-        <span class="section-count" id="pinnedCount">0</span>
-        <div class="section-line"></div>
-    </div>
-    <div class="app-grid" id="pinnedGrid"></div>
-</section>
-
-<div id="library">
-    <div class="status">
-        <strong>Loading Desparenzo...</strong>
-        Connecting to your application library.
-    </div>
-</div>
-
-<div class="status hidden" id="empty">
-    <strong>No applications found</strong>
-    Try a different search.
-</div>
-
-<footer>
-    <span>BUILT WITH CARE BY <strong>DESPARENZO</strong></span>
-
-    <div class="key-hints">
-        <span><b>↕ ↔</b> Navigate</span>
-        <span><b>OK</b> Select</span>
-        <span><b>BACK</b> Return</span>
-    </div>
-</footer>
-
 </div>
 
 <script>
-(() => {
+(()=>{
+"use strict";
 
-'use strict';
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
+const overlay=document.getElementById("overlay");
+const title=document.getElementById("overlayTitle");
+const message=document.getElementById("overlayText");
+const buttons=document.getElementById("menuButtons");
 
-/* SHARED GITHUB DATA */
-
-const DATA_URL =
-'https://raw.githubusercontent.com/Desparenzo/Desparenzo/main/library.txt';
-
-const ICON_BASE =
-'https://raw.githubusercontent.com/Desparenzo/Desparenzo/main/icons/';
-
-const PIN_KEY = 'desparenzo-tv-pins';
-const THEME_KEY = 'desparenzo-tv-theme';
-
-const library = document.getElementById('library');
-const categoryNav = document.getElementById('categoryNav');
-const search = document.getElementById('search');
-const searchArea = document.getElementById('searchArea');
-const pinnedGrid = document.getElementById('pinnedGrid');
-const pinnedSection = document.getElementById('pinnedSection');
-const empty = document.getElementById('empty');
-
-let categories = [];
-let allItems = [];
-let pins = new Set();
-
-let currentCategory = 'all';
-let query = '';
-let focusIndex = 0;
-
-/* STORAGE */
-
-try {
-    pins = new Set(
-        JSON.parse(localStorage.getItem(PIN_KEY) || '[]')
-    );
-} catch(e) {}
-
-function savePins() {
-    try {
-        localStorage.setItem(PIN_KEY, JSON.stringify([...pins]));
-    } catch(e) {}
-}
-
-/* THEME */
-
-function setTheme(theme) {
-    document.documentElement.dataset.theme = theme;
-    document.getElementById('themeBtn').textContent =
-        theme === 'dark' ? '☀' : '☾';
-
-    try {
-        localStorage.setItem(THEME_KEY,theme);
-    } catch(e) {}
-}
-
-let savedTheme = 'dark';
-
-try {
-    savedTheme = localStorage.getItem(THEME_KEY) || 'dark';
-} catch(e) {}
-
-setTheme(savedTheme);
-
-document.getElementById('themeBtn').onclick = () => {
-    setTheme(
-        document.documentElement.dataset.theme === 'dark'
-        ? 'light' : 'dark'
-    );
+const hud={
+ level:document.getElementById("level"),
+ score:document.getElementById("score"),
+ lives:document.getElementById("lives")
 };
 
-/* CLOCK */
+let W=900,H=500;
+let running=false,paused=false,gameOver=false;
+let level=1,score=0,lives=3;
+let last=0,acc=0;
+const keys={};
+let player,platforms,coins,hazards,exit,particles;
+let camera=0;
+let audioCtx=null;
+let focusIndex=0;
 
-function updateClock() {
-    document.getElementById('clock').textContent =
-        new Date().toLocaleTimeString([], {
-            hour:'2-digit',
-            minute:'2-digit'
-        });
-}
-
-updateClock();
-setInterval(updateClock,1000);
-
-/* PARSE CATALOGUE */
-
-function parseCatalogue(raw) {
-
-    const result = [];
-    let current = null;
-
-    raw.replace(/^\uFEFF/,'')
-       .split(/\r?\n/)
-       .forEach(line => {
-
-        line = line.trim();
-
-        if(!line || line.startsWith('#')) return;
-
-        const heading = line.match(/^\[(.+?)\]$/);
-
-        if(heading) {
-            current = {
-                name:heading[1].trim(),
-                items:[]
-            };
-
-            result.push(current);
-            return;
-        }
-
-        if(!current) return;
-
-        const fields = line.split('|').map(x=>x.trim());
-
-        if(fields.length < 2) return;
-
-        const name = fields[0]
-            .replace(/^\d+\s*[.)-]\s*/,'')
-            .trim();
-
-        const url = fields[1];
-        const icon = fields[2] || '';
-
-        try {
-            const parsed = new URL(url);
-
-            if(!['https:','http:'].includes(parsed.protocol)) return;
-
-            if(!name) return;
-
-            current.items.push({
-                name,
-                url,
-                icon,
-                category:current.name
-            });
-
-        } catch(e) {}
-    });
-
-    return result.filter(c=>c.items.length);
-}
-
-/* ICONS */
-
-const palettes = [
-    ['#7867f4','#4d8de8'],
-    ['#f06e8b','#cb5dd5'],
-    ['#24a99a','#3d83c9'],
-    ['#ef9a45','#e45e73'],
-    ['#567ee8','#855ddd'],
-    ['#26a7c7','#4f75dd'],
-    ['#c26bd7','#8063e8'],
-    ['#43ad79','#2994ac']
+const levels=[
+ {
+  length:1800,
+  platforms:[
+   [0,430,380,70],[450,400,220,100],
+   [740,360,220,140],[1030,410,250,90],
+   [1380,370,420,130],
+   [170,340,130,20],[520,300,100,20],
+   [850,260,120,20],[1130,320,100,20]
+  ],
+  coins:[[200,300],[550,260],[880,220],[1150,280],[1450,320],[1580,320]],
+  hazards:[[690,390,35,10],[1290,400,45,10]]
+ },
+ {
+  length:2200,
+  platforms:[
+   [0,430,280,70],[350,390,170,110],
+   [600,330,180,170],[880,390,170,110],
+   [1150,320,170,180],[1430,380,200,120],
+   [1720,330,480,170],
+   [150,340,100,20],[420,290,100,20],
+   [690,240,100,20],[960,290,100,20],
+   [1230,230,100,20],[1530,270,100,20]
+  ],
+  coins:[[180,300],[450,250],[720,200],[990,250],[1260,190],[1560,230],[1850,290]],
+  hazards:[[540,380,35,10],[1080,380,40,10],[1640,370,35,10]]
+ },
+ {
+  length:2600,
+  platforms:[
+   [0,430,260,70],[340,380,150,120],
+   [570,330,140,170],[800,390,150,110],
+   [1050,320,150,180],[1300,380,150,120],
+   [1550,300,170,200],[1830,360,160,140],
+   [2110,320,490,180],
+   [150,320,100,20],[400,260,90,20],
+   [650,210,90,20],[900,260,90,20],
+   [1150,200,90,20],[1400,250,90,20],
+   [1650,190,90,20],[1920,250,90,20]
+  ],
+  coins:[[180,280],[440,220],[680,170],[930,220],[1180,160],[1430,210],[1680,150],[1950,210],[2250,270]],
+  hazards:[[510,370,35,10],[750,320,35,10],[1000,380,35,10],[1500,370,35,10],[2040,310,35,10]]
+ }
 ];
 
-function hash(text) {
-    let h=0;
-    for(let i=0;i<text.length;i++)
-        h=(h*31+text.charCodeAt(i))|0;
-    return Math.abs(h);
+function resize(){
+ const r=canvas.getBoundingClientRect();
+ const d=Math.min(devicePixelRatio||1,2);
+ canvas.width=Math.max(1,Math.floor(r.width*d));
+ canvas.height=Math.max(1,Math.floor(r.height*d));
+ W=900;H=500;
+}
+window.addEventListener("resize",resize);
+resize();
+
+function makePlayer(){
+ return {x:55,y:350,vx:0,vy:0,r:17,onGround:false,invincible:0};
 }
 
-function makeIcon(item) {
-
-    const palette =
-        palettes[hash(item.name)%palettes.length];
-
-    const icon = document.createElement('div');
-    icon.className = 'app-icon';
-
-    icon.style.setProperty('--color1',palette[0]);
-    icon.style.setProperty('--color2',palette[1]);
-
-    if(item.icon) {
-
-        const img = document.createElement('img');
-
-        img.src = ICON_BASE + encodeURIComponent(item.icon);
-        img.alt = '';
-        img.loading = 'lazy';
-
-        img.onerror = () => {
-            img.remove();
-            icon.textContent = item.name.charAt(0).toUpperCase();
-        };
-
-        icon.appendChild(img);
-
-    } else {
-        icon.textContent = item.name.charAt(0).toUpperCase();
-    }
-
-    return icon;
+function loadLevel(n){
+ const data=levels[(n-1)%levels.length];
+ platforms=data.platforms.map(p=>({x:p[0],y:p[1],w:p[2],h:p[3]}));
+ coins=data.coins.map(c=>({x:c[0],y:c[1],taken:false}));
+ hazards=data.hazards.map(h=>({x:h[0],y:h[1],w:h[2],h:h[3]}));
+ exit={x:data.length-75,y:345,w:42,h:75};
+ player=makePlayer();
+ camera=0;
+ hud.level.textContent=n;
 }
 
-/* CREATE APP TILE */
-
-function makeTile(item) {
-
-    const wrapper = document.createElement('div');
-    wrapper.className = 'app-wrap';
-
-    const link = document.createElement('a');
-
-    link.className = 'app-card';
-    link.href = item.url;
-    link.setAttribute('aria-label','Open '+item.name);
-
-    // Same WebView, not a new browser tab.
-    link.target = '_self';
-
-    link.appendChild(makeIcon(item));
-
-    const label = document.createElement('div');
-    label.className = 'app-name';
-    label.textContent = item.name;
-
-    link.appendChild(label);
-
-    const pin = document.createElement('button');
-    pin.className = 'pin';
-    pin.textContent = pins.has(item.url)?'★':'☆';
-    pin.classList.toggle('active',pins.has(item.url));
-    pin.setAttribute('aria-label','Pin '+item.name);
-
-    pin.onclick = e => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        if(pins.has(item.url)) {
-            pins.delete(item.url);
-        } else {
-            pins.add(item.url);
-        }
-
-        savePins();
-        renderPins();
-        renderLibrary();
-    };
-
-    wrapper.append(link,pin);
-
-    return wrapper;
+function sound(freq=440,duration=.08){
+ try{
+  audioCtx ||= new (window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state==="suspended")audioCtx.resume();
+  const o=audioCtx.createOscillator();
+  const g=audioCtx.createGain();
+  o.frequency.value=freq;
+  g.gain.value=.045;
+  o.connect(g);g.connect(audioCtx.destination);
+  o.start();g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+duration);
+  o.stop(audioCtx.currentTime+duration);
+ }catch(e){}
 }
 
-/* PINNED */
-
-function renderPins() {
-
-    pinnedGrid.replaceChildren();
-
-    const items = allItems.filter(item=>pins.has(item.url));
-
-    items.forEach(item=>{
-        pinnedGrid.appendChild(makeTile(item));
-    });
-
-    pinnedSection.classList.toggle(
-        'hidden',
-        items.length===0 || query.length>0
-    );
-
-    document.getElementById('pinnedCount').textContent=items.length;
+function start(){
+ level=1;score=0;lives=3;
+ loadLevel(level);
+ gameOver=false;paused=false;running=true;
+ hideOverlay();
+ updateHUD();
+ sound(600);
+ last=performance.now();
+ requestAnimationFrame(loop);
 }
 
-/* CATEGORY NAVIGATION */
-
-function renderCategories() {
-
-    categoryNav.replaceChildren();
-
-    const allBtn = document.createElement('button');
-
-    allBtn.className='category-btn';
-    allBtn.textContent='All';
-    allBtn.dataset.category='all';
-
-    categoryNav.appendChild(allBtn);
-
-    categories.forEach(category=>{
-        const btn=document.createElement('button');
-
-        btn.className='category-btn';
-        btn.textContent=category.name;
-        btn.dataset.category=category.name;
-
-        categoryNav.appendChild(btn);
-    });
-
-    categoryNav.querySelectorAll('button').forEach(btn=>{
-        btn.onclick=()=>{
-            currentCategory=btn.dataset.category;
-            updateCategory();
-            renderLibrary();
-
-            if(currentCategory!=='all') {
-                document.getElementById(
-                    'section-'+categories.findIndex(
-                        c=>c.name===currentCategory
-                    )
-                )?.scrollIntoView({behavior:'smooth'});
-            } else {
-                window.scrollTo({top:0,behavior:'smooth'});
-            }
-        };
-    });
-
-    updateCategory();
+function updateHUD(){
+ hud.score.textContent=score;
+ hud.lives.textContent=lives;
 }
 
-function updateCategory() {
-
-    categoryNav.querySelectorAll('button').forEach(btn=>{
-        btn.classList.toggle(
-            'active',
-            btn.dataset.category===currentCategory
-        );
-    });
+function showOverlay(t,m,items){
+ running=false;paused=true;
+ title.textContent=t;
+ message.textContent=m;
+ buttons.innerHTML="";
+ items.forEach(item=>{
+  const b=document.createElement("button");
+  b.textContent=item.text;
+  b.onclick=item.action;
+  buttons.appendChild(b);
+ });
+ overlay.classList.remove("hidden");
+ focusFirst();
 }
 
-/* RENDER LIBRARY */
-
-function renderLibrary() {
-
-    library.replaceChildren();
-
-    let visibleTotal=0;
-
-    categories.forEach((category,index)=>{
-
-        if(currentCategory!=='all' &&
-           currentCategory!==category.name) return;
-
-        const items=category.items.filter(item=>
-            item.name.toLowerCase().includes(query)
-        );
-
-        if(!items.length) return;
-
-        visibleTotal+=items.length;
-
-        const section=document.createElement('section');
-        section.className='library-section';
-        section.id='section-'+index;
-
-        const heading=document.createElement('div');
-        heading.className='section-heading';
-
-        const title=document.createElement('h2');
-        title.textContent=category.name;
-
-        const count=document.createElement('span');
-        count.className='section-count';
-        count.textContent=items.length;
-
-        const line=document.createElement('div');
-        line.className='section-line';
-
-        heading.append(title,count,line);
-
-        const grid=document.createElement('div');
-        grid.className='app-grid';
-
-        items.forEach(item=>{
-            grid.appendChild(makeTile(item));
-        });
-
-        section.append(heading,grid);
-        library.appendChild(section);
-    });
-
-    document.getElementById('count').textContent =
-        visibleTotal+' ITEMS';
-
-    empty.classList.toggle('hidden',visibleTotal>0);
-
-    renderPins();
+function hideOverlay(){
+ overlay.classList.add("hidden");
 }
 
-/* SEARCH */
+function focusFirst(){
+ const b=overlay.querySelector("button");
+ if(b)b.focus();
+}
 
-document.getElementById('searchBtn').onclick=()=>{
-    searchArea.classList.toggle('open');
+function restart(){
+ loadLevel(level);
+ paused=false;running=true;
+ hideOverlay();
+ last=performance.now();
+ requestAnimationFrame(loop);
+}
 
-    if(searchArea.classList.contains('open')) {
-        search.focus();
-    } else {
-        search.value='';
-        query='';
-        renderLibrary();
-    }
-};
+function pause(){
+ if(!running)return;
+ paused=true;running=false;
+ showOverlay("PAUSED","Take a breather. Your adventure is waiting.",[
+  {text:"▶ RESUME",action:()=>{paused=false;running=true;hideOverlay();last=performance.now();requestAnimationFrame(loop)}},
+  {text:"↻ RESTART",action:restart},
+  {text:"MAIN MENU",action:mainMenu}
+ ]);
+}
 
-search.addEventListener('input',()=>{
-    query=search.value.toLowerCase().trim();
-    renderLibrary();
+function mainMenu(){
+ paused=false;
+ showOverlay("NOKIA BOUNCE","Ready for another adventure?",[
+  {text:"▶ START GAME",action:start},
+  {text:"CONTROLS",action:help}
+ ]);
+}
+
+function help(){
+ showOverlay("CONTROLS",
+ "D-pad / Arrow keys: Move. OK / Enter: Select. Space: Jump. Back / Escape: Pause or close. Play/Pause: Pause. Next track: Jump. Previous track: Restart.",
+ [
+  {text:"BACK",action:mainMenu},
+  {text:"▶ PLAY",action:start}
+ ]);
+}
+
+function loseLife(){
+ if(player.invincible>0)return;
+ lives--;updateHUD();sound(130,.2);
+ if(lives<=0){
+  showOverlay("GAME OVER","Final score: "+score,[
+   {text:"TRY AGAIN",action:start},
+   {text:"MAIN MENU",action:mainMenu}
+  ]);
+ }else{
+  player.x=Math.max(10,camera+55);
+  player.y=300;player.vx=0;player.vy=0;
+  player.invincible=1.5;
+ }
+}
+
+function nextLevel(){
+ level++;
+ if(level>levels.length){
+  showOverlay("YOU WIN!","All levels completed! Final score: "+score,[
+   {text:"PLAY AGAIN",action:start},
+   {text:"MAIN MENU",action:mainMenu}
+  ]);
+ }else{
+  loadLevel(level);
+  sound(800,.25);
+ }
+}
+
+function update(dt){
+ const left=keys.ArrowLeft||keys.KeyA;
+ const right=keys.ArrowRight||keys.KeyD;
+ const jump=keys.Space||keys.ArrowUp||keys.KeyW;
+
+ const acceleration=1050;
+ const maxSpeed=260;
+
+ if(left)player.vx-=acceleration*dt;
+ if(right)player.vx+=acceleration*dt;
+ if(!left&&!right)player.vx*=Math.pow(.001,dt);
+
+ player.vx=Math.max(-maxSpeed,Math.min(maxSpeed,player.vx));
+
+ if(jump&&player.onGround){
+  player.vy=-570;
+  player.onGround=false;
+  sound(320);
+ }
+
+ player.vy+=1450*dt;
+ player.vy=Math.min(player.vy,850);
+
+ const oldY=player.y;
+ player.x+=player.vx*dt;
+ player.y+=player.vy*dt;
+ player.onGround=false;
+
+ const data=levels[(level-1)%levels.length];
+ player.x=Math.max(0,Math.min(data.length-player.r,player.x));
+
+ for(const p of platforms){
+  if(player.x+player.r>p.x&&player.x-player.r<p.x+p.w){
+   if(oldY+player.r<=p.y&&player.y+player.r>=p.y&&player.vy>=0){
+    player.y=p.y-player.r;
+    player.vy=0;
+    player.onGround=true;
+   }
+  }
+ }
+
+ if(player.y>H+100)loseLife();
+
+ for(const c of coins){
+  if(!c.taken&&Math.hypot(player.x-c.x,player.y-c.y)<27){
+   c.taken=true;score+=10;updateHUD();sound(900);
+  }
+ }
+
+ for(const h of hazards){
+  if(player.x+player.r>h.x&&player.x-player.r<h.x+h.w&&
+     player.y+player.r>h.y-12&&player.y-player.r<h.y+h.h){
+   loseLife();
+  }
+ }
+
+ if(player.x+player.r>exit.x&&player.y+player.r>exit.y&&player.y-player.r<exit.y+exit.h){
+  score+=100;updateHUD();nextLevel();
+ }
+
+ if(player.invincible>0)player.invincible-=dt;
+ camera=Math.max(0,Math.min(data.length-W,player.x-W*.35));
+}
+
+function draw(){
+ const scaleX=canvas.width/W;
+ const scaleY=canvas.height/H;
+ ctx.setTransform(scaleX,0,0,scaleY,0,0);
+ ctx.clearRect(0,0,W,H);
+
+ // Retro background
+ ctx.fillStyle="#a8c66c";
+ ctx.fillRect(0,0,W,H);
+
+ // Decorative hills
+ ctx.fillStyle="#97b65f";
+ for(let i=0;i<7;i++){
+  ctx.beginPath();
+  ctx.arc((i*180-camera*.15)%1100,480,100,Math.PI,0);
+  ctx.fill();
+ }
+
+ ctx.save();
+ ctx.translate(-camera,0);
+
+ // Platforms
+ for(const p of platforms){
+  ctx.fillStyle="#455c32";
+  ctx.fillRect(p.x,p.y,p.w,p.h);
+  ctx.fillStyle="#d3e99a";
+  ctx.fillRect(p.x,p.y,p.w,7);
+  ctx.fillStyle="#78974a";
+  for(let x=p.x+15;x<p.x+p.w-5;x+=30){
+   ctx.fillRect(x,p.y+18,10,5);
+  }
+ }
+
+ // Coins
+ for(const c of coins){
+  if(c.taken)continue;
+  ctx.fillStyle="#fff36a";
+  ctx.beginPath();
+  ctx.arc(c.x,c.y,9,0,Math.PI*2);
+  ctx.fill();
+  ctx.strokeStyle="#8c7222";
+  ctx.lineWidth=2;
+  ctx.stroke();
+ }
+
+ // Hazards
+ for(const h of hazards){
+  ctx.fillStyle="#78372a";
+  ctx.fillRect(h.x,h.y,h.w,h.h);
+  ctx.fillStyle="#df5037";
+  for(let x=h.x;x<h.x+h.w;x+=12){
+   ctx.beginPath();
+   ctx.moveTo(x,h.y);
+   ctx.lineTo(x+6,h.y-17);
+   ctx.lineTo(x+12,h.y);
+   ctx.fill();
+  }
+ }
+
+ // Exit
+ ctx.fillStyle="#40562b";
+ ctx.fillRect(exit.x,exit.y,exit.w,exit.h);
+ ctx.fillStyle="#e4eea5";
+ ctx.fillRect(exit.x+7,exit.y+7,exit.w-14,exit.h-14);
+ ctx.fillStyle="#40562b";
+ ctx.font="bold 12px Arial";
+ ctx.fillText("EXIT",exit.x+5,exit.y+40);
+
+ // Ball
+ if(player.invincible<=0||Math.floor(performance.now()/100)%2===0){
+  ctx.fillStyle="#b51e27";
+  ctx.beginPath();
+  ctx.arc(player.x,player.y,player.r,0,Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle="#ef6260";
+  ctx.beginPath();
+  ctx.arc(player.x-6,player.y-7,6,0,Math.PI*2);
+  ctx.fill();
+  ctx.strokeStyle="#74171d";
+  ctx.lineWidth=3;
+  ctx.stroke();
+ }
+ ctx.restore();
+
+ // Instructions
+ ctx.fillStyle="#344c2d";
+ ctx.font="bold 13px Arial";
+ ctx.fillText("BOUNCE ADVENTURE",15,25);
+}
+
+function loop(time){
+ if(!running)return;
+ let dt=Math.min((time-last)/1000,.035);
+ last=time;
+ update(dt);
+ draw();
+ if(running)requestAnimationFrame(loop);
+}
+
+// Keyboard and remote controls
+function activateFocused(){
+ const el=document.activeElement;
+ if(el&&el.tagName==="BUTTON")el.click();
+}
+
+function handleBack(){
+ if(!overlay.classList.contains("hidden")){
+  if(paused)mainMenu();
+  else mainMenu();
+ }else pause();
+}
+
+window.addEventListener("keydown",e=>{
+ const k=e.key;
+ const code=e.code;
+
+ if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"," ","Enter","Backspace"].includes(k)){
+  e.preventDefault();
+ }
+
+ if(k==="Escape"||k==="Backspace"||k==="BrowserBack"){
+  handleBack();return;
+ }
+
+ if(k==="Enter"||k==="NumpadEnter"){
+  if(!overlay.classList.contains("hidden"))activateFocused();
+  else if(!running)start();
+  return;
+ }
+
+ if(k===" "||code==="Space"){
+  if(!running){
+   if(!overlay.classList.contains("hidden"))activateFocused();
+   else start();
+  }else keys.Space=true;
+  return;
+ }
+
+ if(k==="ArrowLeft"||k==="ArrowRight"||k==="ArrowUp"||k==="ArrowDown"){
+  if(!overlay.classList.contains("hidden")){
+   navigateFocus(k);return;
+  }
+ }
+
+ if(k==="ArrowLeft"||k==="ArrowRight"||k==="ArrowUp"||k==="ArrowDown"||
+    code==="KeyA"||code==="KeyD"||code==="KeyW"){
+  if(running)keys[k]=true;
+ }
+
+ if(code==="MediaPlayPause"){
+  if(running)pause();
+  else if(paused)resumeGame();
+ }
+ if(code==="MediaTrackNext"||code==="MediaNextTrack"){
+  if(running)keys.Space=true;
+ }
+ if(code==="MediaTrackPrevious"||code==="MediaPreviousTrack"){
+  if(running)restart();
+ }
 });
 
-/* FETCH GITHUB CATALOGUE */
-
-async function loadLibrary() {
-
-    try {
-
-        const response=await fetch(DATA_URL,{
-            cache:'no-store'
-        });
-
-        if(!response.ok)
-            throw new Error('HTTP '+response.status);
-
-        const raw=await response.text();
-
-        categories=parseCatalogue(raw);
-
-        allItems=categories.flatMap(c=>c.items);
-
-        renderCategories();
-        renderLibrary();
-
-        if(!allItems.length) {
-            throw new Error('No applications found in catalogue.');
-        }
-
-    } catch(error) {
-
-        library.innerHTML=`
-        <div class="status">
-            <strong>Unable to load library</strong>
-            Check your internet connection and GitHub catalogue.
-            <br><br>
-            ${String(error.message)}
-            <br><br>
-            <button onclick="location.reload()"
-            style="padding:12px 20px;border:0;border-radius:10px;background:#7867ff;color:white">
-            Retry
-            </button>
-        </div>`;
-
-        document.getElementById('count').textContent='ERROR';
-    }
+function resumeGame(){
+ paused=false;running=true;hideOverlay();
+ last=performance.now();requestAnimationFrame(loop);
 }
 
-/* REMOTE NAVIGATION */
-
-function getFocusable() {
-
-    return [
-        ...document.querySelectorAll(
-            '.header-btn, .category-btn, .app-card, .pin'
-        )
-    ].filter(el=>{
-        return el.offsetParent!==null &&
-               !el.closest('.hidden');
-    });
-}
-
-function setFocus(element) {
-
-    const elements=getFocusable();
-
-    elements.forEach(el=>el.classList.remove('focused'));
-
-    if(!element) return;
-
-    element.classList.add('focused');
-    focusIndex=elements.indexOf(element);
-
-    element.scrollIntoView({
-        behavior:'smooth',
-        block:'nearest',
-        inline:'nearest'
-    });
-}
-
-function currentFocus() {
-
-    const elements=getFocusable();
-
-    return elements.find(el=>el.classList.contains('focused'))
-        || elements[0];
-}
-
-function moveFocus(direction) {
-
-    const elements=getFocusable();
-    const current=currentFocus();
-
-    if(!current) return;
-
-    const a=current.getBoundingClientRect();
-
-    const ax=a.left+a.width/2;
-    const ay=a.top+a.height/2;
-
-    let best=null;
-    let bestScore=Infinity;
-
-    elements.forEach(el=>{
-
-        if(el===current) return;
-
-        const r=el.getBoundingClientRect();
-
-        const bx=r.left+r.width/2;
-        const by=r.top+r.height/2;
-
-        const dx=bx-ax;
-        const dy=by-ay;
-
-        let primary,secondary;
-
-        if(direction==='right') {
-            if(dx<=5) return;
-            primary=dx;
-            secondary=Math.abs(dy);
-        }
-
-        if(direction==='left') {
-            if(dx>=-5) return;
-            primary=-dx;
-            secondary=Math.abs(dy);
-        }
-
-        if(direction==='down') {
-            if(dy<=5) return;
-            primary=dy;
-            secondary=Math.abs(dx);
-        }
-
-        if(direction==='up') {
-            if(dy>=-5) return;
-            primary=-dy;
-            secondary=Math.abs(dx);
-        }
-
-        const score=primary+secondary*2.2;
-
-        if(score<bestScore) {
-            bestScore=score;
-            best=el;
-        }
-    });
-
-    if(best) setFocus(best);
-}
-
-function activateFocus() {
-
-    const element=currentFocus();
-
-    if(element) element.click();
-}
-
-function goBack() {
-
-    if(document.activeElement===search) {
-        search.blur();
-        return;
-    }
-
-    if(searchArea.classList.contains('open')) {
-        searchArea.classList.remove('open');
-        search.value='';
-        query='';
-        renderLibrary();
-        return;
-    }
-
-    // Return focus to the first navigation control.
-    setFocus(document.querySelector('.header-btn'));
-}
-
-/* KEYBOARD AND FIRE TV REMOTE */
-
-document.addEventListener('keydown',e=>{
-
-    const key=e.key;
-
-    if(key==='Backspace' || key==='Escape') {
-        if(document.activeElement!==search) {
-            e.preventDefault();
-            e.stopPropagation();
-            goBack();
-        }
-        return;
-    }
-
-    if(document.activeElement===search) {
-
-        if(key==='Enter') {
-            search.blur();
-            e.preventDefault();
-        }
-
-        return;
-    }
-
-    if(key.startsWith('Arrow')) {
-
-        e.preventDefault();
-
-        const directions={
-            ArrowUp:'up',
-            ArrowDown:'down',
-            ArrowLeft:'left',
-            ArrowRight:'right'
-        };
-
-        moveFocus(directions[key]);
-        return;
-    }
-
-    if(key==='Enter' || key===' ') {
-
-        e.preventDefault();
-
-        if(!e.repeat) activateFocus();
-    }
-
+window.addEventListener("keyup",e=>{
+ keys[e.key]=false;
+ keys[e.code]=false;
 });
 
-/* MOUSE FALLBACK */
+function navigateFocus(key){
+ const all=[...overlay.querySelectorAll("button")];
+ if(!all.length)return;
+ let i=all.indexOf(document.activeElement);
+ if(i<0)i=0;
+ if(key==="ArrowRight"||key==="ArrowDown")i=(i+1)%all.length;
+ else i=(i-1+all.length)%all.length;
+ all[i].focus();
+}
 
-document.addEventListener('mouseover',e=>{
-
-    const target=e.target.closest(
-        '.header-btn,.category-btn,.app-card,.pin'
-    );
-
-    if(target) setFocus(target);
-
+window.addEventListener("blur",()=>{
+ Object.keys(keys).forEach(k=>keys[k]=false);
 });
 
-document.addEventListener('click',e=>{
-
-    const target=e.target.closest(
-        '.header-btn,.category-btn,.app-card,.pin'
-    );
-
-    if(target && !target.classList.contains('focused')) {
-        setFocus(target);
-    }
-
+// TV remote key mapping
+document.addEventListener("keydown",e=>{
+ if(e.key==="MediaPlayPause"){
+  e.preventDefault();
+ }
 });
 
-/* INITIALIZE */
+document.getElementById("startBtn").onclick=start;
+document.getElementById("helpBtn").onclick=help;
+document.getElementById("pauseBtn").onclick=()=>running?pause():resumeGame();
+document.getElementById("restartBtn").onclick=restart;
 
-loadLibrary();
+canvas.addEventListener("contextmenu",e=>e.preventDefault());
 
-setTimeout(()=>{
-    setFocus(document.getElementById('searchBtn'));
-},500);
+loadLevel(1);
+draw();
+focusFirst();
 
 })();
 </script>
-
 </body>
 </html>
