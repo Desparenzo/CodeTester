@@ -3,473 +3,299 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Retro Gaming Hub</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Retro Game Vault</title>
+
 <style>
-:root{--bg:#080d18;--panel:#151f32;--panel2:#1c2a42;--text:#f3f6ff;--muted:#9aabc4;--accent:#64e6c7;--focus:#ffe36e}
+:root {
+  --bg:#080d18;
+  --panel:#121d30;
+  --panel2:#1b2940;
+  --accent:#745cff;
+  --text:#f4f6ff;
+  --muted:#9ba9c2;
+}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
-button,select{font:inherit}button{cursor:pointer;color:var(--text)}
-button:focus-visible,select:focus-visible{outline:4px solid var(--focus);outline-offset:4px}
-header{padding:25px 5%;display:flex;align-items:center;justify-content:space-between;gap:20px;background:#111a2a;border-bottom:1px solid #293750}
-.brand{font-size:25px;font-weight:900;letter-spacing:1px}.brand span{color:var(--accent)}
-.sub{color:var(--muted);font-size:12px;margin-top:5px}
-.primary{background:var(--accent);color:#071a18;border:0;border-radius:10px;padding:15px 22px;font-weight:bold}
-.secondary{background:#293b57;border:1px solid #405573;border-radius:9px;padding:12px 18px}
-main{max-width:1400px;margin:auto;padding:25px 5% 70px}
-.toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:25px}
-select,input{background:#17243a;color:white;border:1px solid #3b506d;border-radius:9px;padding:13px}
-.heading{font-size:19px;font-weight:bold;margin:25px 0 17px}.muted{color:var(--muted)}
-.status{padding:12px 15px;background:#122139;border:1px solid #2b405d;border-radius:9px;color:var(--accent);margin:15px 0;font-size:13px}
-.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
-.game-card{background:linear-gradient(145deg,var(--panel2),var(--panel));border:2px solid #293b55;border-radius:14px;padding:17px;min-width:0}
-.game-card:focus-within{border-color:var(--focus)}
-.game-title{font-size:17px;font-weight:bold;overflow-wrap:anywhere}
-.game-system{font-size:12px;color:var(--accent);margin-top:7px}
-.card-actions{display:flex;gap:9px;margin-top:18px}.card-actions button{flex:1}
-.play-btn{background:var(--accent);color:#071a18;border:0;border-radius:8px;padding:13px 8px;font-weight:bold}
-.delete-btn{background:#3a2635;border:1px solid #704052;border-radius:8px;padding:12px}
-.empty{text-align:center;padding:65px 15px;border:2px dashed #35445c;border-radius:15px;color:var(--muted);line-height:2}
-#gameScreen{display:none;position:fixed;inset:0;z-index:10;background:#000}
-.game-top{min-height:55px;padding:8px 15px;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#101827;color:white}
-.game-top button{background:#283a54;border:1px solid #536783;padding:8px 15px;border-radius:7px;flex-shrink:0}
-#controllerStatus{font-size:12px;color:var(--accent);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;text-align:center}
-#emulator{width:100%;height:calc(100% - 55px);background:#000}
-#pauseOverlay{display:none;position:fixed;inset:0;z-index:30;background:#000c;align-items:center;justify-content:center}
-.pause-box{width:min(420px,90%);background:#17243a;border:2px solid var(--accent);border-radius:18px;padding:28px;text-align:center}
-.pause-box h2{margin-top:0}.pause-box button{display:block;width:100%;margin-top:13px;padding:16px}
-#loadingScreen{display:none;position:fixed;inset:0;z-index:20;background:#080d18;align-items:center;justify-content:center;text-align:center}
-.loader{width:48px;height:48px;border:5px solid #293750;border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 22px}
-@keyframes spin{to{transform:rotate(360deg)}}
-footer{padding:25px;text-align:center;color:#72839e;font-size:12px}
-@media(max-width:850px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:550px){.grid{grid-template-columns:1fr}header{align-items:flex-start;flex-direction:column}.game-top{flex-wrap:wrap}#controllerStatus{order:3;flex-basis:100%;text-align:left}}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Arial,sans-serif;
+}
+header{
+  padding:20px;
+  background:#101a2c;
+  border-bottom:1px solid #263653;
+  position:sticky;
+  top:0;
+  z-index:10;
+}
+h1{margin:0 0 8px;font-size:25px}
+.subtitle{color:var(--muted);font-size:13px}
+.toolbar{
+  display:flex;
+  gap:10px;
+  margin-top:16px;
+  flex-wrap:wrap;
+}
+input,select,button{
+  padding:12px;
+  border-radius:9px;
+  border:1px solid #344461;
+  background:#18253a;
+  color:white;
+  font-size:14px;
+}
+input{flex:1;min-width:150px}
+button{cursor:pointer}
+button:hover{background:#34466a}
+button:focus-visible,.card:focus-visible{
+  outline:3px solid #a995ff;
+  outline-offset:3px;
+}
+main{padding:20px}
+#status{color:var(--muted);margin-bottom:18px}
+#games{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(145px,1fr));
+  gap:14px;
+}
+.card{
+  background:var(--panel);
+  border:1px solid #253651;
+  border-radius:12px;
+  padding:16px 10px;
+  min-height:110px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  cursor:pointer;
+  transition:.15s;
+}
+.card:hover{transform:translateY(-3px);background:var(--panel2)}
+.icon{font-size:32px;margin-bottom:10px}
+.name{font-weight:bold;font-size:13px;overflow-wrap:anywhere}
+#player{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:#000;
+  z-index:100;
+  flex-direction:column;
+}
+#playerbar{
+  height:52px;
+  background:#111c30;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:6px 10px;
+}
+#gameTitle{
+  flex:1;
+  font-weight:bold;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+#gameFrame{flex:1;width:100%;border:0;background:white}
+#empty{
+  display:none;
+  text-align:center;
+  padding:50px 15px;
+  color:var(--muted);
+}
+.small{font-size:12px;color:var(--muted)}
+@media(max-width:500px){
+  header{padding:14px}
+  main{padding:12px}
+  #games{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .card{min-height:100px}
+}
 </style>
 </head>
+
 <body>
+
 <header>
-  <div>
-    <div class="brand">🕹️ RETRO <span>GAMING HUB</span></div>
-    <div class="sub">YOUR PERSONAL CLASSIC GAME LIBRARY</div>
-  </div>
-  <button class="primary" id="addButton">＋ ADD GAMES</button>
-</header>
-<main id="library">
+  <h1>🎮 Retro Game Vault</h1>
+  <div class="subtitle">352+ HTML games • Powered by GitHub</div>
+
   <div class="toolbar">
-    <label for="systemOverride" class="muted">Console:</label>
-    <select id="systemOverride">
-      <option value="auto">Automatic detection</option>
-      <option value="nes">Nintendo NES</option><option value="snes">Super Nintendo</option>
-      <option value="gb">Game Boy / Color</option><option value="gba">Game Boy Advance</option>
-      <option value="nds">Nintendo DS</option><option value="n64">Nintendo 64</option>
-      <option value="segaMD">Sega Mega Drive</option><option value="segaMS">Sega Master System</option>
-      <option value="segaGG">Sega Game Gear</option><option value="atari2600">Atari 2600</option>
-      <option value="atari5200">Atari 5200</option><option value="atari7800">Atari 7800</option>
-      <option value="pce">PC Engine</option><option value="psx">PlayStation</option>
-      <option value="psp">PSP</option><option value="arcade">Arcade</option>
+    <input id="search" placeholder="Search games..." autocomplete="off">
+    <select id="sort">
+      <option value="az">A - Z</option>
+      <option value="za">Z - A</option>
     </select>
-    <button class="secondary" id="refreshButton">↻ REFRESH</button>
+    <button onclick="loadGames()">↻ Refresh</button>
   </div>
-  <div class="status" id="status">READY · Select ADD GAMES to import your ROM collection.</div>
-  <div class="heading">MY GAME LIBRARY</div>
-  <div id="gameGrid" class="grid"></div>
-  <div id="empty" class="empty">🎮<br>YOUR GAME LIBRARY IS EMPTY<br><span class="muted">Add ROM files to get started.</span></div>
+</header>
+
+<main>
+  <div id="status">Connecting to GitHub...</div>
+  <div id="games"></div>
+  <div id="empty">No games found.</div>
 </main>
-<footer>RETRO GAMING HUB · POWERED BY EMULATORJS</footer>
-<input type="file" id="filePicker" multiple hidden>
-<section id="gameScreen">
-  <div class="game-top">
-    <span id="playingName">NOW PLAYING</span>
-    <span id="controllerStatus">CONTROLLER: CHECKING…</span>
-    <button id="pauseButton">Ⅱ MENU / PAUSE</button>
+
+<div id="player">
+  <div id="playerbar">
+    <button onclick="closeGame()">← Back</button>
+    <div id="gameTitle">Game</div>
+    <button onclick="newTab()">↗</button>
+    <button onclick="fullscreen()">⛶</button>
   </div>
-  <div id="emulator"></div>
-</section>
-<section id="loadingScreen">
-  <div>
-    <div class="loader"></div><h2>STARTING GAME</h2>
-    <p id="loadingMessage" class="muted">Preparing emulator core...</p>
-    <button class="secondary" id="cancelLoading">CANCEL</button>
-  </div>
-</section>
-<section id="pauseOverlay">
-  <div class="pause-box">
-    <h2>GAME PAUSED</h2><p class="muted">What would you like to do?</p>
-    <button class="primary" id="resumeButton">▶ RESUME GAME</button>
-    <button class="secondary" id="fullscreenButton">⛶ FULLSCREEN</button>
-    <button class="secondary" id="exitButton">⌂ RETURN TO LIBRARY</button>
-  </div>
-</section>
+  <iframe id="gameFrame"
+    allow="autoplay; fullscreen; gamepad; clipboard-read; clipboard-write"
+    allowfullscreen>
+  </iframe>
+</div>
+
 <script>
-(() => {
-"use strict";
+const API =
+"https://api.github.com/repos/CoolDude2349/Offline-HTML-Games-Pack/git/trees/master?recursive=1";
 
-const CDN = "https://cdn.emulatorjs.org/stable/data/";
-const SYSTEMS = {
-  nes:{name:"Nintendo NES",icon:"🎮",extensions:["nes","fds","unf","unif"]},
-  snes:{name:"Super Nintendo",icon:"🕹️",extensions:["sfc","smc","fig","swc","bs"]},
-  gb:{name:"Game Boy / Color",icon:"🟩",extensions:["gb","gbc"]},
-  gba:{name:"Game Boy Advance",icon:"🎮",extensions:["gba"]},
-  nds:{name:"Nintendo DS",icon:"📟",extensions:["nds"]},
-  n64:{name:"Nintendo 64",icon:"🎯",extensions:["n64","z64","v64"]},
-  segaMD:{name:"Sega Mega Drive",icon:"🔵",extensions:["md","gen","smd"]},
-  segaMS:{name:"Sega Master System",icon:"🕹️",extensions:["sms"]},
-  segaGG:{name:"Sega Game Gear",icon:"🎮",extensions:["gg"]},
-  atari2600:{name:"Atari 2600",icon:"👾",extensions:["a26"]},
-  atari5200:{name:"Atari 5200",icon:"👾",extensions:["a52"]},
-  atari7800:{name:"Atari 7800",icon:"👾",extensions:["a78"]},
-  pce:{name:"PC Engine",icon:"🎮",extensions:["pce"]},
-  psx:{name:"PlayStation",icon:"💿",extensions:["cue","iso","chd"]},
-  psp:{name:"PSP",icon:"🎮",extensions:["cso","pbp"]},
-  arcade:{name:"Arcade",icon:"👾",extensions:["zip"]}
-};
+const RAW =
+"https://raw.githubusercontent.com/CoolDude2349/Offline-HTML-Games-Pack/master/";
 
-const $ = id => document.getElementById(id);
-const library = $("library"), grid = $("gameGrid"), empty = $("empty");
-const picker = $("filePicker"), gameScreen = $("gameScreen");
-const loadingScreen = $("loadingScreen"), pauseOverlay = $("pauseOverlay");
-let games = [], currentGame = null, isPlaying = false, isPaused = false;
-let gameGeneration = 0, database = null;
-let lastGamepadInput = "", lastGamepadInputAt = 0;
+let allGames=[];
+let currentURL="";
 
-/* EmulatorJS Player 1 mappings.
-   value = keyboard mapping; value2 = physical gamepad mapping. */
-const defaultControls = {
-  0: {
-    0:{value:"space",value2:"BUTTON_2"},
-    1:{value:"z",value2:"BUTTON_4"},
-    2:{value:"shift",value2:"SELECT"},
-    3:{value:"tab",value2:"START"},
-    4:{value:"up arrow",value2:"DPAD_UP"},
-    5:{value:"down arrow",value2:"DPAD_DOWN"},
-    6:{value:"left arrow",value2:"DPAD_LEFT"},
-    7:{value:"right arrow",value2:"DPAD_RIGHT"},
-    8:{value:"enter",value2:"BUTTON_1"},
-    9:{value:"x",value2:"BUTTON_3"},
-    10:{value:"q",value2:"LEFT_TOP_SHOULDER"},
-    11:{value:"e",value2:"RIGHT_TOP_SHOULDER"},
-    12:{value:"u",value2:"LEFT_BOTTOM_SHOULDER"},
-    13:{value:"i",value2:"RIGHT_BOTTOM_SHOULDER"},
-    14:{value:"",value2:"LEFT_STICK"},
-    15:{value:"",value2:"RIGHT_STICK"},
-    16:{value:"",value2:"LEFT_STICK_X:+1"},
-    17:{value:"",value2:"LEFT_STICK_X:-1"},
-    18:{value:"",value2:"LEFT_STICK_Y:+1"},
-    19:{value:"",value2:"LEFT_STICK_Y:-1"},
-    20:{value:"",value2:"RIGHT_STICK_X:+1"},
-    21:{value:"",value2:"RIGHT_STICK_X:-1"},
-    22:{value:"",value2:"RIGHT_STICK_Y:+1"},
-    23:{value:"",value2:"RIGHT_STICK_Y:-1"}
-  },
-  1:{},2:{},3:{}
-};
+const gamesEl=document.getElementById("games");
+const statusEl=document.getElementById("status");
+const searchEl=document.getElementById("search");
+const sortEl=document.getElementById("sort");
+const frame=document.getElementById("gameFrame");
 
-/* Android TV may expose controller buttons as key events. */
-const androidKeyToEmulatorKey = {
-  19:"ArrowUp",20:"ArrowDown",21:"ArrowLeft",22:"ArrowRight",
-  23:"Enter",
-  96:"Enter",
-  98:"shift",
-  99:"x",
-  100:"z",
-  102:"q",103:"e",104:"u",105:"i",
-  108:"Tab",
-  109:"Shift"
-};
-
-function openDatabase() {
-  return new Promise((resolve,reject) => {
-    const request = indexedDB.open("RetroGamingHubDB",1);
-    request.onupgradeneeded = () => {
-      const db = request.result;
-      if (!db.objectStoreNames.contains("games")) db.createObjectStore("games",{keyPath:"id"});
-    };
-    request.onsuccess = () => { database = request.result; resolve(database); };
-    request.onerror = () => reject(request.error);
-  });
+function titleFromPath(path){
+  let name=path.split("/").pop().replace(/\.html?$/i,"");
+  return name
+    .replace(/[-_]/g," ")
+    .replace(/\b\w/g,c=>c.toUpperCase());
 }
-function dbAction(mode,action) {
-  return new Promise((resolve,reject) => {
-    const tx = database.transaction("games",mode), store = tx.objectStore("games");
-    let request;
-    try { request = action(store); } catch(error) { reject(error); return; }
-    if (request) {
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
-    } else {
-      tx.oncomplete = () => resolve(true);
-      tx.onerror = () => reject(tx.error);
-    }
-  });
-}
-const getAllGames = () => dbAction("readonly",s => s.getAll());
-const saveGame = game => dbAction("readwrite",s => s.put(game));
-const deleteGame = id => dbAction("readwrite",s => s.delete(id));
-function extensionOf(name) { const parts=name.toLowerCase().split("."); return parts.length>1?parts.pop():""; }
-function detectSystem(file,override) {
-  if (override && override!=="auto") return override;
-  const ext=extensionOf(file.name);
-  for (const [key,system] of Object.entries(SYSTEMS)) if(system.extensions.includes(ext)) return key;
-  return null;
-}
-function updateStatus(message) { $("status").textContent=message; }
 
-$("addButton").addEventListener("click",() => picker.click());
-picker.addEventListener("change",async() => {
-  const files=[...picker.files]; if(!files.length)return;
-  const override=$("systemOverride").value; let imported=0,skipped=0;
-  updateStatus("IMPORTING ROM FILES...");
-  for(const file of files) {
-    const system=detectSystem(file,override);
-    if(!system||!SYSTEMS[system]){skipped++;continue;}
-    const id=Date.now()+"-"+Math.random().toString(36).slice(2);
-    try {
-      await saveGame({id,name:file.name,system,size:file.size,type:file.type,blob:file,added:Date.now()});
-      imported++;
-    } catch(error) { console.error(error); skipped++; }
-  }
-  picker.value=""; await refreshLibrary();
-  updateStatus("IMPORT COMPLETE · "+imported+" imported · "+skipped+" skipped.");
-  focusElement($("addButton"));
-});
+async function loadGames(){
+  statusEl.textContent="Loading game collection...";
+  gamesEl.innerHTML="";
+  document.getElementById("empty").style.display="none";
 
-async function refreshLibrary() {
-  games=await getAllGames(); games.sort((a,b)=>a.name.localeCompare(b.name)); grid.innerHTML="";
-  empty.style.display=games.length?"none":"block";
-  for(const game of games) {
-    const system=SYSTEMS[game.system]; if(!system)continue;
-    const card=document.createElement("article"); card.className="game-card";
-    const title=document.createElement("div"); title.className="game-title"; title.textContent=system.icon+" "+game.name;
-    const subtitle=document.createElement("div"); subtitle.className="game-system"; subtitle.textContent=system.name;
-    const actions=document.createElement("div"); actions.className="card-actions";
-    const play=document.createElement("button"); play.className="play-btn"; play.textContent="▶ PLAY";
-    play.addEventListener("click",()=>startGame(game.id));
-    const remove=document.createElement("button"); remove.className="delete-btn"; remove.textContent="✕ REMOVE"; remove.title="Remove game from library";
-    remove.addEventListener("click",async()=>{await deleteGame(game.id);await refreshLibrary();updateStatus("GAME REMOVED FROM LIBRARY.");focusElement($("addButton"));});
-    actions.append(play,remove); card.append(title,subtitle,actions); grid.append(card);
-  }
-}
-$("refreshButton").addEventListener("click",refreshLibrary);
+  try{
+    const response=await fetch(API);
 
-async function startGame(id) {
-  const game=games.find(g=>g.id===id); if(!game)return;
-  const generation=++gameGeneration; currentGame=game; isPlaying=false; isPaused=false;
-  library.style.display="none"; gameScreen.style.display="block"; loadingScreen.style.display="flex";
-  $("playingName").textContent=game.name;
-  $("loadingMessage").textContent="Preparing "+SYSTEMS[game.system].name+"...";
-  $("emulator").innerHTML=""; $("controllerStatus").textContent="CONTROLLER: CHECKING…";
-  try {
-    const rom=new File([game.blob],game.name,{type:game.type||"application/octet-stream"});
-    window.EJS_player="#emulator";
-    window.EJS_gameUrl=rom;
-    window.EJS_core=game.system;
-    window.EJS_pathtodata=CDN;
-    window.EJS_gameName=game.name;
-    window.EJS_startOnLoaded=true;
-    window.EJS_fullscreenOnLoaded=false;
-    window.EJS_volume=0.7;
-    window.EJS_color="#64e6c7";
-    window.EJS_defaultControls=defaultControls;
-    window.EJS_askBeforeExit=false;
-    window.EJS_ready=()=>{
-      if(generation!==gameGeneration)return;
-      $("loadingMessage").textContent="Emulator ready. Loading game...";
-    };
-    window.EJS_onGameStart=()=>{
-      if(generation!==gameGeneration)return;
-      isPlaying=true;isPaused=false;loadingScreen.style.display="none";
-      updateStatus("NOW PLAYING · "+game.name);
-      updateControllerStatus();
-    };
-    const oldLoader=$("emulatorLoader"); if(oldLoader)oldLoader.remove();
-    const script=document.createElement("script"); script.id="emulatorLoader"; script.src=CDN+"loader.js";
-    script.onerror=()=>{
-      if(generation!==gameGeneration)return;
-      $("loadingMessage").textContent="Could not download EmulatorJS. Check your internet connection.";
-    };
-    document.body.appendChild(script);
-  } catch(error) {
-    console.error(error); $("loadingMessage").textContent="Unable to start game: "+error.message;
+    if(!response.ok)
+      throw new Error("GitHub API error: "+response.status);
+
+    const data=await response.json();
+
+    allGames=data.tree
+      .filter(item=>
+        item.type==="blob" &&
+        /^offline\/.+\.html?$/i.test(item.path)
+      )
+      .map(item=>({
+        name:titleFromPath(item.path),
+        path:item.path,
+        url:RAW+item.path.split("/").map(encodeURIComponent).join("/")
+      }));
+
+    statusEl.textContent=
+      allGames.length+" games available";
+
+    renderGames();
+
+  }catch(error){
+    statusEl.textContent=
+      "Could not load games. Check your internet connection or GitHub API limit.";
+    console.error(error);
   }
 }
 
-function togglePause() {
-  if(!isPlaying||!window.EJS_emulator)return;
-  try {
-    if(isPaused){window.EJS_emulator.play();isPaused=false;pauseOverlay.style.display="none";}
-    else{window.EJS_emulator.pause();isPaused=true;pauseOverlay.style.display="flex";focusElement($("resumeButton"));}
-  } catch(error){console.error(error);}
-}
-function showPauseMenu() {
-  if(!currentGame)return;
-  if(window.EJS_emulator&&!isPaused){try{window.EJS_emulator.pause();}catch(error){}}
-  isPaused=true;pauseOverlay.style.display="flex";focusElement($("resumeButton"));
-}
-function resumeGame() {
-  if(window.EJS_emulator){try{window.EJS_emulator.play();}catch(error){}}
-  isPaused=false;pauseOverlay.style.display="none";
-}
-$("pauseButton").addEventListener("click",showPauseMenu);
-$("resumeButton").addEventListener("click",resumeGame);
-$("fullscreenButton").addEventListener("click",()=>{
-  if(window.EJS_emulator){try{window.EJS_emulator.toggleFullscreen(true);}catch(error){console.error(error);}}
-});
+function renderGames(){
+  const query=searchEl.value.toLowerCase().trim();
 
-async function exitGame() {
-  if(!currentGame)return;
-  gameGeneration++;
-  try{if(window.EJS_emulator)window.EJS_emulator.callEvent("exit");}catch(error){console.warn(error);}
-  isPlaying=false;isPaused=false;pauseOverlay.style.display="none";loadingScreen.style.display="none";gameScreen.style.display="none";
-  $("emulator").innerHTML="";
-  const loader=$("emulatorLoader");if(loader)loader.remove();
-  try{delete window.EJS_emulator;}catch(error){}
-  currentGame=null;
-  ["EJS_player","EJS_gameUrl","EJS_core","EJS_pathtodata","EJS_gameName","EJS_defaultControls","EJS_ready","EJS_onGameStart"].forEach(key=>{try{delete window[key];}catch(error){}});
-  library.style.display="block";updateStatus("READY · SELECT ANOTHER GAME.");focusElement($("addButton"));
-}
-$("exitButton").addEventListener("click",exitGame);
+  let filtered=allGames.filter(game=>
+    game.name.toLowerCase().includes(query)
+  );
 
-/* Controller diagnostics: checks WebView Gamepad API access. */
-function updateControllerStatus() {
-  const label=$("controllerStatus");
-  if(!label)return;
-  if(!navigator.getGamepads){label.textContent="GAMEPAD API UNAVAILABLE · KEY INPUT BRIDGE READY";return;}
-  let pads=[];
-  try{pads=Array.from(navigator.getGamepads()).filter(Boolean);}catch(error){}
-  if(!pads.length){
-    const recentKey=lastGamepadInput&&Date.now()-lastGamepadInputAt<2500?" · KEY INPUT: "+lastGamepadInput:"";
-    label.textContent="NO GAMEPAD API DEVICE · KEY BRIDGE READY"+recentKey;
-    return;
-  }
-  const pad=pads.find(p=>p.connected)||pads[0];
-  let input=lastGamepadInput&&Date.now()-lastGamepadInputAt<2500?" · "+lastGamepadInput:"";
-  label.textContent="PAD: "+(pad.id||"Bluetooth controller").slice(0,36)+input;
-}
-window.addEventListener("gamepadconnected",event=>{
-  lastGamepadInput="CONNECTED";lastGamepadInputAt=Date.now();updateControllerStatus();
-});
-window.addEventListener("gamepaddisconnected",()=>{
-  lastGamepadInput="DISCONNECTED";lastGamepadInputAt=Date.now();updateControllerStatus();
-});
-function pollGamepads() {
-  if(navigator.getGamepads) {
-    try {
-      const pads=Array.from(navigator.getGamepads()).filter(Boolean);
-      for(const pad of pads) {
-        if(!pad.connected)continue;
-        const pressed=pad.buttons.findIndex(button=>button&&button.pressed);
-        if(pressed>=0){lastGamepadInput="BUTTON "+(pressed+1);lastGamepadInputAt=Date.now();}
-        else if(pad.axes.some(axis=>Math.abs(axis)>0.55)){
-          const axis=pad.axes.findIndex(value=>Math.abs(value)>0.55);
-          lastGamepadInput="STICK AXIS "+(axis+1);lastGamepadInputAt=Date.now();
-        }
+  filtered.sort((a,b)=>
+    sortEl.value==="az"
+      ? a.name.localeCompare(b.name)
+      : b.name.localeCompare(a.name)
+  );
+
+  gamesEl.innerHTML="";
+
+  filtered.forEach(game=>{
+    const card=document.createElement("div");
+    card.className="card";
+    card.tabIndex=0;
+    card.setAttribute("role","button");
+    card.innerHTML=`
+      <div class="icon">🎮</div>
+      <div class="name"></div>
+    `;
+    card.querySelector(".name").textContent=game.name;
+
+    card.onclick=()=>playGame(game);
+    card.onkeydown=e=>{
+      if(e.key==="Enter"||e.key===" "){
+        e.preventDefault();
+        playGame(game);
       }
-    }catch(error){}
-  }
-  if(gameScreen.style.display!=="none")updateControllerStatus();
-}
-setInterval(pollGamepads,350);
+    };
 
-function visibleFocusables() {
-  return [...document.querySelectorAll("button:not([disabled]),select:not([disabled])")]
-    .filter(el=>el.getClientRects().length>0);
-}
-function focusElement(element) {
-  if(!element)return;
-  element.focus({preventScroll:true});
-  element.scrollIntoView({behavior:"smooth",block:"nearest",inline:"nearest"});
-}
-function moveFocus(direction) {
-  const items=visibleFocusables(),current=document.activeElement;
-  if(!items.includes(current)){focusElement(items[0]);return;}
-  const origin=current.getBoundingClientRect(),ox=origin.left+origin.width/2,oy=origin.top+origin.height/2;
-  const candidates=[];
-  items.forEach(element=>{
-    if(element===current)return;
-    const rect=element.getBoundingClientRect(),x=rect.left+rect.width/2,y=rect.top+rect.height/2,dx=x-ox,dy=y-oy;
-    let primary,secondary;
-    if(direction==="left"){if(dx>=-1)return;primary=-dx;secondary=Math.abs(dy);}
-    if(direction==="right"){if(dx<=1)return;primary=dx;secondary=Math.abs(dy);}
-    if(direction==="up"){if(dy>=-1)return;primary=-dy;secondary=Math.abs(dx);}
-    if(direction==="down"){if(dy<=1)return;primary=dy;secondary=Math.abs(dx);}
-    candidates.push({element,score:primary+secondary*2.3});
+    gamesEl.appendChild(card);
   });
-  candidates.sort((a,b)=>a.score-b.score);
-  focusElement(candidates.length?candidates[0].element:current);
+
+  document.getElementById("empty").style.display=
+    filtered.length?"none":"block";
+
+  statusEl.textContent=
+    filtered.length+" of "+allGames.length+" games";
 }
 
-function dispatchEmulatorKey(type,key,originalEvent) {
-  const codeMap={ArrowUp:"ArrowUp",ArrowDown:"ArrowDown",ArrowLeft:"ArrowLeft",ArrowRight:"ArrowRight",Enter:"Enter",Tab:"Tab",Shift:"Shift",x:"KeyX",z:"KeyZ",q:"KeyQ",e:"KeyE",u:"KeyU",i:"KeyI"};
-  const synthetic=new KeyboardEvent(type,{
-    key,code:codeMap[key]||"",bubbles:true,cancelable:true,
-    repeat:!!(originalEvent&&originalEvent.repeat),
-    shiftKey:key==="Shift"
-  });
-  document.dispatchEvent(synthetic);
-}
-function nativeAndroidKey(event,type) {
-  const code=event.keyCode||event.which||0;
-  if(code===97||code===4||event.key==="Escape"||event.key==="Backspace") {
-    if(type==="keydown")showPauseMenu();
-    event.preventDefault();event.stopImmediatePropagation();return true;
-  }
-  const mapped=androidKeyToEmulatorKey[code];
-  if(mapped) {
-    event.preventDefault();event.stopImmediatePropagation();
-    dispatchEmulatorKey(type,mapped,event);
-    lastGamepadInput="KEY "+(event.key||code);lastGamepadInputAt=Date.now();
-    updateControllerStatus();
-    return true;
-  }
-  return false;
+function playGame(game){
+  currentURL=game.url;
+
+  document.getElementById("gameTitle").textContent=game.name;
+  document.getElementById("player").style.display="flex";
+
+  frame.src=game.url;
 }
 
-/* Remote/keyboard routing. During gameplay, ordinary keys pass through. */
-document.addEventListener("keydown",event=>{
-  const key=event.key;
-  if(key==="MediaPlayPause"||key==="MediaPlay"||key==="MediaPause"||event.keyCode===179) {
-    if(currentGame){event.preventDefault();event.stopImmediatePropagation();togglePause();}
-    return;
+function closeGame(){
+  frame.src="about:blank";
+  document.getElementById("player").style.display="none";
+}
+
+function newTab(){
+  if(currentURL) window.open(currentURL,"_blank");
+}
+
+function fullscreen(){
+  const player=document.getElementById("player");
+
+  if(!document.fullscreenElement){
+    player.requestFullscreen?.();
+  }else{
+    document.exitFullscreen?.();
   }
-  if(key==="Escape"||key==="Backspace"||key==="BrowserBack"||key==="GoBack"||event.keyCode===4) {
-    event.preventDefault();event.stopImmediatePropagation();
-    if(pauseOverlay.style.display==="flex")resumeGame();else if(currentGame)showPauseMenu();
-    return;
-  }
-  if(currentGame&&pauseOverlay.style.display!=="flex") {
-    nativeAndroidKey(event,"keydown");
-    return;
-  }
-  if(event.target.tagName==="SELECT")return;
-  const directions={ArrowUp:"up",ArrowDown:"down",ArrowLeft:"left",ArrowRight:"right"};
-  if(directions[key]){event.preventDefault();moveFocus(directions[key]);return;}
-  if(key==="Enter"||key===" "){
-    if(event.target.tagName!=="SELECT"){
-      event.preventDefault();event.stopImmediatePropagation();
-      const focused=document.activeElement;if(focused&&focused.tagName==="BUTTON")focused.click();
+}
+
+searchEl.addEventListener("input",renderGames);
+sortEl.addEventListener("change",renderGames);
+
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape"){
+    if(document.getElementById("player").style.display==="flex"){
+      closeGame();
     }
   }
-},true);
-
-document.addEventListener("keyup",event=>{
-  if(currentGame&&pauseOverlay.style.display!=="flex")nativeAndroidKey(event,"keyup");
-},true);
-
-document.addEventListener("focusin",event=>{
-  const target=event.target;
-  if(target.tagName==="BUTTON"||target.tagName==="SELECT")target.scrollIntoView({behavior:"smooth",block:"nearest",inline:"nearest"});
 });
-window.addEventListener("pageshow",()=>{
-  if(!currentGame){const items=visibleFocusables();if(!items.includes(document.activeElement))focusElement($("addButton"));}
-});
-$("cancelLoading").addEventListener("click",()=>{if(currentGame)exitGame();});
 
-async function initialize() {
-  try{await openDatabase();await refreshLibrary();updateStatus("READY · "+games.length+" GAMES IN YOUR LIBRARY.");focusElement($("addButton"));}
-  catch(error){console.error(error);updateStatus("DATABASE ERROR · Browser storage is unavailable.");}
-}
-initialize();
-})();
+loadGames();
 </script>
+
 </body>
 </html>
