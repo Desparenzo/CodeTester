@@ -2,2110 +2,845 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<meta name="theme-color" content="#101116">
-<title>Media Viewer</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MediaBox</title>
 <style>
-:root {
-    --bg: #101116;
-    --panel: #191b23;
-    --panel2: #222530;
-    --border: #303342;
-    --text: #f1f1f5;
-    --muted: #969aaa;
-    --accent: #a78bfa;
-    --accent2: #8062dc;
-    --danger: #ef7373;
-}
+  :root {
+    color-scheme: dark;
+    --bg: #101114;
+    --panel: #1b1d22;
+    --panel2: #252830;
+    --text: #f4f5f7;
+    --muted: #a6a9b2;
+    --accent: #8b7cff;
+    --border: #343740;
+  }
 
-* {
-    box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
-}
+  * { box-sizing: border-box; }
 
-body {
+  body {
     margin: 0;
+    min-height: 100vh;
     background: var(--bg);
     color: var(--text);
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    min-height: 100vh;
-}
+  }
 
-button, select {
-    font: inherit;
-}
+  button, input { font: inherit; }
 
-button {
-    cursor: pointer;
+  button {
+    border: 0;
     color: var(--text);
-}
+    background: var(--panel2);
+    border-radius: 12px;
+    padding: 11px 15px;
+    cursor: pointer;
+  }
 
-button:disabled {
-    opacity: .35;
+  button:disabled {
+    opacity: .4;
     cursor: default;
-}
+  }
 
-[hidden] {
-    display: none !important;
-}
+  button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
 
-/* HEADER */
+  .hidden { display: none !important; }
 
-.header {
+  #loadingScreen {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background: var(--bg);
+    text-align: center;
+  }
+
+  .loadingBox { max-width: 460px; }
+
+  .logo {
+    font-size: clamp(42px, 10vw, 70px);
+    font-weight: 800;
+    letter-spacing: -3px;
+    margin-bottom: 8px;
+  }
+
+  .logo span { color: var(--accent); }
+
+  .subtitle, .muted {
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .startActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 24px;
+  }
+
+  .primary {
+    background: var(--accent);
+    color: white;
+    font-weight: 700;
+  }
+
+  #app {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(16,17,20,.92);
     position: sticky;
     top: 0;
-    z-index: 10;
-    background: rgba(16,17,22,.96);
-    border-bottom: 1px solid var(--border);
-    backdrop-filter: blur(15px);
-    padding: 14px 18px;
-}
+    z-index: 5;
+    backdrop-filter: blur(12px);
+  }
 
-.header-inner {
-    max-width: 1400px;
-    margin: auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 15px;
-}
-
-.logo {
-    font-size: 19px;
+  .brand {
+    font-size: 22px;
     font-weight: 800;
-    letter-spacing: -.6px;
-}
+    letter-spacing: -1px;
+    white-space: nowrap;
+  }
 
-.logo span {
-    color: var(--accent);
-}
+  .brand span { color: var(--accent); }
 
-.header-actions {
+  .headerActions {
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
-}
+    justify-content: flex-end;
+  }
 
-/* BUTTONS */
+  .smallButton {
+    padding: 9px 12px;
+    font-size: 14px;
+  }
 
-.btn {
-    border: 1px solid var(--border);
-    background: var(--panel2);
-    border-radius: 10px;
-    padding: 10px 15px;
-    font-size: 13px;
-    font-weight: 650;
-    transition: .15s;
-}
+  main {
+    width: 100%;
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 20px;
+    flex: 1;
+  }
 
-.btn:hover {
-    background: #303445;
-}
-
-.btn.primary {
-    background: var(--accent2);
-    border-color: var(--accent2);
-    color: white;
-}
-
-.btn.primary:hover {
-    background: #9274eb;
-}
-
-.btn.active {
-    background: var(--accent2);
-    border-color: var(--accent2);
-}
-
-/* MAIN */
-
-main {
-    max-width: 1400px;
-    margin: auto;
-    padding: 22px 18px 60px;
-}
-
-.welcome {
-    text-align: center;
-    padding: 75px 20px;
-    color: var(--muted);
-}
-
-.welcome-icon {
-    font-size: 65px;
-    margin-bottom: 15px;
-}
-
-.welcome h1 {
-    color: var(--text);
-    font-size: 27px;
-    margin: 0 0 10px;
-}
-
-.welcome p {
-    max-width: 450px;
-    line-height: 1.6;
-    margin: 0 auto 25px;
-}
-
-.welcome-actions {
+  .sectionHeading {
     display: flex;
-    justify-content: center;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-/* CATEGORY NAVIGATION */
-
-.section-title {
-    font-size: 13px;
-    color: var(--muted);
-    font-weight: 750;
-    letter-spacing: 1px;
-    margin: 18px 0 12px;
-    text-transform: uppercase;
-}
-
-.category-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    max-height: 145px;
-    overflow-y: auto;
-    padding: 2px 3px 10px 0;
-}
-
-.category-btn {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    padding: 9px 13px;
-    border-radius: 10px;
-    font-size: 13px;
-    display: flex;
-    gap: 8px;
-    align-items: center;
-}
-
-.category-btn small {
-    color: var(--muted);
-}
-
-.category-btn.selected {
-    background: rgba(167,139,250,.16);
-    border-color: var(--accent);
-    color: #d6c8ff;
-}
-
-.category-btn.selected small {
-    color: #c4b5fd;
-}
-
-/* CURRENT SECTION */
-
-.library-heading {
-    margin-top: 25px;
-    margin-bottom: 17px;
-    display: flex;
-    align-items: center;
     justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 15px;
-}
+    align-items: baseline;
+    gap: 12px;
+    margin: 6px 0 16px;
+  }
 
-.library-heading h2 {
-    margin: 0 0 4px;
-    font-size: 23px;
-    overflow-wrap: anywhere;
-}
+  h1, h2, p { margin-top: 0; }
+  h1 { font-size: clamp(24px, 5vw, 34px); margin-bottom: 6px; }
+  h2 { font-size: 20px; margin-bottom: 0; }
 
-.library-info {
-    font-size: 12px;
-    color: var(--muted);
-}
-
-.play-actions {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-/* THUMBNAIL GRID */
-
-.media-grid {
+  #categoryGrid, #mediaGrid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
-    gap: 13px;
-}
+    gap: 14px;
+  }
 
-.media-card {
-    padding: 0;
+  .categoryCard, .mediaCard {
+    min-width: 0;
+    overflow: hidden;
     background: var(--panel);
     border: 1px solid var(--border);
-    border-radius: 11px;
-    overflow: hidden;
+    border-radius: 15px;
+    cursor: pointer;
     text-align: left;
-    min-width: 0;
-    transition: border-color .15s, transform .15s;
-}
+    padding: 0;
+  }
 
-.media-card:hover {
-    border-color: var(--accent);
-    transform: translateY(-2px);
-}
+  .categoryArt {
+    aspect-ratio: 1.35;
+    display: grid;
+    place-items: center;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(139,124,255,.55), transparent 45%),
+      linear-gradient(135deg, #292b36, #17181d);
+    font-size: 48px;
+  }
 
-.thumb {
-    width: 100%;
-    aspect-ratio: 4 / 4.8;
-    background: #090a0e;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  .categoryInfo, .mediaInfo { padding: 11px 12px 13px; }
+
+  .categoryName, .mediaName {
+    font-weight: 650;
     overflow: hidden;
-}
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 
-.thumb img {
+  .categoryCount, .mediaType {
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .mediaThumb {
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    background: #090a0c;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .mediaThumb img, .mediaThumb video {
     width: 100%;
     height: 100%;
     object-fit: contain;
-    display: block;
-}
+  }
 
-.video-placeholder {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    gap: 10px;
-    background: linear-gradient(145deg, #252337, #101116);
-    color: #d2c5ff;
-}
-
-.video-placeholder strong {
-    font-size: 43px;
-}
-
-.video-placeholder small {
-    font-size: 11px;
-    color: var(--muted);
-}
-
-.video-label {
+  .videoBadge {
     position: absolute;
-    bottom: 8px;
     right: 8px;
-    background: rgba(0,0,0,.8);
-    border-radius: 5px;
-    padding: 3px 7px;
-    font-size: 10px;
-}
-
-.thumb-name {
-    padding: 9px 10px;
+    bottom: 8px;
+    padding: 4px 7px;
+    border-radius: 7px;
+    background: rgba(0,0,0,.75);
     font-size: 12px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
+  }
 
-.load-more-wrap {
+  .mediaCard:hover, .categoryCard:hover { border-color: var(--accent); }
+
+  .emptyState {
+    border: 1px dashed var(--border);
+    border-radius: 16px;
+    padding: 30px 20px;
     text-align: center;
-    padding: 25px 0;
-}
-
-#loadMoreBtn {
-    min-width: 150px;
-}
-
-/* LOADING SCREEN */
-
-.loading-screen {
-    position: fixed;
-    inset: 0;
-    z-index: 1000;
-    background: rgba(10,11,16,.97);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-}
-
-.loading-box {
-    width: min(420px, 100%);
-    text-align: center;
-}
-
-.loading-icon {
-    font-size: 48px;
-    margin-bottom: 15px;
-}
-
-.loading-box h2 {
-    margin: 0 0 8px;
-    font-size: 22px;
-}
-
-.loading-status {
     color: var(--muted);
-    font-size: 13px;
-    margin: 8px 0 20px;
-}
-
-.progress-track {
-    width: 100%;
-    height: 9px;
-    background: var(--panel2);
-    border-radius: 20px;
-    overflow: hidden;
-}
-
-.progress-bar {
-    height: 100%;
-    width: 0%;
-    background: var(--accent);
-    border-radius: 20px;
-    transition: width .15s;
-}
-
-.progress-percent {
-    font-size: 13px;
-    color: var(--accent);
-    margin-top: 10px;
-    font-weight: 750;
-}
-
-.loading-detail {
-    margin-top: 15px;
-    color: var(--muted);
-    font-size: 11px;
     line-height: 1.6;
-}
+  }
 
-/* VIEWER */
-
-.viewer {
+  #viewer {
     position: fixed;
     inset: 0;
-    z-index: 100;
-    background: #07080c;
+    z-index: 30;
+    background: #000;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
-}
+  }
 
-.viewer-top {
+  .viewerTop, .viewerBottom {
     display: flex;
     align-items: center;
-    gap: 12px;
     justify-content: space-between;
-    background: rgba(20,21,28,.96);
-    border-bottom: 1px solid #282a35;
-    padding: 10px 14px;
-    min-height: 55px;
-    flex-shrink: 0;
-}
+    gap: 10px;
+    padding: 12px 14px;
+    background: rgba(15,15,18,.94);
+    z-index: 2;
+  }
 
-.viewer-title {
+  .viewerTop { border-bottom: 1px solid #25252a; }
+  .viewerBottom { border-top: 1px solid #25252a; }
+
+  #viewerTitle {
     min-width: 0;
     flex: 1;
-}
-
-.viewer-title strong {
-    display: block;
-    font-size: 13px;
-    white-space: nowrap;
+    text-align: center;
     overflow: hidden;
+    white-space: nowrap;
     text-overflow: ellipsis;
-}
+    color: #e8e8ec;
+    font-size: 14px;
+  }
 
-.viewer-title small {
-    color: var(--muted);
-    font-size: 11px;
-}
-
-.icon-btn {
-    border: 1px solid #353744;
-    background: #22242e;
-    width: 39px;
-    height: 39px;
-    border-radius: 9px;
-    font-size: 17px;
-    flex-shrink: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.icon-btn:hover {
-    background: #343747;
-}
-
-.viewer-stage {
+  #viewerStage {
     flex: 1;
     min-height: 0;
+    display: grid;
+    place-items: center;
     position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     overflow: hidden;
     touch-action: pan-y;
-    user-select: none;
-}
+    background: #000;
+  }
 
-.viewer-stage img {
+  #viewerMedia {
     max-width: 100%;
     max-height: 100%;
-    width: 100%;
-    height: 100%;
+    width: auto;
+    height: auto;
     object-fit: contain;
     display: block;
-    pointer-events: auto;
-}
+  }
 
-.viewer-stage video {
-    max-width: 100%;
-    max-height: 100%;
+  #viewerMedia.video {
     width: 100%;
     height: 100%;
-    object-fit: contain;
-    outline: none;
-}
+  }
 
-.viewer-stage .unsupported {
-    text-align: center;
-    padding: 30px;
-    color: var(--muted);
-}
+  .navArrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 46px;
+    height: 58px;
+    border-radius: 12px;
+    background: rgba(35,35,40,.65);
+    font-size: 25px;
+    z-index: 1;
+  }
 
-.viewer-bottom {
-    flex-shrink: 0;
-    background: rgba(20,21,28,.97);
-    border-top: 1px solid #282a35;
-    padding: 10px 12px max(10px, env(safe-area-inset-bottom));
-}
+  #prevButton { left: 12px; }
+  #nextButton { right: 12px; }
 
-.viewer-controls {
+  .viewerBottom button { padding: 10px 13px; }
+
+  .viewerControls {
     display: flex;
+    gap: 8px;
     align-items: center;
-    justify-content: center;
-    gap: 9px;
-    flex-wrap: wrap;
-}
+  }
 
-.control-btn {
-    border: 1px solid #353744;
-    background: #242630;
-    min-width: 43px;
-    height: 42px;
-    border-radius: 10px;
-    font-size: 17px;
-}
-
-.control-btn.active {
-    background: var(--accent2);
-    border-color: var(--accent2);
-}
-
-.control-btn:hover {
-    background: #383b4c;
-}
-
-.control-btn.active:hover {
-    background: #9274eb;
-}
-
-.interval-select {
-    height: 42px;
-    background: #242630;
-    border: 1px solid #353744;
-    color: var(--text);
-    border-radius: 9px;
-    padding: 0 9px;
-    font-size: 12px;
-}
-
-.viewer-progress {
+  #positionLabel {
+    min-width: 75px;
     text-align: center;
-    font-size: 11px;
     color: var(--muted);
-    margin-top: 9px;
-}
-
-.viewer-hint {
-    text-align: center;
-    font-size: 10px;
-    color: #656979;
-    margin-top: 4px;
-}
-
-/* TOAST */
-
-.toast {
-    position: fixed;
-    bottom: 25px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #292b37;
-    color: white;
-    border: 1px solid #46495c;
-    border-radius: 10px;
-    padding: 11px 17px;
     font-size: 13px;
-    z-index: 2000;
-    max-width: 90vw;
+  }
+
+  #slideshowButton.active, #shuffleButton.active {
+    background: var(--accent);
+    color: white;
+  }
+
+  #toast {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    transform: translateX(-50%);
+    z-index: 100;
+    background: #2b2d35;
+    border: 1px solid #444753;
+    border-radius: 12px;
+    padding: 11px 16px;
+    max-width: calc(100vw - 32px);
     text-align: center;
-    box-shadow: 0 5px 30px rgba(0,0,0,.4);
-}
+    box-shadow: 0 8px 30px #0008;
+  }
 
-/* RESPONSIVE */
-
-@media (max-width: 600px) {
-    main {
-        padding: 16px 11px 45px;
+  @media (max-width: 600px) {
+    header { padding: 11px 12px; }
+    main { padding: 14px 12px; }
+    #categoryGrid, #mediaGrid {
+      grid-template-columns: repeat(auto-fill, minmax(115px, 1fr));
+      gap: 10px;
     }
-
-    .header {
-        padding: 11px;
-    }
-
-    .logo {
-        font-size: 16px;
-    }
-
-    .header-inner {
-        gap: 6px;
-    }
-
-    .header-actions {
-        gap: 5px;
-    }
-
-    .header-actions .btn {
-        padding: 8px 9px;
-        font-size: 11px;
-    }
-
-    .media-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 7px;
-    }
-
-    .thumb-name {
-        padding: 7px;
-        font-size: 10px;
-    }
-
-    .library-heading {
-        align-items: flex-start;
-    }
-
-    .library-heading h2 {
-        font-size: 20px;
-    }
-
-    .play-actions {
-        width: 100%;
-    }
-
-    .play-actions .btn {
-        flex: 1;
-    }
-
-    .viewer-top {
-        padding: 8px;
-    }
-
-    .viewer-controls {
-        gap: 6px;
-    }
-
-    .control-btn {
-        min-width: 39px;
-        height: 40px;
-    }
-}
-
-@media (max-width: 360px) {
-    .media-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-}
+    .viewerTop, .viewerBottom { padding: 9px; }
+    .viewerBottom { flex-wrap: wrap; justify-content: center; }
+    .viewerControls { justify-content: center; }
+    .navArrow { width: 38px; height: 50px; }
+  }
 </style>
 </head>
-
 <body>
 
-<!-- HEADER -->
-
-<header class="header">
-    <div class="header-inner">
-
-        <div class="logo">
-            MEDIA<span>BOX</span>
-        </div>
-
-        <div class="header-actions">
-            <button class="btn primary" id="folderBtn">📁 Folder</button>
-            <button class="btn" id="filesBtn">＋ Files</button>
-        </div>
-
+<section id="loadingScreen">
+  <div class="loadingBox">
+    <div class="logo">Media<span>Box</span></div>
+    <p class="subtitle">Your media, neatly sorted by folder.</p>
+    <p class="muted">Choose a folder to use its immediate subfolders as categories. Images and videos inside each category will appear together.</p>
+    <div class="startActions">
+      <button class="primary" id="chooseFolderButton">Choose media folder</button>
+      <button id="chooseFilesButton">Choose files</button>
     </div>
-</header>
+    <input id="folderInput" type="file" accept="image/*,video/*" webkitdirectory directory multiple class="hidden">
+    <input id="filesInput" type="file" accept="image/*,video/*" multiple class="hidden">
+    <p class="muted" style="font-size:12px;margin-top:18px">
+      Folder access is read-only. MediaBox does not upload or move your files.
+    </p>
+  </div>
+</section>
 
-<!-- FILE PICKERS -->
+<div id="app" class="hidden">
+  <header>
+    <div class="brand">Media<span>Box</span></div>
+    <div class="headerActions">
+      <button class="smallButton" id="homeButton">Categories</button>
+      <button class="smallButton" id="addMediaButton">Add media</button>
+      <button class="smallButton" id="changeFolderButton">Change folder</button>
+    </div>
+  </header>
 
-<input
-    type="file"
-    id="folderInput"
-    webkitdirectory
-    directory
-    multiple
-    accept="image/*,video/*"
-    hidden
->
-
-<input
-    type="file"
-    id="filesInput"
-    multiple
-    accept="image/*,video/*"
-    hidden
->
-
-<!-- MAIN LIBRARY -->
-
-<main>
-
-    <section class="welcome" id="welcome">
-
-        <div class="welcome-icon">▣</div>
-
-        <h1>Your Media Library</h1>
-
-        <p>
-            Select a folder containing your images and videos,
-            or pick multiple files to create your temporary media library.
-        </p>
-
-        <div class="welcome-actions">
-            <button class="btn primary" onclick="document.getElementById('folderInput').click()">
-                📁 Select Folder
-            </button>
-
-            <button class="btn" onclick="document.getElementById('filesInput').click()">
-                Select Multiple Files
-            </button>
+  <main>
+    <section id="categoriesView">
+      <div class="sectionHeading">
+        <div>
+          <h1>Your categories</h1>
+          <div class="muted" id="librarySummary"></div>
         </div>
-
+      </div>
+      <div id="categoryGrid"></div>
     </section>
 
-    <section id="library" hidden>
-
-        <div class="section-title">Browse categories</div>
-
-        <div class="category-list" id="categoryList"></div>
-
-        <div class="library-heading">
-
-            <div>
-                <h2 id="sectionHeading">All Media</h2>
-                <div class="library-info" id="sectionInfo"></div>
-            </div>
-
-            <div class="play-actions">
-                <button class="btn primary" id="playAllBtn">▶ Play All</button>
-                <button class="btn" id="shuffleAllBtn">🔀 Shuffle</button>
-            </div>
-
+    <section id="mediaView" class="hidden">
+      <div class="sectionHeading">
+        <div>
+          <h1 id="categoryTitle">Category</h1>
+          <div class="muted" id="categorySummary"></div>
         </div>
-
-        <div class="media-grid" id="mediaGrid"></div>
-
-        <div class="load-more-wrap" id="loadMoreWrap" hidden>
-            <button class="btn" id="loadMoreBtn">Load More</button>
-        </div>
-
+        <button id="backToCategoriesButton">All categories</button>
+      </div>
+      <div id="mediaGrid"></div>
     </section>
-
-</main>
-
-<!-- LOADING OVERLAY -->
-
-<div class="loading-screen" id="loadingScreen" hidden>
-
-    <div class="loading-box">
-
-        <div class="loading-icon">▧</div>
-
-        <h2>Preparing your library</h2>
-
-        <div class="loading-status" id="loadingStatus">
-            Getting files ready...
-        </div>
-
-        <div class="progress-track">
-            <div class="progress-bar" id="progressBar"></div>
-        </div>
-
-        <div class="progress-percent" id="progressPercent">0%</div>
-
-        <div class="loading-detail" id="loadingDetail">
-            Creating thumbnails and organizing categories.<br>
-            Please keep this page open.
-        </div>
-
-    </div>
-
+  </main>
 </div>
 
-<!-- FULLSCREEN VIEWER -->
+<section id="viewer" class="hidden" aria-label="Media viewer">
+  <div class="viewerTop">
+    <button id="closeViewerButton" aria-label="Close viewer">✕</button>
+    <div id="viewerTitle"></div>
+    <button id="fullscreenButton" aria-label="Toggle fullscreen">⛶</button>
+  </div>
 
-<div class="viewer" id="viewer" hidden>
+  <div id="viewerStage">
+    <button class="navArrow" id="prevButton" aria-label="Previous">‹</button>
+    <div id="viewerMediaHost" style="display:contents"></div>
+    <button class="navArrow" id="nextButton" aria-label="Next">›</button>
+  </div>
 
-    <div class="viewer-top">
-
-        <button class="icon-btn" id="closeViewer" title="Close">
-            ✕
-        </button>
-
-        <div class="viewer-title">
-            <strong id="viewerFilename">filename.jpg</strong>
-            <small id="viewerCategory">Category</small>
-        </div>
-
-        <div style="display:flex;gap:7px;align-items:center;">
-            <button class="icon-btn" id="viewerFullscreen" title="Fullscreen">
-                ⛶
-            </button>
-        </div>
-
+  <div class="viewerBottom">
+    <div class="viewerControls">
+      <button id="viewerPrevButton">Previous</button>
+      <span id="positionLabel">0 / 0</span>
+      <button id="viewerNextButton">Next</button>
     </div>
-
-    <div class="viewer-stage" id="viewerStage"></div>
-
-    <div class="viewer-bottom">
-
-        <div class="viewer-controls">
-
-            <button class="control-btn" id="previousBtn" title="Previous">
-                ◀
-            </button>
-
-            <button class="control-btn" id="nextBtn" title="Next">
-                ▶
-            </button>
-
-            <button class="control-btn" id="shuffleBtn" title="Toggle shuffle">
-                🔀
-            </button>
-
-            <button class="control-btn" id="slideshowBtn" title="Toggle slideshow">
-                ▷
-            </button>
-
-            <select class="interval-select" id="intervalSelect" title="Slideshow interval">
-                <option value="2">2 sec</option>
-                <option value="3">3 sec</option>
-                <option value="5" selected>5 sec</option>
-                <option value="10">10 sec</option>
-                <option value="15">15 sec</option>
-                <option value="30">30 sec</option>
-            </select>
-
-        </div>
-
-        <div class="viewer-progress" id="viewerProgress">
-            1 / 100
-        </div>
-
-        <div class="viewer-hint">
-            Swipe left/right or use arrow keys to navigate
-        </div>
-
+    <div class="viewerControls">
+      <button id="shuffleButton">Shuffle</button>
+      <button id="slideshowButton">Slideshow</button>
+      <button id="slideshowSpeedButton">5 sec</button>
     </div>
+  </div>
+</section>
 
-</div>
-
-<div class="toast" id="toast" hidden></div>
+<div id="toast" class="hidden"></div>
 
 <script>
-"use strict";
+(() => {
+  "use strict";
 
-/* =========================================
-   CONFIGURATION
-========================================= */
+  const $ = id => document.getElementById(id);
 
-const THUMBNAIL_BATCH = 5;
-const GRID_PAGE_SIZE = 120;
+  const loadingScreen = $("loadingScreen");
+  const app = $("app");
+  const folderInput = $("folderInput");
+  const filesInput = $("filesInput");
+  const categoriesView = $("categoriesView");
+  const mediaView = $("mediaView");
+  const categoryGrid = $("categoryGrid");
+  const mediaGrid = $("mediaGrid");
+  const viewer = $("viewer");
+  const viewerStage = $("viewerStage");
+  const viewerMediaHost = $("viewerMediaHost");
 
-const ALL = "__ALL__";
-const UNCAT = "__UNCATEGORISED__";
+  let library = [];
+  let categories = new Map();
+  let currentCategory = "";
+  let viewerItems = [];
+  let viewerIndex = 0;
+  let shuffleOn = false;
+  let slideshowOn = false;
+  let slideshowTimer = null;
+  let slideshowSeconds = 5;
+  let objectUrls = [];
+  let toastTimer = null;
+  let touchStartX = 0;
+  let touchStartY = 0;
 
-const IMAGE_EXTENSIONS = new Set([
-    "jpg", "jpeg", "png", "gif", "webp",
-    "bmp", "avif", "svg", "tif", "tiff",
-    "heic", "heif"
-]);
-
-const VIDEO_EXTENSIONS = new Set([
-    "mp4", "webm", "ogv", "ogg",
-    "mov", "m4v", "3gp", "mkv", "avi"
-]);
-
-/* =========================================
-   DOM REFERENCES
-========================================= */
-
-const folderInput = document.getElementById("folderInput");
-const filesInput = document.getElementById("filesInput");
-
-const folderBtn = document.getElementById("folderBtn");
-const filesBtn = document.getElementById("filesBtn");
-
-const welcome = document.getElementById("welcome");
-const libraryElement = document.getElementById("library");
-
-const categoryList = document.getElementById("categoryList");
-const sectionHeading = document.getElementById("sectionHeading");
-const sectionInfo = document.getElementById("sectionInfo");
-
-const mediaGrid = document.getElementById("mediaGrid");
-const loadMoreWrap = document.getElementById("loadMoreWrap");
-const loadMoreBtn = document.getElementById("loadMoreBtn");
-
-const playAllBtn = document.getElementById("playAllBtn");
-const shuffleAllBtn = document.getElementById("shuffleAllBtn");
-
-const loadingScreen = document.getElementById("loadingScreen");
-const loadingStatus = document.getElementById("loadingStatus");
-const loadingDetail = document.getElementById("loadingDetail");
-const progressBar = document.getElementById("progressBar");
-const progressPercent = document.getElementById("progressPercent");
-
-const viewer = document.getElementById("viewer");
-const viewerStage = document.getElementById("viewerStage");
-const viewerFilename = document.getElementById("viewerFilename");
-const viewerCategory = document.getElementById("viewerCategory");
-const viewerProgress = document.getElementById("viewerProgress");
-
-const closeViewer = document.getElementById("closeViewer");
-const previousBtn = document.getElementById("previousBtn");
-const nextBtn = document.getElementById("nextBtn");
-const shuffleBtn = document.getElementById("shuffleBtn");
-const slideshowBtn = document.getElementById("slideshowBtn");
-const intervalSelect = document.getElementById("intervalSelect");
-const fullscreenBtn = document.getElementById("viewerFullscreen");
-
-const toastElement = document.getElementById("toast");
-
-/* =========================================
-   APPLICATION STATE
-========================================= */
-
-let mediaLibrary = [];
-let categories = [];
-
-let selectedCategory = ALL;
-let currentItems = [];
-let visibleItems = 0;
-
-let nextID = 1;
-
-let viewerQueue = [];
-let currentIndex = 0;
-
-let playbackHistory = [];
-let historyPosition = -1;
-
-let shuffleMode = false;
-let slideshowMode = false;
-
-let shuffleBag = [];
-let slideTimer = null;
-let toastTimer = null;
-
-let pointerStart = null;
-
-/* =========================================
-   UTILITIES
-========================================= */
-
-function escapeHTML(value) {
-    return String(value).replace(/[&<>"']/g, character => ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#39;"
-    })[character]);
-}
-
-function formatBytes(bytes) {
-    if (bytes < 1024) return bytes + " B";
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
-    if (bytes < 1024 * 1024 * 1024) {
-        return (bytes / (1024 * 1024)).toFixed(1) + " MB";
-    }
-    return (bytes / (1024 * 1024 * 1024)).toFixed(2) + " GB";
-}
-
-function getExtension(filename) {
-    const position = filename.lastIndexOf(".");
-    return position >= 0 ? filename.slice(position + 1).toLowerCase() : "";
-}
-
-function isImageFile(file) {
-    return file.type.startsWith("image/") ||
-        IMAGE_EXTENSIONS.has(getExtension(file.name));
-}
-
-function isVideoFile(file) {
-    return file.type.startsWith("video/") ||
-        VIDEO_EXTENSIONS.has(getExtension(file.name));
-}
-
-function showToast(message, duration = 2600) {
-    toastElement.textContent = message;
-    toastElement.hidden = false;
-
+  function showToast(message) {
+    const toast = $("toast");
+    toast.textContent = message;
+    toast.classList.remove("hidden");
     clearTimeout(toastTimer);
-
-    toastTimer = setTimeout(() => {
-        toastElement.hidden = true;
-    }, duration);
-}
-
-function naturalSort(a, b) {
-    return a.name.localeCompare(b.name, undefined, {
-        numeric: true,
-        sensitivity: "base"
-    });
-}
-
-/* =========================================
-   CATEGORY DETECTION
-========================================= */
-
-function detectCategory(filename) {
-
-    const dot = filename.lastIndexOf(".");
-    let stem = dot > 0 ? filename.slice(0, dot) : filename;
-
-    stem = stem.trim();
-
-    // Remove serial suffixes such as:
-    // Mira(2).jpg
-    // Mira (3).jpg
-
-    const base = stem.replace(/\s*\(\d+\)\s*$/, "").trim();
-
-    if (!base) return UNCAT;
-
-    // Common generic device/camera filename patterns.
-
-    const genericPatterns = [
-        /^IMG[-_]?\d+/i,
-        /^DSC[F]?[-_]?\d+/i,
-        /^PXL[-_]?\d{8}/i,
-        /^VID[-_]?\d+/i,
-        /^MOV[-_]?\d+/i,
-        /^MVI[-_]?\d+/i,
-        /^Screenshot(?:[-_ ]\d{4}.*)?$/i,
-        /^Screen[_ ]?Recording/i,
-        /^WhatsApp (?:Image|Video)/i,
-        /^received[_-]?\d+$/i,
-        /^mmexport\d+/i,
-        /^signal-\d+/i,
-        /^\d{8}[_-]?\d{6,}$/
-    ];
-
-    if (genericPatterns.some(pattern => pattern.test(base))) {
-        return UNCAT;
-    }
-
-    return base;
-}
-
-function getCategoryName(key) {
-    return key === UNCAT ? "Uncategorised" : key;
-}
-
-/* =========================================
-   IMAGE THUMBNAIL GENERATION
-========================================= */
-
-async function makeThumbnail(file, sourceURL) {
-
-    let bitmap = null;
-    let image = null;
-
-    try {
-
-        let width;
-        let height;
-        let drawable;
-
-        if ("createImageBitmap" in window) {
-
-            bitmap = await createImageBitmap(file);
-
-            width = bitmap.width;
-            height = bitmap.height;
-            drawable = bitmap;
-
-        } else {
-
-            image = new Image();
-            image.src = sourceURL;
-
-            if (image.decode) {
-                await image.decode();
-            } else {
-                await new Promise((resolve, reject) => {
-                    image.onload = resolve;
-                    image.onerror = reject;
-                });
-            }
-
-            width = image.naturalWidth;
-            height = image.naturalHeight;
-            drawable = image;
-        }
-
-        const maxDimension = 350;
-
-        const ratio = Math.min(
-            1,
-            maxDimension / Math.max(width, height)
-        );
-
-        const canvas = document.createElement("canvas");
-
-        canvas.width = Math.max(1, Math.round(width * ratio));
-        canvas.height = Math.max(1, Math.round(height * ratio));
-
-        const context = canvas.getContext("2d", {
-            alpha: false
-        });
-
-        if (!context) throw new Error("Canvas unavailable");
-
-        context.fillStyle = "#090a0e";
-        context.fillRect(0, 0, canvas.width, canvas.height);
-
-        context.drawImage(
-            drawable,
-            0,
-            0,
-            canvas.width,
-            canvas.height
-        );
-
-        const blob = await new Promise(resolve => {
-            canvas.toBlob(resolve, "image/jpeg", 0.78);
-        });
-
-        if (!blob) throw new Error("Thumbnail creation failed");
-
-        if (bitmap) bitmap.close();
-
-        return URL.createObjectURL(blob);
-
-    } catch (error) {
-
-        if (bitmap) {
-            try { bitmap.close(); } catch (_) {}
-        }
-
-        // Fall back to original image if thumbnail creation fails.
-
-        return sourceURL;
-    }
-}
-
-/* =========================================
-   LOADING SCREEN
-========================================= */
-
-function updateLoadingProgress(done, total) {
-
-    const percentage = total === 0
-        ? 100
-        : Math.round((done / total) * 100);
-
-    progressBar.style.width = percentage + "%";
-    progressPercent.textContent = percentage + "%";
-
-    loadingStatus.textContent =
-        "Preparing files: " + done + " / " + total;
-}
-
-async function loadFiles(fileList) {
-
-    const incoming = Array.from(fileList);
-
-    const accepted = incoming.filter(file =>
-        isImageFile(file) || isVideoFile(file)
-    );
-
-    const skipped = incoming.length - accepted.length;
-
-    if (accepted.length === 0) {
-        showToast("No supported image or video files found.");
-        return;
-    }
-
-    // Close any previous viewer.
-
-    stopSlideshow();
-    viewer.hidden = true;
-
-    // Release URLs belonging to the previous library.
-
-    mediaLibrary.forEach(item => {
-
-        if (item.sourceURL) URL.revokeObjectURL(item.sourceURL);
-
-        if (
-            item.thumbnailURL &&
-            item.thumbnailURL !== item.sourceURL
-        ) {
-            URL.revokeObjectURL(item.thumbnailURL);
-        }
-    });
-
-    mediaLibrary = [];
-    categories = [];
-    nextID = 1;
-
-    welcome.hidden = true;
-    libraryElement.hidden = true;
-    loadingScreen.hidden = false;
-
-    loadingDetail.textContent =
-        "Preparing " + accepted.length.toLocaleString() +
-        " files. Large collections are processed in small batches.";
-
-    progressBar.style.width = "0%";
-    progressPercent.textContent = "0%";
-
-    const total = accepted.length;
-
-    // Create metadata and source URLs first.
-
-    for (const file of accepted) {
-
-        const image = isImageFile(file);
-
-        mediaLibrary.push({
-            id: nextID++,
-            file: file,
-            name: file.name,
-            type: image ? "image" : "video",
-            size: file.size,
-            sourceURL: URL.createObjectURL(file),
-            thumbnailURL: null,
-            categoryKey: detectCategory(file.name)
-        });
-    }
-
-    // Sort files naturally by filename.
-
-    mediaLibrary.sort(naturalSort);
-
-    // Generate image thumbnails in small batches.
-
-    let processed = 0;
-
-    for (let i = 0; i < mediaLibrary.length; i += THUMBNAIL_BATCH) {
-
-        const batch = mediaLibrary.slice(
-            i,
-            i + THUMBNAIL_BATCH
-        );
-
-        await Promise.all(batch.map(async item => {
-
-            if (item.type === "image") {
-
-                item.thumbnailURL = await makeThumbnail(
-                    item.file,
-                    item.sourceURL
-                );
-            }
-
-            processed++;
-
-        }));
-
-        updateLoadingProgress(processed, total);
-
-        loadingDetail.textContent =
-            "Processed " + processed.toLocaleString() +
-            " of " + total.toLocaleString() + " files.";
-
-        // Let the browser repaint the progress screen.
-
-        await new Promise(resolve => setTimeout(resolve, 0));
-    }
-
-    buildCategories();
-
-    loadingStatus.textContent = "Finishing library...";
-    progressBar.style.width = "100%";
-    progressPercent.textContent = "100%";
-
-    await new Promise(resolve => setTimeout(resolve, 250));
-
-    loadingScreen.hidden = true;
-    libraryElement.hidden = false;
-
-    selectedCategory = ALL;
-
-    renderLibrary();
-
-    const totalSize = mediaLibrary.reduce(
-        (sum, item) => sum + item.size,
-        0
-    );
-
-    let message =
-        mediaLibrary.length.toLocaleString() +
-        " files loaded · " + formatBytes(totalSize);
-
-    if (skipped > 0) {
-        message += " · " + skipped + " unsupported files skipped";
-    }
-
-    showToast(message, 4500);
-}
-
-/* =========================================
-   BUILD CATEGORIES
-========================================= */
-
-function buildCategories() {
-
-    const map = new Map();
-
-    for (const item of mediaLibrary) {
-
-        const key = item.categoryKey;
-
-        if (!map.has(key)) {
-            map.set(key, []);
-        }
-
-        map.get(key).push(item);
-    }
-
-    categories = Array.from(map.entries())
-        .map(([key, items]) => ({
-            key,
-            name: getCategoryName(key),
-            items
-        }))
-        .sort((a, b) => {
-
-            if (a.key === UNCAT) return 1;
-            if (b.key === UNCAT) return -1;
-
-            return a.name.localeCompare(b.name, undefined, {
-                numeric: true,
-                sensitivity: "base"
-            });
-        });
-}
-
-/* =========================================
-   LIBRARY DISPLAY
-========================================= */
-
-function getCurrentItems() {
-
-    if (selectedCategory === ALL) {
-        return mediaLibrary;
-    }
-
-    if (selectedCategory === UNCAT) {
-        return mediaLibrary.filter(
-            item => item.categoryKey === UNCAT
-        );
-    }
-
-    return mediaLibrary.filter(
-        item => item.categoryKey === selectedCategory
-    );
-}
-
-function renderCategories() {
-
-    let html = "";
-
-    const allSelected = selectedCategory === ALL;
-
-    html += `
-        <button class="category-btn ${allSelected ? "selected" : ""}"
-                data-category="${ALL}">
-            All Media <small>${mediaLibrary.length}</small>
-        </button>
-    `;
-
-    const uncategorised = mediaLibrary.filter(
-        item => item.categoryKey === UNCAT
-    );
-
-    if (uncategorised.length > 0) {
-
-        html += `
-            <button class="category-btn ${
-                selectedCategory === UNCAT ? "selected" : ""
-            }" data-category="${UNCAT}">
-                Uncategorised <small>${uncategorised.length}</small>
-            </button>
-        `;
-    }
-
-    categories.forEach(category => {
-
-        if (category.key === UNCAT) return;
-
-        html += `
-            <button class="category-btn ${
-                selectedCategory === category.key ? "selected" : ""
-            }" data-category="${escapeHTML(category.key)}">
-                ${escapeHTML(category.name)}
-                <small>${category.items.length}</small>
-            </button>
-        `;
-    });
-
-    categoryList.innerHTML = html;
-}
-
-function renderLibrary() {
-
-    renderCategories();
-
-    currentItems = getCurrentItems();
-
-    const title = selectedCategory === ALL
-        ? "All Media"
-        : getCategoryName(selectedCategory);
-
-    const totalSize = currentItems.reduce(
-        (sum, item) => sum + item.size,
-        0
-    );
-
-    sectionHeading.textContent = title;
-
-    sectionInfo.textContent =
-        currentItems.length.toLocaleString() +
-        " files · " + formatBytes(totalSize);
-
-    mediaGrid.innerHTML = "";
-
-    visibleItems = 0;
-
-    if (currentItems.length === 0) {
-        mediaGrid.innerHTML =
-            '<p style="color:var(--muted)">No media found.</p>';
-
-        loadMoreWrap.hidden = true;
-        return;
-    }
-
-    appendGridItems();
-
-}
-
-function createMediaCard(item) {
-
-    const card = document.createElement("button");
-
-    card.className = "media-card";
-    card.dataset.id = item.id;
-    card.title = item.name;
-
-    let thumbnailContent = "";
-
-    if (item.type === "image") {
-
-        const src = item.thumbnailURL || item.sourceURL;
-
-        thumbnailContent = `
-            <img
-                src="${src}"
-                alt=""
-                loading="lazy"
-                decoding="async"
-                draggable="false"
-            >
-        `;
-
-    } else {
-
-        thumbnailContent = `
-            <div class="video-placeholder">
-                <strong>▶</strong>
-                <small>VIDEO</small>
-            </div>
-            <span class="video-label">VIDEO</span>
-        `;
-    }
-
-    card.innerHTML = `
-        <div class="thumb">
-            ${thumbnailContent}
-        </div>
-        <div class="thumb-name">
-            ${escapeHTML(item.name)}
-        </div>
-    `;
-
-    return card;
-}
-
-function appendGridItems() {
-
-    const fragment = document.createDocumentFragment();
-
-    const end = Math.min(
-        visibleItems + GRID_PAGE_SIZE,
-        currentItems.length
-    );
-
-    for (let i = visibleItems; i < end; i++) {
-
-        fragment.appendChild(
-            createMediaCard(currentItems[i])
-        );
-    }
-
-    mediaGrid.appendChild(fragment);
-
-    visibleItems = end;
-
-    loadMoreWrap.hidden = visibleItems >= currentItems.length;
-
-    if (visibleItems < currentItems.length) {
-
-        loadMoreBtn.textContent =
-            "Load More (" +
-            visibleItems.toLocaleString() +
-            " / " +
-            currentItems.length.toLocaleString() +
-            ")";
-    }
-}
-
-/* =========================================
-   SHUFFLE BAG
-========================================= */
-
-function makeShuffleBag(excludeIndex) {
-
-    const bag = [];
-
-    for (let i = 0; i < viewerQueue.length; i++) {
-
-        if (i !== excludeIndex) {
-            bag.push(i);
-        }
-    }
-
-    // Fisher-Yates shuffle.
-
-    for (let i = bag.length - 1; i > 0; i--) {
-
-        const j = Math.floor(Math.random() * (i + 1));
-
-        [bag[i], bag[j]] = [bag[j], bag[i]];
-    }
-
-    return bag;
-}
-
-/* =========================================
-   START VIEWER
-========================================= */
-
-function startViewer(items, itemID = null, startShuffle = false) {
-
-    if (!items || items.length === 0) {
-        showToast("No media to play.");
-        return;
-    }
-
-    stopSlideshow();
-
-    viewerQueue = items.slice();
-
-    let index = itemID === null
-        ? 0
-        : viewerQueue.findIndex(item => item.id === itemID);
-
-    if (index < 0) index = 0;
-
-    shuffleMode = !!startShuffle;
-
-    if (shuffleMode) {
-
-        index = Math.floor(Math.random() * viewerQueue.length);
-        shuffleBag = makeShuffleBag(index);
-
-    } else {
-
-        shuffleBag = [];
-    }
-
-    currentIndex = index;
-
-    playbackHistory = [currentIndex];
-    historyPosition = 0;
-
-    slideshowMode = false;
-
-    viewer.hidden = false;
-
-    renderViewerItem();
-
-    updateViewerControls();
-}
-
-/* =========================================
-   RENDER CURRENT MEDIA
-========================================= */
-
-function renderViewerItem() {
-
-    clearTimeout(slideTimer);
-
-    const item = viewerQueue[currentIndex];
-
-    if (!item) return;
-
-    viewerFilename.textContent = item.name;
-    viewerCategory.textContent =
-        getCategoryName(item.categoryKey) +
-        " · " + item.type.toUpperCase();
-
-    viewerProgress.textContent =
-        (historyPosition + 1).toLocaleString() +
-        " / " + viewerQueue.length.toLocaleString();
-
-    viewerStage.innerHTML = "";
-
-    if (item.type === "image") {
-
-        const img = document.createElement("img");
-
-        img.src = item.sourceURL;
-        img.alt = item.name;
-        img.draggable = false;
-
-        img.onerror = () => {
-
-            viewerStage.innerHTML = `
-                <div class="unsupported">
-                    <h2>Unable to display image</h2>
-                    <p>${escapeHTML(item.name)}</p>
-                    <p>This format may not be supported by your browser.</p>
-                </div>
-            `;
-        };
-
-        viewerStage.appendChild(img);
-
-    } else {
-
-        const video = document.createElement("video");
-
-        video.src = item.sourceURL;
-        video.controls = true;
-        video.playsInline = true;
-        video.preload = "metadata";
-
-        video.addEventListener("ended", () => {
-            nextItem();
-        });
-
-        video.addEventListener("error", () => {
-
-            if (video.error) {
-
-                viewerStage.insertAdjacentHTML(
-                    "beforeend",
-                    `<div class="unsupported">
-                        Unable to play this video format.
-                    </div>`
-                );
-            }
-        });
-
-        viewerStage.appendChild(video);
-
-        // When slideshow is active, start videos automatically.
-
-        if (slideshowMode) {
-            video.play().catch(() => {
-                showToast("Tap the video to start playback.");
-            });
-        }
-    }
-
-    updateViewerControls();
-
-    scheduleSlideshow();
-}
-
-/* =========================================
-   NAVIGATION
-========================================= */
-
-function nextItem() {
-
-    if (viewerQueue.length === 0) return;
-
-    // If we previously went backwards, restore forward history.
-
-    if (historyPosition < playbackHistory.length - 1) {
-
-        historyPosition++;
-
-        currentIndex = playbackHistory[historyPosition];
-
-        renderViewerItem();
-        return;
-    }
-
-    let nextIndex;
-
-    if (shuffleMode) {
-
-        if (shuffleBag.length === 0) {
-            shuffleBag = makeShuffleBag(currentIndex);
-        }
-
-        nextIndex = shuffleBag.shift();
-
-        if (nextIndex === undefined) {
-            nextIndex = currentIndex;
-        }
-
-    } else {
-
-        nextIndex = (currentIndex + 1) % viewerQueue.length;
-    }
-
-    currentIndex = nextIndex;
-
-    playbackHistory.push(currentIndex);
-    historyPosition = playbackHistory.length - 1;
-
-    // Keep history within reasonable memory limits.
-
-    if (playbackHistory.length > 5000) {
-
-        playbackHistory.shift();
-        historyPosition--;
-    }
-
-    renderViewerItem();
-}
-
-function previousItem() {
-
-    if (historyPosition <= 0) return;
-
-    historyPosition--;
-
-    currentIndex = playbackHistory[historyPosition];
-
-    renderViewerItem();
-}
-
-/* =========================================
-   SHUFFLE CONTROL
-========================================= */
-
-function toggleShuffle() {
-
-    shuffleMode = !shuffleMode;
-
-    // Discard forward history after changing playback mode.
-
-    playbackHistory = playbackHistory.slice(
-        0,
-        historyPosition + 1
-    );
-
-    if (shuffleMode) {
-        shuffleBag = makeShuffleBag(currentIndex);
-    } else {
-        shuffleBag = [];
-    }
-
-    updateViewerControls();
-
-    showToast(
-        shuffleMode
-            ? "Shuffle enabled"
-            : "Shuffle disabled"
-    );
-}
-
-/* =========================================
-   SLIDESHOW
-========================================= */
-
-function stopSlideshow() {
-
-    slideshowMode = false;
-
-    clearTimeout(slideTimer);
-    slideTimer = null;
-}
-
-function scheduleSlideshow() {
-
-    clearTimeout(slideTimer);
-
-    if (!slideshowMode) return;
-
-    const item = viewerQueue[currentIndex];
-
-    if (!item) return;
-
-    // Images automatically advance after the selected interval.
-    // Videos advance when they finish playing.
-
-    if (item.type === "image") {
-
-        const seconds = Number(intervalSelect.value) || 5;
-
-        slideTimer = setTimeout(() => {
-            nextItem();
-        }, seconds * 1000);
-    }
-}
-
-function toggleSlideshow() {
-
-    slideshowMode = !slideshowMode;
-
-    clearTimeout(slideTimer);
-
-    if (slideshowMode) {
-
-        const item = viewerQueue[currentIndex];
-
-        if (item && item.type === "video") {
-
-            const video = viewerStage.querySelector("video");
-
-            if (video) {
-                video.play().catch(() => {
-                    showToast("Tap the video to start playback.");
-                });
-            }
-
-        } else {
-
-            scheduleSlideshow();
-        }
-    }
-
-    updateViewerControls();
-
-    showToast(
-        slideshowMode
-            ? "Slideshow started"
-            : "Slideshow paused"
-    );
-}
-
-/* =========================================
-   VIEWER CONTROLS
-========================================= */
-
-function updateViewerControls() {
-
-    previousBtn.disabled = historyPosition <= 0;
-
-    shuffleBtn.classList.toggle(
-        "active",
-        shuffleMode
-    );
-
-    slideshowBtn.classList.toggle(
-        "active",
-        slideshowMode
-    );
-
-    slideshowBtn.textContent = slideshowMode ? "Ⅱ" : "▷";
-}
-
-function closeMediaViewer() {
-
-    stopSlideshow();
-
-    viewer.hidden = true;
-
-    viewerStage.innerHTML = "";
-
-    pointerStart = null;
-
-    if (document.fullscreenElement) {
-        document.exitFullscreen().catch(() => {});
-    }
-}
-
-/* =========================================
-   FULLSCREEN
-========================================= */
-
-async function toggleFullscreen() {
-
-    try {
-
-        if (!document.fullscreenElement) {
-
-            await viewer.requestFullscreen();
-
-        } else {
-
-            await document.exitFullscreen();
-        }
-
-    } catch (error) {
-
-        showToast("Fullscreen is unavailable in this browser.");
-    }
-}
-
-/* =========================================
-   EVENT HANDLERS
-========================================= */
-
-// File import buttons.
-
-folderBtn.addEventListener("click", () => {
-    folderInput.click();
-});
-
-filesBtn.addEventListener("click", () => {
-    filesInput.click();
-});
-
-// Folder selection.
-
-folderInput.addEventListener("change", async event => {
-
-    const files = Array.from(event.target.files);
-
-    event.target.value = "";
-
-    if (files.length) {
-        await loadFiles(files);
-    }
-});
-
-// Multiple file selection.
-
-filesInput.addEventListener("change", async event => {
-
-    const files = Array.from(event.target.files);
-
-    event.target.value = "";
-
-    if (files.length) {
-        await loadFiles(files);
-    }
-});
-
-// Category selection.
-
-categoryList.addEventListener("click", event => {
-
-    const button = event.target.closest("[data-category]");
-
-    if (!button) return;
-
-    selectedCategory = button.dataset.category;
-
-    renderLibrary();
-});
-
-// Thumbnail click.
-
-mediaGrid.addEventListener("click", event => {
-
-    const card = event.target.closest(".media-card");
-
-    if (!card) return;
-
-    const itemID = Number(card.dataset.id);
-
-    startViewer(currentItems, itemID, false);
-});
-
-// Load more thumbnails.
-
-loadMoreBtn.addEventListener("click", appendGridItems);
-
-// Play all.
-
-playAllBtn.addEventListener("click", () => {
-
-    startViewer(currentItems, null, false);
-});
-
-// Shuffle section.
-
-shuffleAllBtn.addEventListener("click", () => {
-
-    startViewer(currentItems, null, true);
-});
-
-// Viewer buttons.
-
-closeViewer.addEventListener("click", closeMediaViewer);
-
-previousBtn.addEventListener("click", previousItem);
-
-nextBtn.addEventListener("click", nextItem);
-
-shuffleBtn.addEventListener("click", toggleShuffle);
-
-slideshowBtn.addEventListener("click", toggleSlideshow);
-
-fullscreenBtn.addEventListener("click", toggleFullscreen);
-
-intervalSelect.addEventListener("change", () => {
-
-    if (slideshowMode) {
-        scheduleSlideshow();
-    }
-});
-
-/* =========================================
-   SWIPE NAVIGATION
-========================================= */
-
-viewerStage.addEventListener("pointerdown", event => {
-
-    // Don't interfere with native video controls.
-
-    if (event.target.closest("video, button")) {
-        pointerStart = null;
-        return;
-    }
-
-    pointerStart = {
-        x: event.clientX,
-        y: event.clientY
+    toastTimer = setTimeout(() => toast.classList.add("hidden"), 2600);
+  }
+
+  function isSupportedMedia(file) {
+    return file.type.startsWith("image/") || file.type.startsWith("video/");
+  }
+
+  function getRelativePath(file) {
+    return file.webkitRelativePath || file.name;
+  }
+
+  function categoryFromPath(file) {
+    const path = getRelativePath(file).replaceAll("\\", "/");
+    const parts = path.split("/").filter(Boolean);
+
+    // The selected folder is the root. Its immediate subfolders are categories.
+    // Files directly in the selected root are placed in "Uncategorised".
+    return parts.length > 1 ? parts[0] : "Uncategorised";
+  }
+
+  function createItem(file, category) {
+    return {
+      file,
+      name: file.name,
+      type: file.type.startsWith("video/") ? "video" : "image",
+      category,
+      url: null
     };
-});
+  }
 
-viewerStage.addEventListener("pointerup", event => {
+  function loadFiles(fileList, useFolderPaths) {
+    const files = Array.from(fileList).filter(isSupportedMedia);
 
-    if (!pointerStart) return;
-
-    const dx = event.clientX - pointerStart.x;
-    const dy = event.clientY - pointerStart.y;
-
-    pointerStart = null;
-
-    // Require a clear horizontal gesture.
-
-    if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.25) {
-
-        if (dx < 0) {
-            nextItem();
-        } else {
-            previousItem();
-        }
-    }
-});
-
-viewerStage.addEventListener("pointercancel", () => {
-    pointerStart = null;
-});
-
-/* =========================================
-   KEYBOARD CONTROLS
-========================================= */
-
-document.addEventListener("keydown", event => {
-
-    if (viewer.hidden) return;
-
-    const target = event.target;
-
-    if (
-        target.closest &&
-        target.closest("video, button, select, input")
-    ) {
-        return;
+    if (!files.length) {
+      showToast("No supported images or videos were selected.");
+      return;
     }
 
-    switch (event.key) {
-
-        case "ArrowRight":
-            event.preventDefault();
-            nextItem();
-            break;
-
-        case "ArrowLeft":
-            event.preventDefault();
-            previousItem();
-            break;
-
-        case "Escape":
-            closeMediaViewer();
-            break;
-
-        case " ":
-            event.preventDefault();
-            toggleSlideshow();
-            break;
-
-        case "s":
-        case "S":
-            toggleShuffle();
-            break;
-    }
-});
-
-/* =========================================
-   CLEANUP
-========================================= */
-
-window.addEventListener("pagehide", () => {
-
-    stopSlideshow();
-
-    mediaLibrary.forEach(item => {
-
-        if (item.sourceURL) {
-            URL.revokeObjectURL(item.sourceURL);
-        }
-
-        if (
-            item.thumbnailURL &&
-            item.thumbnailURL !== item.sourceURL
-        ) {
-            URL.revokeObjectURL(item.thumbnailURL);
-        }
+    library = files.map(file => {
+      const category = useFolderPaths ? categoryFromPath(file) : "All Media";
+      return createItem(file, category);
     });
-});
 
+    currentCategory = "";
+    buildCategories();
+    loadingScreen.classList.add("hidden");
+    app.classList.remove("hidden");
+    showCategories();
+    showToast(`${library.length} media files loaded`);
+  }
+
+  function buildCategories() {
+    categories = new Map();
+
+    for (const item of library) {
+      if (!categories.has(item.category)) categories.set(item.category, []);
+      categories.get(item.category).push(item);
+    }
+
+    $("librarySummary").textContent =
+      `${library.length} files · ${categories.size} categories`;
+  }
+
+  function showCategories() {
+    stopSlideshow();
+    viewer.classList.add("hidden");
+    categoriesView.classList.remove("hidden");
+    mediaView.classList.add("hidden");
+    renderCategories();
+  }
+
+  function renderCategories() {
+    categoryGrid.replaceChildren();
+
+    if (!categories.size) {
+      categoryGrid.innerHTML = '<div class="emptyState">Choose a folder or select media files to get started.</div>';
+      return;
+    }
+
+    const sorted = Array.from(categories.entries()).sort((a, b) =>
+      a[0].localeCompare(b[0], undefined, { sensitivity: "base" })
+    );
+
+    for (const [name, items] of sorted) {
+      const card = document.createElement("button");
+      card.className = "categoryCard";
+
+      const art = document.createElement("div");
+      art.className = "categoryArt";
+      art.textContent = items.some(item => item.type === "video") ? "▣" : "▧";
+
+      const info = document.createElement("div");
+      info.className = "categoryInfo";
+
+      const title = document.createElement("div");
+      title.className = "categoryName";
+      title.textContent = name;
+
+      const count = document.createElement("div");
+      count.className = "categoryCount";
+      count.textContent = `${items.length} ${items.length === 1 ? "item" : "items"}`;
+
+      info.append(title, count);
+      card.append(art, info);
+      card.addEventListener("click", () => openCategory(name));
+      categoryGrid.append(card);
+    }
+  }
+
+  function openCategory(name) {
+    currentCategory = name;
+    const items = categories.get(name) || [];
+
+    categoriesView.classList.add("hidden");
+    mediaView.classList.remove("hidden");
+    $("categoryTitle").textContent = name;
+    $("categorySummary").textContent = `${items.length} items`;
+    renderMedia(items);
+  }
+
+  function renderMedia(items) {
+    mediaGrid.replaceChildren();
+
+    if (!items.length) {
+      mediaGrid.innerHTML = '<div class="emptyState">This category is empty.</div>';
+      return;
+    }
+
+    items.forEach((item, index) => {
+      const card = document.createElement("button");
+      card.className = "mediaCard";
+
+      const thumb = document.createElement("div");
+      thumb.className = "mediaThumb";
+
+      if (item.type === "image") {
+        const img = document.createElement("img");
+        img.alt = "";
+        img.loading = "lazy";
+        img.src = getObjectUrl(item);
+        thumb.append(img);
+      } else {
+        const video = document.createElement("video");
+        video.muted = true;
+        video.preload = "metadata";
+        video.src = getObjectUrl(item);
+        video.playsInline = true;
+        thumb.append(video);
+
+        const badge = document.createElement("span");
+        badge.className = "videoBadge";
+        badge.textContent = "▶ Video";
+        thumb.append(badge);
+      }
+
+      const info = document.createElement("div");
+      info.className = "mediaInfo";
+
+      const title = document.createElement("div");
+      title.className = "mediaName";
+      title.textContent = item.name;
+      title.title = item.name;
+
+      const type = document.createElement("div");
+      type.className = "mediaType";
+      type.textContent = item.type === "video" ? "Video" : "Image";
+
+      info.append(title, type);
+      card.append(thumb, info);
+      card.addEventListener("click", () => {
+        viewerItems = items.slice();
+        viewerIndex = index;
+        shuffleOn = false;
+        $("shuffleButton").classList.remove("active");
+        openViewer();
+      });
+
+      mediaGrid.append(card);
+    });
+  }
+
+  function getObjectUrl(item) {
+    if (!item.url) {
+      item.url = URL.createObjectURL(item.file);
+      objectUrls.push(item.url);
+    }
+    return item.url;
+  }
+
+  function openViewer() {
+    if (!viewerItems.length) return;
+    viewer.classList.remove("hidden");
+    renderViewerItem();
+  }
+
+  function renderViewerItem() {
+    const item = viewerItems[viewerIndex];
+    if (!item) return;
+
+    viewerMediaHost.replaceChildren();
+
+    const media = document.createElement(item.type === "video" ? "video" : "img");
+    media.id = "viewerMedia";
+    media.src = getObjectUrl(item);
+
+    if (item.type === "video") {
+      media.className = "video";
+      media.controls = true;
+      media.autoplay = true;
+      media.playsInline = true;
+      media.addEventListener("loadedmetadata", () => {
+        if (media.videoWidth > 0 && media.videoHeight > 0) {
+          media.style.aspectRatio = `${media.videoWidth} / ${media.videoHeight}`;
+        }
+      });
+    } else {
+      media.alt = item.name;
+      media.draggable = false;
+    }
+
+    viewerMediaHost.append(media);
+    $("viewerTitle").textContent = item.name;
+    $("positionLabel").textContent = `${viewerIndex + 1} / ${viewerItems.length}`;
+
+    $("viewerPrevButton").disabled = viewerItems.length < 2;
+    $("viewerNextButton").disabled = viewerItems.length < 2;
+    $("prevButton").disabled = viewerItems.length < 2;
+    $("nextButton").disabled = viewerItems.length < 2;
+  }
+
+  function nextItem() {
+    if (viewerItems.length < 2) return;
+
+    if (shuffleOn) {
+      if (viewerItems.length === 2) {
+        viewerIndex = (viewerIndex + 1) % viewerItems.length;
+      } else {
+        let next = viewerIndex;
+        while (next === viewerIndex) {
+          next = Math.floor(Math.random() * viewerItems.length);
+        }
+        viewerIndex = next;
+      }
+    } else {
+      viewerIndex = (viewerIndex + 1) % viewerItems.length;
+    }
+
+    renderViewerItem();
+  }
+
+  function previousItem() {
+    if (viewerItems.length < 2) return;
+    viewerIndex = (viewerIndex - 1 + viewerItems.length) % viewerItems.length;
+    renderViewerItem();
+  }
+
+  function startSlideshow() {
+    if (viewerItems.length < 2) {
+      showToast("This category needs at least two items for a slideshow.");
+      return;
+    }
+
+    slideshowOn = true;
+    $("slideshowButton").classList.add("active");
+    $("slideshowButton").textContent = "Stop slideshow";
+    slideshowTimer = setInterval(nextItem, slideshowSeconds * 1000);
+  }
+
+  function stopSlideshow() {
+    slideshowOn = false;
+    clearInterval(slideshowTimer);
+    slideshowTimer = null;
+    $("slideshowButton").classList.remove("active");
+    $("slideshowButton").textContent = "Slideshow";
+  }
+
+  function toggleSlideshow() {
+    if (slideshowOn) stopSlideshow();
+    else startSlideshow();
+  }
+
+  function closeViewer() {
+    stopSlideshow();
+    viewer.classList.add("hidden");
+    viewerMediaHost.replaceChildren();
+  }
+
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      viewer.requestFullscreen?.().catch(() => showToast("Fullscreen is not available here."));
+    } else {
+      document.exitFullscreen?.();
+    }
+  }
+
+  function openPicker(input) {
+    input.value = "";
+    input.click();
+  }
+
+  $("chooseFolderButton").addEventListener("click", () => openPicker(folderInput));
+  $("chooseFilesButton").addEventListener("click", () => openPicker(filesInput));
+  $("addMediaButton").addEventListener("click", () => openPicker(filesInput));
+  $("changeFolderButton").addEventListener("click", () => openPicker(folderInput));
+
+  folderInput.addEventListener("change", event => {
+    if (event.target.files.length) loadFiles(event.target.files, true);
+  });
+
+  filesInput.addEventListener("change", event => {
+    if (event.target.files.length) loadFiles(event.target.files, false);
+  });
+
+  $("homeButton").addEventListener("click", showCategories);
+  $("backToCategoriesButton").addEventListener("click", showCategories);
+
+  $("closeViewerButton").addEventListener("click", closeViewer);
+  $("fullscreenButton").addEventListener("click", toggleFullscreen);
+  $("prevButton").addEventListener("click", previousItem);
+  $("nextButton").addEventListener("click", nextItem);
+  $("viewerPrevButton").addEventListener("click", previousItem);
+  $("viewerNextButton").addEventListener("click", nextItem);
+  $("slideshowButton").addEventListener("click", toggleSlideshow);
+
+  $("shuffleButton").addEventListener("click", () => {
+    shuffleOn = !shuffleOn;
+    $("shuffleButton").classList.toggle("active", shuffleOn);
+    showToast(shuffleOn ? "Shuffle enabled" : "Shuffle disabled");
+  });
+
+  $("slideshowSpeedButton").addEventListener("click", () => {
+    const speeds = [3, 5, 8, 10, 15];
+    const current = speeds.indexOf(slideshowSeconds);
+    slideshowSeconds = speeds[(current + 1) % speeds.length];
+    $("slideshowSpeedButton").textContent = `${slideshowSeconds} sec`;
+
+    if (slideshowOn) {
+      stopSlideshow();
+      startSlideshow();
+    }
+  });
+
+  viewerStage.addEventListener("touchstart", event => {
+    if (event.touches.length !== 1) return;
+    touchStartX = event.touches[0].clientX;
+    touchStartY = event.touches[0].clientY;
+  }, { passive: true });
+
+  viewerStage.addEventListener("touchend", event => {
+    if (event.changedTouches.length !== 1) return;
+
+    const dx = event.changedTouches[0].clientX - touchStartX;
+    const dy = event.changedTouches[0].clientY - touchStartY;
+
+    if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.2) {
+      dx < 0 ? nextItem() : previousItem();
+    }
+  }, { passive: true });
+
+  document.addEventListener("keydown", event => {
+    if (viewer.classList.contains("hidden")) return;
+
+    if (event.key === "Escape") closeViewer();
+    if (event.key === "ArrowRight") nextItem();
+    if (event.key === "ArrowLeft") previousItem();
+  });
+
+  window.addEventListener("beforeunload", () => {
+    objectUrls.forEach(url => URL.revokeObjectURL(url));
+  });
+})();
 </script>
-
 </body>
 </html>
