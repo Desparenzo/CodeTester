@@ -4,375 +4,424 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>MediaBox</title>
+
 <style>
-  :root {
-    color-scheme: dark;
-    --bg: #101114;
-    --panel: #1b1d22;
-    --panel2: #252830;
-    --text: #f4f5f7;
-    --muted: #a6a9b2;
-    --accent: #8b7cff;
-    --border: #343740;
-  }
+:root {
+  color-scheme: dark;
+  --bg: #101114;
+  --panel: #1b1d22;
+  --panel2: #292c35;
+  --text: #f4f5f7;
+  --muted: #a6a9b2;
+  --accent: #8b7cff;
+  --border: #343740;
+}
 
-  * { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
-  body {
-    margin: 0;
-    min-height: 100vh;
-    background: var(--bg);
-    color: var(--text);
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
 
-  button, input { font: inherit; }
+button {
+  font: inherit;
+  border: 0;
+  color: var(--text);
+  background: var(--panel2);
+  border-radius: 12px;
+  padding: 11px 15px;
+  cursor: pointer;
+}
 
-  button {
-    border: 0;
-    color: var(--text);
-    background: var(--panel2);
-    border-radius: 12px;
-    padding: 11px 15px;
-    cursor: pointer;
-  }
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
 
-  button:disabled {
-    opacity: .4;
-    cursor: default;
-  }
+button:disabled {
+  opacity: .4;
+  cursor: default;
+}
 
-  button:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 3px;
-  }
+.hidden {
+  display: none !important;
+}
 
-  .hidden { display: none !important; }
+/* Loading screen */
 
-  #loadingScreen {
-    position: fixed;
-    inset: 0;
-    z-index: 50;
-    display: grid;
-    place-items: center;
-    padding: 24px;
-    background: var(--bg);
-    text-align: center;
-  }
+#loadingScreen {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: var(--bg);
+  text-align: center;
+}
 
-  .loadingBox { max-width: 460px; }
+.loadingBox {
+  max-width: 460px;
+}
 
-  .logo {
-    font-size: clamp(42px, 10vw, 70px);
-    font-weight: 800;
-    letter-spacing: -3px;
-    margin-bottom: 8px;
-  }
+.logo {
+  font-size: clamp(42px, 10vw, 70px);
+  font-weight: 800;
+  letter-spacing: -3px;
+  margin-bottom: 8px;
+}
 
-  .logo span { color: var(--accent); }
+.logo span,
+.brand span {
+  color: var(--accent);
+}
 
-  .subtitle, .muted {
-    color: var(--muted);
-    line-height: 1.5;
-  }
+.subtitle,
+.muted {
+  color: var(--muted);
+  line-height: 1.5;
+}
 
-  .startActions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: center;
-    margin-top: 24px;
-  }
+.startActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 24px;
+}
 
-  .primary {
-    background: var(--accent);
-    color: white;
-    font-weight: 700;
-  }
+.primary {
+  background: var(--accent);
+  color: white;
+  font-weight: 700;
+}
 
-  #app {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
+/* Main app */
 
+#app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(16,17,20,.94);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  backdrop-filter: blur(12px);
+}
+
+.brand {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  white-space: nowrap;
+}
+
+.headerActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.smallButton {
+  padding: 9px 12px;
+  font-size: 14px;
+}
+
+main {
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 20px;
+  flex: 1;
+}
+
+.sectionHeading {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin: 6px 0 16px;
+}
+
+h1 {
+  font-size: clamp(24px, 5vw, 34px);
+  margin: 0 0 6px;
+}
+
+#categoryGrid,
+#mediaGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+  gap: 14px;
+}
+
+/* Category cards */
+
+.categoryCard,
+.mediaCard {
+  min-width: 0;
+  overflow: hidden;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  cursor: pointer;
+  text-align: left;
+  padding: 0;
+}
+
+.categoryArt {
+  aspect-ratio: 1.35;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(139,124,255,.55), transparent 45%),
+    linear-gradient(135deg, #292b36, #17181d);
+  font-size: 48px;
+}
+
+.categoryInfo,
+.mediaInfo {
+  padding: 11px 12px 13px;
+}
+
+.categoryName,
+.mediaName {
+  font-weight: 650;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.categoryCount,
+.mediaType {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.categoryCard:hover,
+.mediaCard:hover {
+  border-color: var(--accent);
+}
+
+/* Media thumbnails */
+
+.mediaThumb {
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  background: #090a0c;
+  overflow: hidden;
+  position: relative;
+}
+
+.mediaThumb img,
+.mediaThumb video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.videoBadge {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  padding: 4px 7px;
+  border-radius: 7px;
+  background: rgba(0,0,0,.75);
+  font-size: 12px;
+}
+
+.emptyState {
+  border: 1px dashed var(--border);
+  border-radius: 16px;
+  padding: 30px 20px;
+  text-align: center;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+/* Simple media viewer */
+
+#viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+}
+
+#viewerStage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  background: #000;
+  touch-action: pan-y;
+}
+
+#viewerMedia {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+#viewerMedia.video {
+  width: 100%;
+  height: 100%;
+}
+
+.viewerClose {
+  position: absolute;
+  top: max(14px, env(safe-area-inset-top));
+  left: 14px;
+  z-index: 3;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border-radius: 50%;
+  background: rgba(35,35,40,.75);
+  font-size: 22px;
+  display: grid;
+  place-items: center;
+}
+
+.shuffleButton {
+  position: absolute;
+  z-index: 3;
+  right: 16px;
+  bottom: max(18px, env(safe-area-inset-bottom));
+  min-width: 48px;
+  height: 48px;
+  padding: 0 15px;
+  border-radius: 24px;
+  background: rgba(35,35,40,.85);
+  font-size: 21px;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 4px 20px #0008;
+}
+
+.shuffleButton.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+#toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  z-index: 100;
+  background: #2b2d35;
+  border: 1px solid #444753;
+  border-radius: 12px;
+  padding: 11px 16px;
+  max-width: calc(100vw - 32px);
+  text-align: center;
+  box-shadow: 0 8px 30px #0008;
+}
+
+@media (max-width: 600px) {
   header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 14px 18px;
-    border-bottom: 1px solid var(--border);
-    background: rgba(16,17,20,.92);
-    position: sticky;
-    top: 0;
-    z-index: 5;
-    backdrop-filter: blur(12px);
-  }
-
-  .brand {
-    font-size: 22px;
-    font-weight: 800;
-    letter-spacing: -1px;
-    white-space: nowrap;
-  }
-
-  .brand span { color: var(--accent); }
-
-  .headerActions {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-  }
-
-  .smallButton {
-    padding: 9px 12px;
-    font-size: 14px;
+    padding: 11px 12px;
   }
 
   main {
-    width: 100%;
-    max-width: 1500px;
-    margin: 0 auto;
-    padding: 20px;
-    flex: 1;
+    padding: 14px 12px;
   }
 
-  .sectionHeading {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 12px;
-    margin: 6px 0 16px;
-  }
-
-  h1, h2, p { margin-top: 0; }
-  h1 { font-size: clamp(24px, 5vw, 34px); margin-bottom: 6px; }
-  h2 { font-size: 20px; margin-bottom: 0; }
-
-  #categoryGrid, #mediaGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
-    gap: 14px;
-  }
-
-  .categoryCard, .mediaCard {
-    min-width: 0;
-    overflow: hidden;
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 15px;
-    cursor: pointer;
-    text-align: left;
-    padding: 0;
-  }
-
-  .categoryArt {
-    aspect-ratio: 1.35;
-    display: grid;
-    place-items: center;
-    background:
-      radial-gradient(circle at 20% 20%, rgba(139,124,255,.55), transparent 45%),
-      linear-gradient(135deg, #292b36, #17181d);
-    font-size: 48px;
-  }
-
-  .categoryInfo, .mediaInfo { padding: 11px 12px 13px; }
-
-  .categoryName, .mediaName {
-    font-weight: 650;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .categoryCount, .mediaType {
-    margin-top: 4px;
-    color: var(--muted);
-    font-size: 13px;
-  }
-
-  .mediaThumb {
-    aspect-ratio: 1;
-    display: grid;
-    place-items: center;
-    background: #090a0c;
-    overflow: hidden;
-    position: relative;
-  }
-
-  .mediaThumb img, .mediaThumb video {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-  }
-
-  .videoBadge {
-    position: absolute;
-    right: 8px;
-    bottom: 8px;
-    padding: 4px 7px;
-    border-radius: 7px;
-    background: rgba(0,0,0,.75);
-    font-size: 12px;
-  }
-
-  .mediaCard:hover, .categoryCard:hover { border-color: var(--accent); }
-
-  .emptyState {
-    border: 1px dashed var(--border);
-    border-radius: 16px;
-    padding: 30px 20px;
-    text-align: center;
-    color: var(--muted);
-    line-height: 1.6;
-  }
-
-  #viewer {
-    position: fixed;
-    inset: 0;
-    z-index: 30;
-    background: #000;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .viewerTop, .viewerBottom {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  #categoryGrid,
+  #mediaGrid {
+    grid-template-columns: repeat(auto-fill, minmax(115px, 1fr));
     gap: 10px;
-    padding: 12px 14px;
-    background: rgba(15,15,18,.94);
-    z-index: 2;
   }
-
-  .viewerTop { border-bottom: 1px solid #25252a; }
-  .viewerBottom { border-top: 1px solid #25252a; }
-
-  #viewerTitle {
-    min-width: 0;
-    flex: 1;
-    text-align: center;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    color: #e8e8ec;
-    font-size: 14px;
-  }
-
-  #viewerStage {
-    flex: 1;
-    min-height: 0;
-    display: grid;
-    place-items: center;
-    position: relative;
-    overflow: hidden;
-    touch-action: pan-y;
-    background: #000;
-  }
-
-  #viewerMedia {
-    max-width: 100%;
-    max-height: 100%;
-    width: auto;
-    height: auto;
-    object-fit: contain;
-    display: block;
-  }
-
-  #viewerMedia.video {
-    width: 100%;
-    height: 100%;
-  }
-
-  .navArrow {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 46px;
-    height: 58px;
-    border-radius: 12px;
-    background: rgba(35,35,40,.65);
-    font-size: 25px;
-    z-index: 1;
-  }
-
-  #prevButton { left: 12px; }
-  #nextButton { right: 12px; }
-
-  .viewerBottom button { padding: 10px 13px; }
-
-  .viewerControls {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-  }
-
-  #positionLabel {
-    min-width: 75px;
-    text-align: center;
-    color: var(--muted);
-    font-size: 13px;
-  }
-
-  #slideshowButton.active, #shuffleButton.active {
-    background: var(--accent);
-    color: white;
-  }
-
-  #toast {
-    position: fixed;
-    left: 50%;
-    bottom: 24px;
-    transform: translateX(-50%);
-    z-index: 100;
-    background: #2b2d35;
-    border: 1px solid #444753;
-    border-radius: 12px;
-    padding: 11px 16px;
-    max-width: calc(100vw - 32px);
-    text-align: center;
-    box-shadow: 0 8px 30px #0008;
-  }
-
-  @media (max-width: 600px) {
-    header { padding: 11px 12px; }
-    main { padding: 14px 12px; }
-    #categoryGrid, #mediaGrid {
-      grid-template-columns: repeat(auto-fill, minmax(115px, 1fr));
-      gap: 10px;
-    }
-    .viewerTop, .viewerBottom { padding: 9px; }
-    .viewerBottom { flex-wrap: wrap; justify-content: center; }
-    .viewerControls { justify-content: center; }
-    .navArrow { width: 38px; height: 50px; }
-  }
+}
 </style>
 </head>
+
 <body>
+
+<!-- Loading screen -->
 
 <section id="loadingScreen">
   <div class="loadingBox">
     <div class="logo">Media<span>Box</span></div>
-    <p class="subtitle">Your media, neatly sorted by folder.</p>
-    <p class="muted">Choose a folder to use its immediate subfolders as categories. Images and videos inside each category will appear together.</p>
+
+    <p class="subtitle">
+      Your media, neatly sorted by folder.
+    </p>
+
+    <p class="muted">
+      Select your main folder. Its immediate subfolders will become your categories.
+    </p>
+
     <div class="startActions">
-      <button class="primary" id="chooseFolderButton">Choose media folder</button>
-      <button id="chooseFilesButton">Choose files</button>
+      <button class="primary" id="chooseFolderButton">
+        Choose main folder
+      </button>
+
+      <button id="chooseFilesButton">
+        Choose files
+      </button>
     </div>
-    <input id="folderInput" type="file" accept="image/*,video/*" webkitdirectory directory multiple class="hidden">
-    <input id="filesInput" type="file" accept="image/*,video/*" multiple class="hidden">
+
+    <input
+      id="folderInput"
+      type="file"
+      accept="image/*,video/*"
+      webkitdirectory
+      directory
+      multiple
+      class="hidden"
+    >
+
+    <input
+      id="filesInput"
+      type="file"
+      accept="image/*,video/*"
+      multiple
+      class="hidden"
+    >
+
     <p class="muted" style="font-size:12px;margin-top:18px">
-      Folder access is read-only. MediaBox does not upload or move your files.
+      Your files stay on your device. MediaBox does not upload or move them.
     </p>
   </div>
 </section>
 
+<!-- Main application -->
+
 <div id="app" class="hidden">
+
   <header>
     <div class="brand">Media<span>Box</span></div>
+
     <div class="headerActions">
       <button class="smallButton" id="homeButton">Categories</button>
       <button class="smallButton" id="addMediaButton">Add media</button>
@@ -381,6 +430,7 @@
   </header>
 
   <main>
+
     <section id="categoriesView">
       <div class="sectionHeading">
         <div>
@@ -388,6 +438,7 @@
           <div class="muted" id="librarySummary"></div>
         </div>
       </div>
+
       <div id="categoryGrid"></div>
     </section>
 
@@ -397,38 +448,35 @@
           <h1 id="categoryTitle">Category</h1>
           <div class="muted" id="categorySummary"></div>
         </div>
+
         <button id="backToCategoriesButton">All categories</button>
       </div>
+
       <div id="mediaGrid"></div>
     </section>
+
   </main>
 </div>
 
+<!-- Simple viewer: swipe + shuffle -->
+
 <section id="viewer" class="hidden" aria-label="Media viewer">
-  <div class="viewerTop">
-    <button id="closeViewerButton" aria-label="Close viewer">✕</button>
-    <div id="viewerTitle"></div>
-    <button id="fullscreenButton" aria-label="Toggle fullscreen">⛶</button>
-  </div>
 
-  <div id="viewerStage">
-    <button class="navArrow" id="prevButton" aria-label="Previous">‹</button>
-    <div id="viewerMediaHost" style="display:contents"></div>
-    <button class="navArrow" id="nextButton" aria-label="Next">›</button>
-  </div>
+  <button
+    class="viewerClose"
+    id="closeViewerButton"
+    aria-label="Close viewer"
+  >×</button>
 
-  <div class="viewerBottom">
-    <div class="viewerControls">
-      <button id="viewerPrevButton">Previous</button>
-      <span id="positionLabel">0 / 0</span>
-      <button id="viewerNextButton">Next</button>
-    </div>
-    <div class="viewerControls">
-      <button id="shuffleButton">Shuffle</button>
-      <button id="slideshowButton">Slideshow</button>
-      <button id="slideshowSpeedButton">5 sec</button>
-    </div>
-  </div>
+  <div id="viewerStage"></div>
+
+  <button
+    class="shuffleButton"
+    id="shuffleButton"
+    aria-label="Toggle shuffle"
+    title="Shuffle"
+  >⤨</button>
+
 </section>
 
 <div id="toast" class="hidden"></div>
@@ -441,53 +489,93 @@
 
   const loadingScreen = $("loadingScreen");
   const app = $("app");
+
   const folderInput = $("folderInput");
   const filesInput = $("filesInput");
+
   const categoriesView = $("categoriesView");
   const mediaView = $("mediaView");
+
   const categoryGrid = $("categoryGrid");
   const mediaGrid = $("mediaGrid");
+
   const viewer = $("viewer");
   const viewerStage = $("viewerStage");
-  const viewerMediaHost = $("viewerMediaHost");
 
   let library = [];
   let categories = new Map();
+
   let currentCategory = "";
+
   let viewerItems = [];
-  let viewerIndex = 0;
+  let playbackOrder = [];
+  let viewerPosition = 0;
+
   let shuffleOn = false;
-  let slideshowOn = false;
-  let slideshowTimer = null;
-  let slideshowSeconds = 5;
+
   let objectUrls = [];
   let toastTimer = null;
+
   let touchStartX = 0;
   let touchStartY = 0;
+  let pointerStartX = 0;
+  let pointerStartY = 0;
+
+  /* Notifications */
 
   function showToast(message) {
     const toast = $("toast");
+
     toast.textContent = message;
     toast.classList.remove("hidden");
+
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => toast.classList.add("hidden"), 2600);
+
+    toastTimer = setTimeout(() => {
+      toast.classList.add("hidden");
+    }, 2600);
   }
 
+  /* File handling */
+
   function isSupportedMedia(file) {
-    return file.type.startsWith("image/") || file.type.startsWith("video/");
+    return (
+      file.type.startsWith("image/") ||
+      file.type.startsWith("video/")
+    );
   }
 
   function getRelativePath(file) {
-    return file.webkitRelativePath || file.name;
+    return (file.webkitRelativePath || file.name)
+      .replaceAll("\\", "/");
   }
 
-  function categoryFromPath(file) {
-    const path = getRelativePath(file).replaceAll("\\", "/");
-    const parts = path.split("/").filter(Boolean);
+  /*
+    IMPORTANT CATEGORY FIX
 
-    // The selected folder is the root. Its immediate subfolders are categories.
-    // Files directly in the selected root are placed in "Uncategorised".
-    return parts.length > 1 ? parts[0] : "Uncategorised";
+    Selecting a main folder produces paths similar to:
+
+    MainFolder/PersonName/photo1.jpg
+    MainFolder/PersonName/photo2.jpg
+    MainFolder/AnotherPerson/video1.mp4
+
+    The first path segment is the selected main folder.
+    The SECOND path segment is the actual category.
+
+    Files directly inside the main folder go into Uncategorised.
+    Deeper nested folders remain inside their top-level category.
+  */
+
+  function categoryFromPath(file) {
+    const parts = getRelativePath(file)
+      .split("/")
+      .filter(Boolean);
+
+    if (parts.length >= 3) {
+      return parts[1];
+    }
+
+    return "Uncategorised";
   }
 
   function createItem(file, category) {
@@ -500,32 +588,82 @@
     };
   }
 
-  function loadFiles(fileList, useFolderPaths) {
+  function revokeObjectUrls() {
+    objectUrls.forEach(url => URL.revokeObjectURL(url));
+    objectUrls = [];
+  }
+
+  function getObjectUrl(item) {
+    if (!item.url) {
+      item.url = URL.createObjectURL(item.file);
+      objectUrls.push(item.url);
+    }
+
+    return item.url;
+  }
+
+  function loadFolderFiles(fileList) {
     const files = Array.from(fileList).filter(isSupportedMedia);
 
     if (!files.length) {
-      showToast("No supported images or videos were selected.");
+      showToast("No supported images or videos found.");
       return;
     }
 
+    closeViewer();
+    revokeObjectUrls();
+
     library = files.map(file => {
-      const category = useFolderPaths ? categoryFromPath(file) : "All Media";
-      return createItem(file, category);
+      return createItem(file, categoryFromPath(file));
     });
 
     currentCategory = "";
+
     buildCategories();
+
     loadingScreen.classList.add("hidden");
     app.classList.remove("hidden");
+
     showCategories();
+
     showToast(`${library.length} media files loaded`);
   }
+
+  function addSelectedFiles(fileList) {
+    const files = Array.from(fileList).filter(isSupportedMedia);
+
+    if (!files.length) {
+      showToast("No supported images or videos selected.");
+      return;
+    }
+
+    const addedItems = files.map(file => {
+      return createItem(file, "Uncategorised");
+    });
+
+    library.push(...addedItems);
+
+    buildCategories();
+
+    if (currentCategory && categories.has(currentCategory)) {
+      openCategory(currentCategory);
+    } else {
+      showCategories();
+    }
+
+    showToast(`${addedItems.length} files added`);
+  }
+
+  /* Category handling */
 
   function buildCategories() {
     categories = new Map();
 
     for (const item of library) {
-      if (!categories.has(item.category)) categories.set(item.category, []);
+      if (!categories.has(item.category)) {
+        categories.set(item.category, []);
+      }
+
       categories.get(item.category).push(item);
     }
 
@@ -534,10 +672,11 @@
   }
 
   function showCategories() {
-    stopSlideshow();
-    viewer.classList.add("hidden");
+    closeViewer();
+
     categoriesView.classList.remove("hidden");
     mediaView.classList.add("hidden");
+
     renderCategories();
   }
 
@@ -545,21 +684,32 @@
     categoryGrid.replaceChildren();
 
     if (!categories.size) {
-      categoryGrid.innerHTML = '<div class="emptyState">Choose a folder or select media files to get started.</div>';
+      const empty = document.createElement("div");
+
+      empty.className = "emptyState";
+      empty.textContent = "Choose a folder or select media files to get started.";
+
+      categoryGrid.append(empty);
       return;
     }
 
-    const sorted = Array.from(categories.entries()).sort((a, b) =>
-      a[0].localeCompare(b[0], undefined, { sensitivity: "base" })
+    const sortedCategories = Array.from(categories.entries()).sort(
+      (a, b) => a[0].localeCompare(
+        b[0],
+        undefined,
+        { sensitivity: "base" }
+      )
     );
 
-    for (const [name, items] of sorted) {
+    for (const [name, items] of sortedCategories) {
       const card = document.createElement("button");
       card.className = "categoryCard";
 
       const art = document.createElement("div");
       art.className = "categoryArt";
-      art.textContent = items.some(item => item.type === "video") ? "▣" : "▧";
+      art.textContent = items.some(item => item.type === "video")
+        ? "▣"
+        : "▧";
 
       const info = document.createElement("div");
       info.className = "categoryInfo";
@@ -570,31 +720,46 @@
 
       const count = document.createElement("div");
       count.className = "categoryCount";
-      count.textContent = `${items.length} ${items.length === 1 ? "item" : "items"}`;
+      count.textContent =
+        `${items.length} ${items.length === 1 ? "item" : "items"}`;
 
       info.append(title, count);
       card.append(art, info);
-      card.addEventListener("click", () => openCategory(name));
+
+      card.addEventListener("click", () => {
+        openCategory(name);
+      });
+
       categoryGrid.append(card);
     }
   }
 
   function openCategory(name) {
     currentCategory = name;
+
     const items = categories.get(name) || [];
 
     categoriesView.classList.add("hidden");
     mediaView.classList.remove("hidden");
+
     $("categoryTitle").textContent = name;
     $("categorySummary").textContent = `${items.length} items`;
+
     renderMedia(items);
   }
+
+  /* Media thumbnails */
 
   function renderMedia(items) {
     mediaGrid.replaceChildren();
 
     if (!items.length) {
-      mediaGrid.innerHTML = '<div class="emptyState">This category is empty.</div>';
+      const empty = document.createElement("div");
+
+      empty.className = "emptyState";
+      empty.textContent = "This category is empty.";
+
+      mediaGrid.append(empty);
       return;
     }
 
@@ -607,21 +772,26 @@
 
       if (item.type === "image") {
         const img = document.createElement("img");
+
         img.alt = "";
         img.loading = "lazy";
         img.src = getObjectUrl(item);
+
         thumb.append(img);
       } else {
         const video = document.createElement("video");
+
         video.muted = true;
         video.preload = "metadata";
         video.src = getObjectUrl(item);
         video.playsInline = true;
+
         thumb.append(video);
 
         const badge = document.createElement("span");
         badge.className = "videoBadge";
         badge.textContent = "▶ Video";
+
         thumb.append(badge);
       }
 
@@ -639,181 +809,167 @@
 
       info.append(title, type);
       card.append(thumb, info);
+
       card.addEventListener("click", () => {
-        viewerItems = items.slice();
-        viewerIndex = index;
-        shuffleOn = false;
-        $("shuffleButton").classList.remove("active");
-        openViewer();
+        startViewer(items, index);
       });
 
       mediaGrid.append(card);
     });
   }
 
-  function getObjectUrl(item) {
-    if (!item.url) {
-      item.url = URL.createObjectURL(item.file);
-      objectUrls.push(item.url);
-    }
-    return item.url;
-  }
+  /* Viewer */
 
-  function openViewer() {
-    if (!viewerItems.length) return;
+  function startViewer(items, selectedIndex) {
+    viewerItems = items.slice();
+
+    viewerPosition = selectedIndex;
+
+    shuffleOn = false;
+    playbackOrder = viewerItems.map((_, index) => index);
+
+    $("shuffleButton").classList.remove("active");
+
     viewer.classList.remove("hidden");
+
     renderViewerItem();
   }
 
+  function currentViewerItem() {
+    const originalIndex = playbackOrder[viewerPosition];
+
+    return viewerItems[originalIndex];
+  }
+
   function renderViewerItem() {
-    const item = viewerItems[viewerIndex];
+    const item = currentViewerItem();
+
     if (!item) return;
 
-    viewerMediaHost.replaceChildren();
+    viewerStage.replaceChildren();
 
-    const media = document.createElement(item.type === "video" ? "video" : "img");
-    media.id = "viewerMedia";
-    media.src = getObjectUrl(item);
+    let media;
 
     if (item.type === "video") {
+      media = document.createElement("video");
+
       media.className = "video";
       media.controls = true;
       media.autoplay = true;
       media.playsInline = true;
-      media.addEventListener("loadedmetadata", () => {
-        if (media.videoWidth > 0 && media.videoHeight > 0) {
-          media.style.aspectRatio = `${media.videoWidth} / ${media.videoHeight}`;
-        }
-      });
+      media.preload = "auto";
     } else {
+      media = document.createElement("img");
+
       media.alt = item.name;
       media.draggable = false;
     }
 
-    viewerMediaHost.append(media);
-    $("viewerTitle").textContent = item.name;
-    $("positionLabel").textContent = `${viewerIndex + 1} / ${viewerItems.length}`;
+    media.id = "viewerMedia";
+    media.src = getObjectUrl(item);
 
-    $("viewerPrevButton").disabled = viewerItems.length < 2;
-    $("viewerNextButton").disabled = viewerItems.length < 2;
-    $("prevButton").disabled = viewerItems.length < 2;
-    $("nextButton").disabled = viewerItems.length < 2;
+    viewerStage.append(media);
   }
 
-  function nextItem() {
+  function goNext() {
     if (viewerItems.length < 2) return;
 
-    if (shuffleOn) {
-      if (viewerItems.length === 2) {
-        viewerIndex = (viewerIndex + 1) % viewerItems.length;
-      } else {
-        let next = viewerIndex;
-        while (next === viewerIndex) {
-          next = Math.floor(Math.random() * viewerItems.length);
-        }
-        viewerIndex = next;
-      }
-    } else {
-      viewerIndex = (viewerIndex + 1) % viewerItems.length;
-    }
+    viewerPosition =
+      (viewerPosition + 1) % playbackOrder.length;
 
     renderViewerItem();
   }
 
-  function previousItem() {
+  function goPrevious() {
     if (viewerItems.length < 2) return;
-    viewerIndex = (viewerIndex - 1 + viewerItems.length) % viewerItems.length;
+
+    viewerPosition =
+      (viewerPosition - 1 + playbackOrder.length) %
+      playbackOrder.length;
+
     renderViewerItem();
   }
 
-  function startSlideshow() {
+  function toggleShuffle() {
     if (viewerItems.length < 2) {
-      showToast("This category needs at least two items for a slideshow.");
+      showToast("Add more media to use shuffle.");
       return;
     }
 
-    slideshowOn = true;
-    $("slideshowButton").classList.add("active");
-    $("slideshowButton").textContent = "Stop slideshow";
-    slideshowTimer = setInterval(nextItem, slideshowSeconds * 1000);
-  }
+    const currentOriginalIndex = playbackOrder[viewerPosition];
 
-  function stopSlideshow() {
-    slideshowOn = false;
-    clearInterval(slideshowTimer);
-    slideshowTimer = null;
-    $("slideshowButton").classList.remove("active");
-    $("slideshowButton").textContent = "Slideshow";
-  }
+    shuffleOn = !shuffleOn;
 
-  function toggleSlideshow() {
-    if (slideshowOn) stopSlideshow();
-    else startSlideshow();
+    if (shuffleOn) {
+      const shuffled = viewerItems.map((_, index) => index);
+
+      // Keep the currently displayed item at the beginning.
+      const remaining = shuffled.filter(
+        index => index !== currentOriginalIndex
+      );
+
+      // Fisher-Yates shuffle.
+      for (let i = remaining.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+
+        [remaining[i], remaining[j]] =
+          [remaining[j], remaining[i]];
+      }
+
+      playbackOrder = [currentOriginalIndex, ...remaining];
+      viewerPosition = 0;
+
+      $("shuffleButton").classList.add("active");
+
+      showToast("Shuffle enabled");
+    } else {
+      playbackOrder = viewerItems.map((_, index) => index);
+
+      viewerPosition = currentOriginalIndex;
+
+      $("shuffleButton").classList.remove("active");
+
+      showToast("Shuffle disabled");
+    }
   }
 
   function closeViewer() {
-    stopSlideshow();
     viewer.classList.add("hidden");
-    viewerMediaHost.replaceChildren();
+    viewerStage.replaceChildren();
+
+    viewerItems = [];
+    playbackOrder = [];
+    viewerPosition = 0;
+
+    shuffleOn = false;
+
+    $("shuffleButton").classList.remove("active");
   }
 
-  function toggleFullscreen() {
-    if (!document.fullscreenElement) {
-      viewer.requestFullscreen?.().catch(() => showToast("Fullscreen is not available here."));
+  /* Swipe navigation */
+
+  function handleSwipe(startX, startY, endX, endY) {
+    const dx = endX - startX;
+    const dy = endY - startY;
+
+    // Ignore short movements and mostly vertical gestures.
+    if (
+      Math.abs(dx) < 55 ||
+      Math.abs(dx) < Math.abs(dy) * 1.2
+    ) {
+      return;
+    }
+
+    if (dx < 0) {
+      goNext();
     } else {
-      document.exitFullscreen?.();
+      goPrevious();
     }
   }
-
-  function openPicker(input) {
-    input.value = "";
-    input.click();
-  }
-
-  $("chooseFolderButton").addEventListener("click", () => openPicker(folderInput));
-  $("chooseFilesButton").addEventListener("click", () => openPicker(filesInput));
-  $("addMediaButton").addEventListener("click", () => openPicker(filesInput));
-  $("changeFolderButton").addEventListener("click", () => openPicker(folderInput));
-
-  folderInput.addEventListener("change", event => {
-    if (event.target.files.length) loadFiles(event.target.files, true);
-  });
-
-  filesInput.addEventListener("change", event => {
-    if (event.target.files.length) loadFiles(event.target.files, false);
-  });
-
-  $("homeButton").addEventListener("click", showCategories);
-  $("backToCategoriesButton").addEventListener("click", showCategories);
-
-  $("closeViewerButton").addEventListener("click", closeViewer);
-  $("fullscreenButton").addEventListener("click", toggleFullscreen);
-  $("prevButton").addEventListener("click", previousItem);
-  $("nextButton").addEventListener("click", nextItem);
-  $("viewerPrevButton").addEventListener("click", previousItem);
-  $("viewerNextButton").addEventListener("click", nextItem);
-  $("slideshowButton").addEventListener("click", toggleSlideshow);
-
-  $("shuffleButton").addEventListener("click", () => {
-    shuffleOn = !shuffleOn;
-    $("shuffleButton").classList.toggle("active", shuffleOn);
-    showToast(shuffleOn ? "Shuffle enabled" : "Shuffle disabled");
-  });
-
-  $("slideshowSpeedButton").addEventListener("click", () => {
-    const speeds = [3, 5, 8, 10, 15];
-    const current = speeds.indexOf(slideshowSeconds);
-    slideshowSeconds = speeds[(current + 1) % speeds.length];
-    $("slideshowSpeedButton").textContent = `${slideshowSeconds} sec`;
-
-    if (slideshowOn) {
-      stopSlideshow();
-      startSlideshow();
-    }
-  });
 
   viewerStage.addEventListener("touchstart", event => {
     if (event.touches.length !== 1) return;
+
     touchStartX = event.touches[0].clientX;
     touchStartY = event.touches[0].clientY;
   }, { passive: true });
@@ -821,26 +977,114 @@
   viewerStage.addEventListener("touchend", event => {
     if (event.changedTouches.length !== 1) return;
 
-    const dx = event.changedTouches[0].clientX - touchStartX;
-    const dy = event.changedTouches[0].clientY - touchStartY;
+    const touch = event.changedTouches[0];
 
-    if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.2) {
-      dx < 0 ? nextItem() : previousItem();
-    }
+    handleSwipe(
+      touchStartX,
+      touchStartY,
+      touch.clientX,
+      touch.clientY
+    );
   }, { passive: true });
+
+  // Pointer support for mouse dragging on computers.
+  viewerStage.addEventListener("pointerdown", event => {
+    if (event.pointerType === "touch") return;
+
+    pointerStartX = event.clientX;
+    pointerStartY = event.clientY;
+  });
+
+  viewerStage.addEventListener("pointerup", event => {
+    if (event.pointerType === "touch") return;
+
+    handleSwipe(
+      pointerStartX,
+      pointerStartY,
+      event.clientX,
+      event.clientY
+    );
+  });
+
+  /* Buttons */
+
+  function openPicker(input) {
+    input.value = "";
+    input.click();
+  }
+
+  $("chooseFolderButton").addEventListener("click", () => {
+    openPicker(folderInput);
+  });
+
+  $("chooseFilesButton").addEventListener("click", () => {
+    openPicker(filesInput);
+  });
+
+  $("addMediaButton").addEventListener("click", () => {
+    openPicker(filesInput);
+  });
+
+  $("changeFolderButton").addEventListener("click", () => {
+    openPicker(folderInput);
+  });
+
+  folderInput.addEventListener("change", event => {
+    if (event.target.files.length) {
+      loadFolderFiles(event.target.files);
+    }
+  });
+
+  filesInput.addEventListener("change", event => {
+    if (event.target.files.length) {
+      if (library.length === 0) {
+        library = [];
+        addSelectedFiles(event.target.files);
+
+        loadingScreen.classList.add("hidden");
+        app.classList.remove("hidden");
+
+        showCategories();
+      } else {
+        addSelectedFiles(event.target.files);
+      }
+    }
+  });
+
+  $("homeButton").addEventListener("click", showCategories);
+
+  $("backToCategoriesButton").addEventListener("click", showCategories);
+
+  $("closeViewerButton").addEventListener("click", closeViewer);
+
+  $("shuffleButton").addEventListener("click", toggleShuffle);
+
+  /* Keyboard fallback */
 
   document.addEventListener("keydown", event => {
     if (viewer.classList.contains("hidden")) return;
 
-    if (event.key === "Escape") closeViewer();
-    if (event.key === "ArrowRight") nextItem();
-    if (event.key === "ArrowLeft") previousItem();
+    if (event.key === "Escape") {
+      closeViewer();
+    }
+
+    if (event.key === "ArrowRight") {
+      goNext();
+    }
+
+    if (event.key === "ArrowLeft") {
+      goPrevious();
+    }
   });
 
+  /* Cleanup */
+
   window.addEventListener("beforeunload", () => {
-    objectUrls.forEach(url => URL.revokeObjectURL(url));
+    revokeObjectUrls();
   });
+
 })();
 </script>
+
 </body>
 </html>
